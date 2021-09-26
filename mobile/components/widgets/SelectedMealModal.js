@@ -5,6 +5,23 @@ import {
 } from 'react-native-paper';
 import { prettyDate } from '../helpers/date';
 
+const styles = StyleSheet.create({
+  viewContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerText: {
+    textAlign: 'center',
+  },
+  actionButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    margin: 10,
+  },
+});
+
 export const SelectedMealModal = ({ meal }) => {
   const mealSlot = meal.slot.substr(0, 1).toUpperCase() + meal.slot.substr(1);
   const title = `${mealSlot} on ${prettyDate(meal.date)}`;
@@ -22,20 +39,3 @@ export const SelectedMealModal = ({ meal }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  viewContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  centerText: {
-    textAlign: 'center',
-  },
-  actionButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    margin: 10,
-  },
-});

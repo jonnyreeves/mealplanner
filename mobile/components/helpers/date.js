@@ -1,6 +1,13 @@
 const daysOfTheWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const monthsOfTheYear = ['January', 'Febuary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
+function zeroHMS(d) {
+  d.setUTCHours(0);
+  d.setUTCMinutes(0);
+  d.setUTCSeconds(0);
+  d.setUTCMilliseconds(0);
+}
+
 export function getDayOfTheWeek(isoDate) {
   return daysOfTheWeek[new Date(isoDate).getDay()];
 }
@@ -43,11 +50,4 @@ export function today() {
 
 export function toShortISOString(d) {
   return d.toISOString().split('T')[0];
-}
-
-function zeroHMS(d) {
-  d.setUTCHours(0);
-  d.setUTCMinutes(0);
-  d.setUTCSeconds(0);
-  d.setUTCMilliseconds(0);
 }

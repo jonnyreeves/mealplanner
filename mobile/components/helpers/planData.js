@@ -1,6 +1,4 @@
-import { getShortDayOfTheWeek, today, toShortISOString } from './date';
-
-const daysOfTheWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+import { getShortDayOfTheWeek, today } from './date';
 
 // The Meal Plan API starts returning entries from the rollover date (Friday);
 // This logic will swap the order around so the array starts from Monday.
@@ -34,7 +32,7 @@ export function toPlannerGridData(planEntries) {
 
 export function toTodayAndTomorrowData(planEntries) {
   const t = today().toISOString();
-  for (let i = 0; i < planEntries.length; i++) {
+  for (let i = 0; i < planEntries.length; i += 1) {
     if (planEntries[i].date === t) {
       return [planEntries[i], planEntries[i + 1]];
     }
