@@ -165,5 +165,4 @@ class HttpHandler {
   doRecipesRequest(req, resp) {
     return resp.setContent(this._db.getAllRecipes());
   }
-
 }
