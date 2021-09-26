@@ -155,6 +155,11 @@ class MealPlannerDb {
     };
   }
 
+  getAllRecipes() {
+    this._initMealCache();
+    return Object.values(this._mealCache);
+  }
+
   getMealsByIngredient(ingredient) {
     this._initMealCache();
     const meals = [];
@@ -176,6 +181,7 @@ class MealPlannerDb {
 
     this._mealCache = {};
     const values = this.sheets.meals().getDataRange().getValues();
+    values.shift(); // Remove the header row
     let thisRow;
 
     const ingredientMapper = (str) => str.split(',').map((val) => {

@@ -1,160 +1,137 @@
-/* global dateUtils, MealPlannerDb */
+/* global dateUtils, assert, MealPlannerDb */
 
 // The following comment is required to fix OAuth issues w/ Google App Scripts
 // DriveApp.getFiles()
 
 // eslint-disable-next-line no-unused-vars
 function doPost(e) {
-  return doReq(e, 'post');
+  return HttpHandler.serveDefault(e, 'post');
 }
 
 // eslint-disable-next-line no-unused-vars
 function doGet(e) {
-  return doReq(e, 'get');
+  return HttpHandler.serveDefault(e, 'get');
 }
 
-function doReq(e, method) {
-  const { pathInfo = '', parameters } = e;
-  const pathParts = pathInfo.split('/');
-
-  const reqCtx = {
-    method,
-    pathParts,
-    requestParams: e,
-    db: MealPlannerDb.init(),
-  };
-
-  let resp;
-  switch (pathParts[0]) {
-    case 'plan':
-      resp = doPlanRequest(reqCtx);
-      break;
-    case 'find':
-      resp = doFindRequest(reqCtx);
-      break;
-    default:
-      resp = JSON.stringify({ reqCtx });
-      break;
+class HttpHandler {
+  static serveDefault(e, method) {
+    return new HttpHandler({ db: MealPlannerDb.init() }).doReq(e, method);
   }
 
-  if (parameters.debug) {
-    return HtmlService.createHtmlOutput(resp);
+  constructor({ db }) {
+    this._db = db;
   }
-  return ContentService
-    .createTextOutput(resp)
-    .setMimeType(ContentService.MimeType.JSON);
-}
 
-function doPlanRequest(reqCtx) {
-  const [, reqAction] = reqCtx.pathParts;
+  doReq(e, method) {
+    const { pathInfo = '', parameters } = e;
+    const pathParts = pathInfo.split('/');
 
-  if (reqCtx.method === 'post') {
-    if (reqAction !== undefined) {
-      throw new Error(`POST request made to unsupported endpoint: '/plan/${reqAction}'`);
+    const reqCtx = {
+      method,
+      pathParts,
+      requestParams: e,
+    };
+
+    let resp;
+    switch (pathParts[0]) {
+      case 'plan':
+        resp = this.doPlanRequest(reqCtx);
+        break;
+      case 'recipes':
+        resp = this.doRecipesRequest(reqCtx);
+        break;
+      default:
+        resp = JSON.stringify({ reqCtx });
+        break;
     }
-    return doModifyPlanRequest(reqCtx);
-  }
 
-  switch (reqAction) {
-    case 'by-days':
-      return doPlanByDaysRequest(reqCtx);
-    case 'by-range':
-      return doPlanByRangeRequest(reqCtx);
-    case undefined: // handles '/plan' route.
-      return JSON.stringify(reqCtx.db.getPlan());
-    default:
-      throw new Error(`GET request made to unsupported endpoint: '/plan/${reqAction}'`);
-  }
-}
-
-function doModifyPlanRequest(reqCtx) {
-  const reqData = parseReqData(reqCtx);
-
-  /*
-  {
-    version: "1.0",
-    entryMap: {
-      "2021-09-21": { lunch: "foo", dinner: "bar", note: "hello" }
+    if (parameters.debug) {
+      return HtmlService.createHtmlOutput(resp);
     }
+    return ContentService
+      .createTextOutput(resp)
+      .setMimeType(ContentService.MimeType.JSON);
   }
-  */
-  const entries = reqData.entryMap || {};
-  Object.keys(entries)
-    .forEach((date) => {
-      const resp = reqCtx.db.setPlanEntry(date, entries[date]);
-      if (!resp.success) {
-        throw new Error(resp.message);
+
+  doPlanRequest(reqCtx) {
+    const [, reqAction] = reqCtx.pathParts;
+
+    if (reqCtx.method === 'post') {
+      if (reqAction !== undefined) {
+        throw new Error(`POST request made to unsupported endpoint: '/plan/${reqAction}'`);
       }
-    });
-}
+      return this.doModifyPlanRequest(reqCtx);
+    }
 
-function doPlanByDaysRequest(reqCtx) {
-  const [, , reqNumDays] = reqCtx.pathParts;
-  const numDays = Number.parseInt(reqNumDays, 10);
-  if (!(Number.isFinite(numDays) && numDays > 0)) {
-    throw new Error(formatInvalidApiRequestError('plan/by-days', `expected number of days to be a positive integer value but got '${reqNumDays}'`));
+    switch (reqAction) {
+      case 'by-days':
+        return this.doPlanByDaysRequest(reqCtx);
+      case 'by-range':
+        return this.doPlanByRangeRequest(reqCtx);
+      case undefined: // handles '/plan' route.
+        return JSON.stringify(this._db.getPlan());
+      default:
+        throw new Error(`GET request made to unsupported endpoint: '/plan/${reqAction}'`);
+    }
   }
 
-  const startDate = dateUtils.today();
-  const endDate = dateUtils.addDays(startDate, numDays - 1);
-
-  const meals = reqCtx.db.getPlanByRange(
-    dateUtils.toShortISOString(startDate),
-    dateUtils.toShortISOString(endDate),
-  );
-
-  return JSON.stringify(meals);
-}
-
-function doPlanByRangeRequest(reqCtx) {
-  const [, , reqStart, reqEnd] = reqCtx.pathParts;
-  assertIsoDate(reqStart, 'plan/by-range', 'start date');
-  assertIsoDate(reqEnd, 'plan/by-range', 'end date');
-
-  const meals = reqCtx.db.getPlanByRange(reqStart, reqEnd);
-
-  return JSON.stringify(meals);
-}
-
-function doFindRequest(reqCtx) {
-  const [, reqAction] = reqCtx.pathParts;
-  assertMethodParam('find', reqAction, ['by-ingredient']);
-  switch (reqAction) {
-    case 'by-ingredient':
-      return doFindByIngredientRequest(reqCtx);
-    default:
-      throw new Error('Invalid state');
+  doModifyPlanRequest(reqCtx) {
+    const reqData = this.parseReqData(reqCtx);
+    /*
+    {
+      version: "1.0",
+      entryMap: {
+        "2021-09-21": { lunch: "foo", dinner: "bar", note: "hello" }
+      }
+    }
+    */
+    const entries = reqData.entryMap || {};
+    Object.keys(entries)
+      .forEach((date) => {
+        const resp = this._db.setPlanEntry(date, entries[date]);
+        if (!resp.success) {
+          throw new Error(resp.message);
+        }
+      });
   }
-}
 
-function doFindByIngredientRequest(reqCtx) {
-  let [, , searchTerm] = reqCtx.pathParts;
-  // TODO: assert SearchTerm
-  searchTerm = decodeURIComponent(searchTerm);
-  const results = reqCtx.db.getMealsByIngredient(searchTerm);
-  return JSON.stringify(results);
-}
+  doPlanByDaysRequest(reqCtx) {
+    const [, , reqNumDays] = reqCtx.pathParts;
+    const numDays = Number.parseInt(reqNumDays, 10);
+    if (!(Number.isFinite(numDays) && numDays > 0)) {
+      throw new Error(assert.formatInvalidApiRequestError('plan/by-days', `expected number of days to be a positive integer value but got '${reqNumDays}'`));
+    }
 
-function parseReqData(reqCtx) {
-  try {
-    return JSON.parse(reqCtx.requestParams.postData.contents);
-  } catch (e) {
-    throw new Error(`Error parsing POST request payload as JSON: '${e}'`);
+    const startDate = dateUtils.today();
+    const endDate = dateUtils.addDays(startDate, numDays - 1);
+
+    const meals = this._db.getPlanByRange(
+      dateUtils.toShortISOString(startDate),
+      dateUtils.toShortISOString(endDate),
+    );
+
+    return JSON.stringify(meals);
   }
-}
 
-function assertMethodParam(methodName, actual, supported) {
-  if (!supported.some((v) => v === actual)) {
-    throw new Error(formatInvalidApiRequestError(methodName, `expected one of (${supported.join(',')}), but got '${actual}'`));
+  doPlanByRangeRequest(reqCtx) {
+    const [, , reqStart, reqEnd] = reqCtx.pathParts;
+    assert.assertIsoDate(reqStart, 'plan/by-range', 'start date');
+    assert.assertIsoDate(reqEnd, 'plan/by-range', 'end date');
+
+    const meals = this._db.getPlanByRange(reqStart, reqEnd);
+
+    return JSON.stringify(meals);
   }
-}
 
-function assertIsoDate(v, methodName, ctxStr) {
-  if (!dateUtils.isShortISOString(v)) {
-    throw new Error(formatInvalidApiRequestError(methodName), `expected ${ctxStr} to be formatted YYYY-MM-DD, but was '${v}'`);
+  doRecipesRequest() {
+    return JSON.stringify(this._db.getAllRecipes());
   }
-}
 
-function formatInvalidApiRequestError(methodName, message) {
-  return `Invalid API request parameters. API method '${methodName}' ${message}`;
+  parseReqData(reqCtx) {
+    try {
+      return JSON.parse(reqCtx.requestParams.postData.contents);
+    } catch (e) {
+      throw new Error(`Error parsing POST request payload as JSON: '${e}'`);
+    }
+  }
 }
