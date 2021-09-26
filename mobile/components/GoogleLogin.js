@@ -2,8 +2,8 @@ import React, { Fragment } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
-import * as GoogleAuthHelper from '../expoGooleAuthHelper';
-import { MealPlanApiContext } from '../apiContext';
+import * as GoogleAuthHelper from '../data/expoGooleAuthHelper';
+import { MealPlanApiContext } from '../data/apiContext';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 
 const SECURE_STORE_KEY = 'rt_v1';

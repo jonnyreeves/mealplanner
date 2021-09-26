@@ -1,10 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { Text, Provider as PaperProvider } from 'react-native-paper';
-import Constants, {AppOwnership} from 'expo-constants';
 
 import DefaultContainer from './components/DefaultContainer';
 import GoogleLogin from './components/GoogleLogin';
-import { MealPlanApiContext } from './apiContext';
+import { MealPlanApiContext } from './data/apiContext';
 
 
 export default function App() {

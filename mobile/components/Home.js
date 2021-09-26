@@ -4,7 +4,7 @@ import { Title, Paragraph, Headline, Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MealPlanApiContext } from '../apiContext';
+import { MealPlanApiContext } from '../data/apiContext';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { toTodayAndTomorrowData } from './helpers/planData';
 

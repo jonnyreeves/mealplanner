@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Portal, Modal, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MealPlanApiContext } from '../apiContext';
+import { MealPlanApiContext } from '../data/apiContext';
 import { toPlannerGridData } from './helpers/planData';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { PlannerGrid } from './widgets/PlannerGrid';
