@@ -11,6 +11,7 @@ module.exports = {
   ],
   rules: {
     'no-use-before-define': 'off',
+    'class-methods-use-this': 'off',
   },
   ignorePatterns: ['Code.js', 'Menu.js', 'ShoppingList.js'],
 };

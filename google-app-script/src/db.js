@@ -212,7 +212,7 @@ class MealPlannerDb {
     }
   }
 
-  static dayToRowIdx(jsDay) {
+  dayToRowIdx(jsDay) {
     // JS Date API has Sunday as 0, through Saturday as 6; source spreadsheet as Monday as row 1.
     if (jsDay === 0) {
       return 8;
@@ -233,7 +233,7 @@ class MealPlannerDb {
     return { nextRolloverDate, prevRolloverDate };
   }
 
-  static getNextRolloverDate(startDate) {
+  getNextRolloverDate(startDate) {
     const res = new Date(startDate.getTime());
     res.setDate((startDate.getDate() + (7 + ROLLOVER_DAY_OF_WEEK - startDate.getDay())) % 7);
     dateUtils.zeroHMS(res);
