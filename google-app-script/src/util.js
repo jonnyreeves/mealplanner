@@ -2,7 +2,7 @@ const dateUtils = {
   today() {
     let d = new Date();
     const offset = d.getTimezoneOffset();
-    d = new Date(d.getTime() - (offset*60*1000));
+    d = new Date(d.getTime() - (offset * 60 * 1000));
     dateUtils.zeroHMS(d);
     return d;
   },
@@ -19,7 +19,7 @@ const dateUtils = {
   },
 
   toShortISOString(d) {
-    return d.toISOString().split("T")[0];
+    return d.toISOString().split('T')[0];
   },
 
   isShortISOString(str) {
@@ -33,10 +33,9 @@ const dateUtils = {
   },
 
   zeroHMS(d) {
-    d.setUTCHours(0)
+    d.setUTCHours(0);
     d.setUTCMinutes(0);
     d.setUTCSeconds(0);
     d.setUTCMilliseconds(0);
-  }
-}
-
+  },
+};
