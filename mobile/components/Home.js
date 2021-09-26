@@ -6,7 +6,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import MealPlanApiContext from '../data/apiContext';
+import { MealPlanServiceCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { toTodayAndTomorrowData } from './helpers/planData';
 
@@ -21,17 +21,13 @@ const styles = StyleSheet.create({
 export default function Home() {
   const navigation = useNavigation();
 
-  const api = React.useContext(MealPlanApiContext);
+  const mealPlanService = React.useContext(MealPlanServiceCtx);
   const [mealData, setMealData] = React.useState(null);
 
   React.useEffect(() => {
     if (!mealData) {
-      api.getPlan()
-        .then((data) => {
-          const result = toTodayAndTomorrowData(data);
-          console.log(result);
-          setMealData(result);
-        });
+      mealPlanService.getPlan()
+        .then((data) => setMealData(toTodayAndTomorrowData(data)));
     }
   });
 

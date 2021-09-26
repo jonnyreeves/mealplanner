@@ -21,6 +21,7 @@ module.exports = {
     'max-len': 'off',
     'no-console': 'off',
     'no-underscore-dangle': 'off',
+    'import/prefer-default-export': 'off',
     'react/prop-types': 'off',
     'react/jsx-filename-extension': 'off',
   },

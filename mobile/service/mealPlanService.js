@@ -1,4 +1,4 @@
-class MealPlanApi {
+class MealPlanService {
   constructor({ apiRoot, useProxy }) {
     this._apiRoot = apiRoot;
     this._useProxy = useProxy;
@@ -37,4 +37,4 @@ class MealPlanApi {
   }
 }
 
-export default MealPlanApi;
+export default MealPlanService;

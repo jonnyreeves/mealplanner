@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Portal, Modal } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import MealPlanApiContext from '../data/apiContext';
+import { MealPlanServiceCtx } from '../service/context';
 import { toPlannerGridData } from './helpers/planData';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { PlannerGrid } from './widgets/PlannerGrid';
@@ -28,11 +28,11 @@ export default function Plan() {
   const [selectedMeal, setSelectedMeal] = React.useState(null);
   const [modalVisible, setModalVisible] = React.useState(false);
 
-  const api = React.useContext(MealPlanApiContext);
+  const mealPlanService = React.useContext(MealPlanServiceCtx);
   const [plannerGridData, setPlannerGridData] = useState(null);
 
   React.useEffect(() => {
-    api.getPlan()
+    mealPlanService.getPlan()
       .then((response) => setPlannerGridData(toPlannerGridData(response)));
   }, []);
 
@@ -49,17 +49,17 @@ export default function Plan() {
         </Modal>
       </Portal>
 
-      { !plannerGridData
-          && <LoadingSpinner message="Fetching meal plan" />}
+      {!plannerGridData
+        && <LoadingSpinner message="Fetching meal plan" />}
 
-      { plannerGridData && (
+      {plannerGridData && (
         <PlannerGrid
           selectedWeek={selectedWeek}
           onWeekSelected={(week) => setSelectedWeek(week)}
           onMealSelected={onMealSelected}
           gridData={plannerGridData[selectedWeek]}
         />
-      ) }
+      )}
     </SafeAreaView>
   );
 }

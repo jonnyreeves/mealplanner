@@ -6,6 +6,16 @@ import * as AppAuth from 'expo-app-auth';
 import { Platform } from 'react-native';
 import Constants, { AppOwnership } from 'expo-constants';
 
+function getRefreshClientId(authConfig) {
+  const isStandalone = Constants.appOwnership === AppOwnership.Standalone;
+  const { androidStandaloneAppClientId, androidClientId } = authConfig;
+  if (Platform.OS === 'android') {
+    return (isStandalone) ? androidStandaloneAppClientId : androidClientId;
+  }
+  console.warn(`Could not determine refresh clientId for platform: ${Platform.OS}`);
+  return '';
+}
+
 // Call this function once in your Component which handles the Google authentication
 // flow; typically done outside of the component decleration (ie: just after your
 // import statements).
@@ -32,7 +42,7 @@ export function useGoogleSignIn(authConfig) {
   const [authResult, setAuthResult] = React.useState(null);
   const promptAsync = () => {
     setAuthRequest(false);
-    GoogleAppAuth.logInAsync(authConfig)
+    return GoogleAppAuth.logInAsync(authConfig)
       .then((authObject) => {
         setAuthRequest(true);
         const type = authObject?.type;
@@ -57,7 +67,7 @@ export function useGoogleSignIn(authConfig) {
 export function useGoogleTokenRefresh(authConfig) {
   const [refreshRequest, setRefreshRequest] = React.useState(true);
   const [refreshResult, setRefreshResult] = React.useState(null);
-  const refreshAsync = React.useCallback((refreshToken) => {
+  const refreshAsync = (refreshToken) => {
     if (!refreshToken) {
       return setRefreshResult({
         type: 'cancelled',
@@ -71,30 +81,20 @@ export function useGoogleTokenRefresh(authConfig) {
       clientId,
       scopes: authConfig.scopes,
     };
-    AppAuth.refreshAsync(config, refreshToken)
+    return AppAuth.refreshAsync(config, refreshToken)
       .then((res) => {
         setRefreshResult({
           type: 'success',
           authentication: res,
         });
       })
-      .catch((err) => {
+      .catch(() => {
         setRefreshResult({
           type: 'failed',
         });
       })
       .finally(() => setRefreshRequest(true));
-  }, [authConfig?.expoClientId]);
+  };
 
   return [refreshRequest, refreshResult, refreshAsync];
-}
-
-function getRefreshClientId(authConfig) {
-  const isStandalone = Constants.appOwnership === AppOwnership.Standalone;
-  const { androidStandaloneAppClientId, androidClientId } = authConfig;
-  if (Platform.OS === 'android') {
-    return (isStandalone) ? androidStandaloneAppClientId : androidClientId;
-  }
-  console.warn(`Could not determine refresh clientId for platform: ${Platform.OS}`);
-  return '';
 }
