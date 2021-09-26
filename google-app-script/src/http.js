@@ -1,10 +1,14 @@
+/* global dateUtils, MealPlannerDb */
+
 // The following comment is required to fix OAuth issues w/ Google App Scripts
 // DriveApp.getFiles()
 
+// eslint-disable-next-line no-unused-vars
 function doPost(e) {
   return doReq(e, 'post');
 }
 
+// eslint-disable-next-line no-unused-vars
 function doGet(e) {
   return doReq(e, 'get');
 }
@@ -28,10 +32,9 @@ function doReq(e, method) {
     case 'find':
       resp = doFindRequest(reqCtx);
       break;
-  }
-
-  if (!resp) {
-    resp = JSON.stringify({ reqCtx });
+    default:
+      resp = JSON.stringify({ reqCtx });
+      break;
   }
 
   if (parameters.debug) {
@@ -65,7 +68,7 @@ function doPlanRequest(reqCtx) {
 }
 
 function doModifyPlanRequest(reqCtx) {
-  const reqData = this.parseReqData(reqCtx);
+  const reqData = parseReqData(reqCtx);
 
   /*
   {
@@ -86,9 +89,9 @@ function doModifyPlanRequest(reqCtx) {
 }
 
 function doPlanByDaysRequest(reqCtx) {
-  const [,, reqNumDays] = reqCtx.pathParts;
-  const numDays = parseInt(reqNumDays);
-  if (!(isFinite(numDays) && numDays > 0)) {
+  const [, , reqNumDays] = reqCtx.pathParts;
+  const numDays = Number.parseInt(reqNumDays, 10);
+  if (!(Number.isFinite(numDays) && numDays > 0)) {
     throw new Error(formatInvalidApiRequestError('plan/by-days', `expected number of days to be a positive integer value but got '${reqNumDays}'`));
   }
 
@@ -104,9 +107,9 @@ function doPlanByDaysRequest(reqCtx) {
 }
 
 function doPlanByRangeRequest(reqCtx) {
-  const [,, reqStart, reqEnd] = reqCtx.pathParts;
-  this.assertIsoDate(reqStart, 'plan/by-range', 'start date');
-  this.assertIsoDate(reqEnd, 'plan/by-range', 'end date');
+  const [, , reqStart, reqEnd] = reqCtx.pathParts;
+  assertIsoDate(reqStart, 'plan/by-range', 'start date');
+  assertIsoDate(reqEnd, 'plan/by-range', 'end date');
 
   const meals = reqCtx.db.getPlanByRange(reqStart, reqEnd);
 
@@ -125,7 +128,7 @@ function doFindRequest(reqCtx) {
 }
 
 function doFindByIngredientRequest(reqCtx) {
-  let [,, searchTerm] = reqCtx.pathParts;
+  let [, , searchTerm] = reqCtx.pathParts;
   // TODO: assert SearchTerm
   searchTerm = decodeURIComponent(searchTerm);
   const results = reqCtx.db.getMealsByIngredient(searchTerm);
@@ -141,7 +144,7 @@ function parseReqData(reqCtx) {
 }
 
 function assertMethodParam(methodName, actual, supported) {
-  if (!supported.some((v) => v == actual)) {
+  if (!supported.some((v) => v === actual)) {
     throw new Error(formatInvalidApiRequestError(methodName, `expected one of (${supported.join(',')}), but got '${actual}'`));
   }
 }

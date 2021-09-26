@@ -1,4 +1,5 @@
-// Test.
+/* global dateUtils */
+
 const ROLLOVER_DAY_OF_WEEK = 5; // Friday.
 
 class MealPlannerDb {
@@ -160,7 +161,7 @@ class MealPlannerDb {
 
     Object.keys(this._mealCache).forEach((mealName) => {
       const thisMeal = this._mealCache[mealName];
-      for (let i = 0; i < thisMeal.ingredients.length; i++) {
+      for (let i = 0; i < thisMeal.ingredients.length; i += 1) {
         if (thisMeal.ingredients[i].name.toLowerCase() === ingredient.toLowerCase()) {
           meals.push(thisMeal);
         }
@@ -183,11 +184,13 @@ class MealPlannerDb {
 
       const matches = /([0-9]+)(x|g|ml)(.*)/.exec(val);
       if (matches) {
-        if (matches[2] == 'x') {
+        if (matches[2] === 'x') {
+          // eslint-disable-next-line prefer-destructuring
           quantity = matches[1];
         } else {
           quantity = matches[1] + matches[2];
         }
+        // eslint-disable-next-line prefer-destructuring
         name = matches[3];
       }
 
@@ -197,7 +200,7 @@ class MealPlannerDb {
       };
     });
 
-    for (let i = 0; i < values.length; i++) {
+    for (let i = 0; i < values.length; i += 1) {
       thisRow = values[i];
       const mealName = String(thisRow[0]).toLowerCase();
       this._mealCache[mealName] = {
@@ -209,9 +212,9 @@ class MealPlannerDb {
     }
   }
 
-  dayToRowIdx(jsDay) {
+  static dayToRowIdx(jsDay) {
     // JS Date API has Sunday as 0, through Saturday as 6; source spreadsheet as Monday as row 1.
-    if (jsDay == 0) {
+    if (jsDay === 0) {
       return 8;
     }
     return jsDay + 1;
@@ -230,9 +233,9 @@ class MealPlannerDb {
     return { nextRolloverDate, prevRolloverDate };
   }
 
-  getNextRolloverDate(startDate) {
+  static getNextRolloverDate(startDate) {
     const res = new Date(startDate.getTime());
-    res.setDate(startDate.getDate() + (7 + ROLLOVER_DAY_OF_WEEK - startDate.getDay()) % 7);
+    res.setDate((startDate.getDate() + (7 + ROLLOVER_DAY_OF_WEEK - startDate.getDay())) % 7);
     dateUtils.zeroHMS(res);
     return res;
   }
