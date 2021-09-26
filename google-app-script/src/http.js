@@ -13,6 +13,53 @@ function doGet(e) {
   return HttpHandler.serveDefault(e, 'get');
 }
 
+class HttpRequest {
+  constructor({ method, pathParts, requestParams }) {
+    this.method = method;
+    this.pathParts = pathParts;
+    this.requestParams = requestParams;
+  }
+
+  getJsonPayload() {
+    try {
+      return JSON.parse(this.requestParams.postData.contents);
+    } catch (err) {
+      throw new Error(`Error parsing POST request payload as JSON: '${err}'`);
+    }
+  }
+}
+
+class HttpResponse {
+  constructor() {
+    this._mimeType = ContentService.MimeType.JSON;
+    this._content = null;
+  }
+
+  setContent(v) {
+    this._content = v;
+  }
+
+  setMimeType(v) {
+    this._mimeType = v;
+  }
+
+  toOutput({ debug }) {
+    if (debug) {
+      return HtmlService.createHtmlOutput(`<pre>${this.marshallTextOutput(true)}</pre>`);
+    }
+    return ContentService
+      .createTextOutput(this.marshallTextOutput())
+      .setMimeType(this._mimeType);
+  }
+
+  marshallTextOutput(debug = false) {
+    if (this._mimeType === ContentService.MimeType.JSON) {
+      return JSON.stringify(this._content, '\t', debug ? 2 : 0);
+    }
+    return String(this._content);
+  }
+}
+
 class HttpHandler {
   static serveDefault(e, method) {
     return new HttpHandler({ db: MealPlannerDb.init() }).doReq(e, method);
@@ -26,57 +73,52 @@ class HttpHandler {
     const { pathInfo = '', parameters } = e;
     const pathParts = pathInfo.split('/');
 
-    const reqCtx = {
+    const req = new HttpRequest({
       method,
       pathParts,
       requestParams: e,
-    };
+    });
 
-    let resp;
+    const resp = new HttpResponse();
+
     switch (pathParts[0]) {
       case 'plan':
-        resp = this.doPlanRequest(reqCtx);
+        this.doPlanRequest(req, resp);
         break;
       case 'recipes':
-        resp = this.doRecipesRequest(reqCtx);
+        this.doRecipesRequest(req, resp);
         break;
       default:
-        resp = JSON.stringify({ reqCtx });
+        resp.setContent(req);
         break;
     }
 
-    if (parameters.debug) {
-      return HtmlService.createHtmlOutput(resp);
-    }
-    return ContentService
-      .createTextOutput(resp)
-      .setMimeType(ContentService.MimeType.JSON);
+    return resp.toOutput({ debug: parameters.debug });
   }
 
-  doPlanRequest(reqCtx) {
-    const [, reqAction] = reqCtx.pathParts;
+  doPlanRequest(req, resp) {
+    const [, reqAction] = req.pathParts;
 
-    if (reqCtx.method === 'post') {
+    if (req.method === 'post') {
       if (reqAction !== undefined) {
         throw new Error(`POST request made to unsupported endpoint: '/plan/${reqAction}'`);
       }
-      return this.doModifyPlanRequest(reqCtx);
+      return this.doModifyPlanRequest(req, resp);
     }
 
     switch (reqAction) {
       case 'by-days':
-        return this.doPlanByDaysRequest(reqCtx);
+        return this.doPlanByDaysRequest(req, resp);
       case 'by-range':
-        return this.doPlanByRangeRequest(reqCtx);
+        return this.doPlanByRangeRequest(req, resp);
       case undefined: // handles '/plan' route.
-        return JSON.stringify(this._db.getPlan());
+        return resp.setContent(this._db.getPlan());
       default:
         throw new Error(`GET request made to unsupported endpoint: '/plan/${reqAction}'`);
     }
   }
 
-  doModifyPlanRequest(reqCtx) {
-    const reqData = this.parseReqData(reqCtx);
+  doModifyPlanRequest(req, resp) {
     /*
     {
       version: "1.0",
@@ -85,18 +127,19 @@ class HttpHandler {
       }
     }
     */
-    const entries = reqData.entryMap || {};
-    Object.keys(entries)
+    const { entryMap = {} } = req.getJsonPayload();
+    Object.keys(entryMap)
       .forEach((date) => {
-        const resp = this._db.setPlanEntry(date, entries[date]);
-        if (!resp.success) {
-          throw new Error(resp.message);
+        const result = this._db.setPlanEntry(date, entryMap[date]);
+        if (!result.success) {
+          throw new Error(result.message);
         }
       });
+    resp.setContent({ message: 'ok' });
   }
 
-  doPlanByDaysRequest(reqCtx) {
-    const [, , reqNumDays] = reqCtx.pathParts;
+  doPlanByDaysRequest(req, resp) {
+    const [, , reqNumDays] = req.pathParts;
     const numDays = Number.parseInt(reqNumDays, 10);
     if (!(Number.isFinite(numDays) && numDays > 0)) {
       throw new Error(assert.formatInvalidApiRequestError('plan/by-days', `expected number of days to be a positive integer value but got '${reqNumDays}'`));
@@ -105,33 +148,22 @@ class HttpHandler {
     const startDate = dateUtils.today();
     const endDate = dateUtils.addDays(startDate, numDays - 1);
 
-    const meals = this._db.getPlanByRange(
+    return resp.setContent(this._db.getPlanByRange(
       dateUtils.toShortISOString(startDate),
       dateUtils.toShortISOString(endDate),
-    );
-
-    return JSON.stringify(meals);
+    ));
   }
 
-  doPlanByRangeRequest(reqCtx) {
-    const [, , reqStart, reqEnd] = reqCtx.pathParts;
+  doPlanByRangeRequest(req, resp) {
+    const [, , reqStart, reqEnd] = req.pathParts;
     assert.assertIsoDate(reqStart, 'plan/by-range', 'start date');
     assert.assertIsoDate(reqEnd, 'plan/by-range', 'end date');
 
-    const meals = this._db.getPlanByRange(reqStart, reqEnd);
-
-    return JSON.stringify(meals);
+    resp.setContent(this._db.getPlanByRange(reqStart, reqEnd));
   }
 
-  doRecipesRequest() {
-    return JSON.stringify(this._db.getAllRecipes());
+  doRecipesRequest(req, resp) {
+    return resp.setContent(this._db.getAllRecipes());
   }
 
-  parseReqData(reqCtx) {
-    try {
-      return JSON.parse(reqCtx.requestParams.postData.contents);
-    } catch (e) {
-      throw new Error(`Error parsing POST request payload as JSON: '${e}'`);
-    }
-  }
 }
