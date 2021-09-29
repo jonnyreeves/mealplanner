@@ -12,9 +12,9 @@ export default function App() {
   return (
     <PaperProvider>
       <MealPlanServiceCtx.Provider value={mealPlanService}>
-        { !appInitialised
-            && <GoogleLogin onAccessTokenSet={() => { setAppInitalised(true); }} />}
-        { appInitialised && <DefaultContainer /> }
+        {!appInitialised
+          && <GoogleLogin onAccessTokenSet={() => { setAppInitalised(true); }} />}
+        {appInitialised && <DefaultContainer />}
       </MealPlanServiceCtx.Provider>
     </PaperProvider>
   );

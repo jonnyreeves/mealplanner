@@ -16,6 +16,10 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: 'row',
   },
+  viewContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
 });
 
 export default function Home() {
@@ -53,7 +57,7 @@ export default function Home() {
 
   const HomeView = () => (
     <>
-      <Headline>Today :)</Headline>
+      <Headline>Today</Headline>
       <MealCardGroup mealRow={mealData[0]} />
 
       <Headline>Tomorrow</Headline>
@@ -62,9 +66,9 @@ export default function Home() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, justifyContent: 'center' }}>
-      { !mealData && <LoadingSpinner /> }
-      { mealData && <HomeView /> }
+    <SafeAreaView style={styles.viewContainer}>
+      {!mealData && <LoadingSpinner />}
+      {mealData && <HomeView />}
     </SafeAreaView>
   );
 }

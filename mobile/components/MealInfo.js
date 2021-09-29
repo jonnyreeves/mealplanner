@@ -5,18 +5,24 @@ import {
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
-export default function MealInfo({ route }) {
+export default function MealInfo({ route, showNav = true }) {
   const { meal } = route.params;
   const navigation = useNavigation();
 
-  console.log(meal);
+  const NavHeader = () => {
+    return (
+      <Appbar.Header>
+        <Appbar.BackAction onPress={navigation.goBack} />
+      </Appbar.Header>
+    );
+  };
 
   const RecipeCard = ({ recipe }) => {
     console.log(recipe);
     if (!recipe) return <></>;
     if (recipe.substr(0, 4) === 'http') {
       return (
-        <Button onPress={() => Linking.openURL(recipe)}>
+        <Button mode="outlined" onPress={() => Linking.openURL(recipe)}>
           Open Recipe
         </Button>
       );
@@ -26,9 +32,7 @@ export default function MealInfo({ route }) {
 
   return (
     <Provider>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={navigation.goBack} />
-      </Appbar.Header>
+      {showNav && <NavHeader />}
       <Title>{meal.name}</Title>
       <RecipeCard recipe={meal.recipe} />
     </Provider>

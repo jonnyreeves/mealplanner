@@ -2,6 +2,7 @@ class MealPlanService {
   constructor({ apiRoot, useProxy }) {
     this._apiRoot = apiRoot;
     this._useProxy = useProxy;
+    this._promiseCache = {};
   }
 
   setAccessToken(v) {
@@ -17,11 +18,18 @@ class MealPlanService {
   }
 
   getPlan() {
-    if (this._cachedGetPlanPromise) {
-      return this._cachedGetPlanPromise;
+    return this._makeCachedRequest('/plan');
+  }
+
+  getRecipes() {
+    return this._makeCachedRequest('/recipes');
+  }
+
+  _makeCachedRequest(resource) {
+    if (!this._promiseCache[resource]) {
+      this._promiseCache[resource] = this.makeRequest({ resource });
     }
-    this._cachedGetPlanPromise = this.makeRequest({ resource: '/plan' });
-    return this._cachedGetPlanPromise;
+    return this._promiseCache[resource];
   }
 
   makeRequest({ resource }) {

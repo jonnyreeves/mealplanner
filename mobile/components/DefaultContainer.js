@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BottomNavigation, Text } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -7,6 +7,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from './Home';
 import Plan from './Plan';
 import MealInfo from './MealInfo';
+import { MealPlanServiceCtx } from '../service/context';
+import Recipes from './Recipes';
 
 const HomeStack = createNativeStackNavigator();
 
@@ -20,22 +22,35 @@ const PlanRoute = () => (
   <Plan />
 );
 
-const MealsRoute = () => <Text>Meals</Text>;
-const ListRoute = () => <Text>List</Text>;
+const RecpiesRoute = () => (
+  <Recipes />
+);
+
+const ListRoute = () => (
+  <Text>Shopping List</Text>
+);
 
 export default function DefaultContainer() {
+  const mealPlanService = React.useContext(MealPlanServiceCtx);
+
+  // On mount, prefetch all API calls.
+  useEffect(() => {
+    mealPlanService.getPlan();
+    mealPlanService.getRecipes();
+  }, []);
+
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
     { key: 'home', title: 'Home', icon: 'home' },
     { key: 'plan', title: 'Plan', icon: 'calendar' },
-    { key: 'meals', title: 'Meals', icon: 'silverware-fork-knife' },
+    { key: 'recipes', title: 'Recipes', icon: 'silverware-fork-knife' },
     { key: 'list', title: 'List', icon: 'view-list' },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
     home: HomeRoute,
     plan: PlanRoute,
-    meals: MealsRoute,
+    recipes: RecpiesRoute,
     list: ListRoute,
   });
 
