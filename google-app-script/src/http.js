@@ -14,15 +14,30 @@ function doGet(e) {
 }
 
 class HttpRequest {
-  constructor({ method, pathParts, requestParams }) {
-    this.method = method;
-    this.pathParts = pathParts;
-    this.requestParams = requestParams;
+  constructor({ method, requestEvent }) {
+    this._method = method;
+    this._requestEvent = requestEvent;
+  }
+
+  isPost() {
+    return this._method === 'post';
+  }
+
+  getPath() {
+    return this._requestEvent.pathInfo || '';
+  }
+
+  getPathParts() {
+    return this.getPath().split('/');
+  }
+
+  getParam(key) {
+    return this._requestEvent.parameters[key];
   }
 
   getJsonPayload() {
     try {
-      return JSON.parse(this.requestParams.postData.contents);
+      return JSON.parse(this._requestEvent.postData.contents);
     } catch (err) {
       throw new Error(`Error parsing POST request payload as JSON: '${err}'`);
     }
@@ -45,7 +60,8 @@ class HttpResponse {
 
   toOutput({ debug }) {
     if (debug) {
-      return HtmlService.createHtmlOutput(`<pre>${this.marshallTextOutput(true)}</pre>`);
+      return HtmlService
+        .createHtmlOutput(`<pre>${this.marshallTextOutput(true)}</pre>`);
     }
     return ContentService
       .createTextOutput(this.marshallTextOutput())
@@ -62,60 +78,60 @@ class HttpResponse {
 
 class HttpHandler {
   static serveDefault(e, method) {
-    return new HttpHandler({ db: MealPlannerDb.init() }).doReq(e, method);
+    return new HttpHandler({
+      db: MealPlannerDb.init(),
+    }).doReq(e, method);
   }
 
-  constructor({ db }) {
+  constructor({ routerMap, db }) {
     this._db = db;
+    this._routerMap = routerMap || this.defaultRouterMap();
   }
 
-  doReq(e, method) {
-    const { pathInfo = '', parameters } = e;
-    const pathParts = pathInfo.split('/');
+  defaultRouterMap() {
+    return {
+      post: {
+        plan: this.doModifyPlanRequest,
+      },
+      get: {
+        plan: this.doPlanRequest2,
+        'plan/by-days/*': this.doPlanByDaysRequest,
+        'plan/by-range/*': this.doPlanByRangeRequest,
+        recipes: this.doRecipesRequest,
+      },
+    };
+  }
 
-    const req = new HttpRequest({
-      method,
-      pathParts,
-      requestParams: e,
-    });
-
+  doReq(requestEvent, method) {
+    const req = new HttpRequest({ method, requestEvent });
     const resp = new HttpResponse();
 
-    switch (pathParts[0]) {
-      case 'plan':
-        this.doPlanRequest(req, resp);
-        break;
-      case 'recipes':
-        this.doRecipesRequest(req, resp);
-        break;
-      default:
-        resp.setContent(req);
-        break;
+    const handlerMap = req.isPost() ? this._routerMap.post : this._routerMap.get;
+    const routePriority = Object.keys(handlerMap)
+      .sort((a, b) => {
+        const aLen = a.split('/').length;
+        const bLen = b.split('/').length;
+        if (aLen > bLen) return -1;
+        if (aLen === bLen) return 0;
+        return -1;
+      });
+
+    const handlerName = routePriority.find((r) => new RegExp(r).test(req.getPath()));
+    if (handlerName) {
+      handlerMap[handlerName].apply(this, [req, resp]);
+    } else {
+      this.doNoHandlerFound(req, resp);
     }
 
-    return resp.toOutput({ debug: parameters.debug });
+    return resp.toOutput({ debug: req.getParam('debug') });
   }
 
-  doPlanRequest(req, resp) {
-    const [, reqAction] = req.pathParts;
+  doNoHandlerFound(req, resp) {
+    return resp.setContent({ error: `No handler registered for route: ${req.getRoute()}` });
+  }
 
-    if (req.method === 'post') {
-      if (reqAction !== undefined) {
-        throw new Error(`POST request made to unsupported endpoint: '/plan/${reqAction}'`);
-      }
-      return this.doModifyPlanRequest(req, resp);
-    }
-
-    switch (reqAction) {
-      case 'by-days':
-        return this.doPlanByDaysRequest(req, resp);
-      case 'by-range':
-        return this.doPlanByRangeRequest(req, resp);
-      case undefined: // handles '/plan' route.
-        return resp.setContent(this._db.getPlan());
-      default:
-        throw new Error(`GET request made to unsupported endpoint: '/plan/${reqAction}'`);
-    }
+  doPlanRequest2(req, resp) {
+    return resp.setContent(this._db.getPlan());
   }
 
   doModifyPlanRequest(req, resp) {
@@ -139,7 +155,7 @@ class HttpHandler {
   }
 
   doPlanByDaysRequest(req, resp) {
-    const [, , reqNumDays] = req.pathParts;
+    const [, , reqNumDays] = req.getPathParts();
     const numDays = Number.parseInt(reqNumDays, 10);
     if (!(Number.isFinite(numDays) && numDays > 0)) {
       throw new Error(assert.formatInvalidApiRequestError('plan/by-days', `expected number of days to be a positive integer value but got '${reqNumDays}'`));
@@ -155,7 +171,7 @@ class HttpHandler {
   }
 
   doPlanByRangeRequest(req, resp) {
-    const [, , reqStart, reqEnd] = req.pathParts;
+    const [, , reqStart, reqEnd] = req.getPathParts();
     assert.assertIsoDate(reqStart, 'plan/by-range', 'start date');
     assert.assertIsoDate(reqEnd, 'plan/by-range', 'end date');
 
