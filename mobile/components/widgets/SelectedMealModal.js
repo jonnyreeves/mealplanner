@@ -15,10 +15,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   actionButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    margin: 10,
   },
 });
 
