@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     padding: 20,
     margin: 20,
     backgroundColor: 'white',
+    flex: 0,
   },
 });
 

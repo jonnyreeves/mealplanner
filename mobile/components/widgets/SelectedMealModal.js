@@ -7,14 +7,18 @@ import { prettyDate } from '../helpers/date';
 
 const styles = StyleSheet.create({
   viewContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   centerText: {
     textAlign: 'center',
   },
   actionButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    margin: 10,
+  },
+  actionButton: {
+    marginRight: 8,
   },
 });
 
@@ -28,9 +32,9 @@ export const SelectedMealModal = ({ meal }) => {
       <Subheading style={styles.centerText}>{subtitle}</Subheading>
 
       <View style={styles.actionButtonContainer}>
-        <Button mode="outlined" style={{ marginRight: 10 }}>Delete Meal</Button>
-        <Button mode="outlined" style={{ marginRight: 10 }}>Change Meal</Button>
-        <Button mode="outlined">Swap Meal</Button>
+        <Button mode="outlined" icon="delete" compact style={styles.actionButton}>Delete</Button>
+        <Button mode="outlined" icon="pencil" compact style={styles.actionButton}>Change</Button>
+        <Button mode="outlined" icon="swap-horizontal" compact style={styles.actionButton}>Swap</Button>
       </View>
     </View>
   );
