@@ -34,12 +34,16 @@ class MealPlannerDb {
       ...this.sheets.thisWeek().getRange(2, 1, ROLLOVER_DAY_OF_WEEK - 1, 4).getValues(),
       ...this.sheets.nextWeek().getRange(ROLLOVER_DAY_OF_WEEK + 1, 1, 8 - ROLLOVER_DAY_OF_WEEK, 4).getValues(),
       ...this.sheets.nextWeek().getRange(2, 1, ROLLOVER_DAY_OF_WEEK - 1, 4).getValues(),
-    ].map((row, idx) => ({
-      date: dateUtils.addDays(startDate, idx),
+    ].map((row, idx) => this.rowMapper(row, dateUtils.addDays(startDate, idx)));
+  }
+
+  rowMapper(row, date) {
+    return {
+      date: dateUtils.toShortISOString(date),
       lunch: this.getMeal(row[1]),
       dinner: this.getMeal(row[2]),
       note: row[3],
-    }));
+    };
   }
 
   getPlanByRange(startIsoDate, endIsoDate) {
