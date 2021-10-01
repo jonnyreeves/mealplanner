@@ -28,8 +28,7 @@ class MealPlannerDb {
   }
 
   getPlan() {
-    const startDate = dateUtils.addDays(this.getNextRolloverDate(new Date()), -7);
-
+    const startDate = dateUtils.addDays(this.getNextRolloverDate(dateUtils.today()), -7);
     return [
       ...this.sheets.thisWeek().getRange(ROLLOVER_DAY_OF_WEEK + 1, 1, 8 - ROLLOVER_DAY_OF_WEEK, 4).getValues(),
       ...this.sheets.thisWeek().getRange(2, 1, ROLLOVER_DAY_OF_WEEK - 1, 4).getValues(),
@@ -241,7 +240,10 @@ class MealPlannerDb {
 
   getNextRolloverDate(startDate) {
     const res = new Date(startDate.getTime());
-    const daysUntilNextRollover = ROLLOVER_DAY_OF_WEEK - startDate.getDay();
+    let daysUntilNextRollover = ROLLOVER_DAY_OF_WEEK - startDate.getDay();
+    if (daysUntilNextRollover === 0) {
+      daysUntilNextRollover = 7;
+    }
     res.setDate(startDate.getDate() + daysUntilNextRollover);
     dateUtils.zeroHMS(res);
     return res;
