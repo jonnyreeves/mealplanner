@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Platform, StyleSheet, Text } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { Portal, Modal, Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MealPlanServiceCtx } from '../service/context';
 import { toPlannerGridData } from './helpers/planData';
+import { Glass } from './widgets/Glass';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { PlannerGrid } from './widgets/PlannerGrid';
+import { RecipeSearch } from './widgets/RecipeSearch';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
 
 const styles = StyleSheet.create({
@@ -28,11 +30,15 @@ const styles = StyleSheet.create({
 export default function Plan() {
   // const navigation = useNavigation();
 
+  const inputRef = useRef();
+
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [glassVisible, setGlassVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
 
+  const [recipes, setRecipes] = useState(null);
   const [plannerGridData, setPlannerGridData] = useState(null);
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
@@ -42,6 +48,8 @@ export default function Plan() {
   useEffect(() => {
     mealPlanService.getPlan()
       .then((response) => setPlannerGridData(toPlannerGridData(response)));
+    mealPlanService.getRecipes()
+      .then((response) => setRecipes(response));
   }, []);
 
   const mutateGridData = (mutations) => {
@@ -116,6 +124,35 @@ export default function Plan() {
     }
   };
 
+  const doEditMeal = (meal) => {
+    setSwapSource(meal);
+    setGlassVisible(true);
+    inputRef.current.focus();
+  };
+
+  const doSetMeal = (recipe) => {
+    const hasChange = mutateGridData([{ mealId: swapSource.id, mealName: recipe.name }]);
+    if (hasChange) {
+      mealPlanService.updatePlan({
+        [swapSource.date]: { [swapSource.slot]: recipe.name },
+      });
+    }
+    setSwapSource(null);
+    setGlassVisible(false);
+  };
+
+  const onSearchEntry = (recipe) => {
+    if (!recipe) {
+      return;
+    }
+    console.log(`onSearchEntry: ${recipe.name}`);
+    if (swapSource) {
+      doSetMeal(recipe);
+      return;
+    }
+    console.log("Lol");
+  };
+
   const onAction = (action, meal) => {
     setModalVisible(false);
     switch (action) {
@@ -125,7 +162,9 @@ export default function Plan() {
       case 'delete':
         doDeleteMeal(meal);
         break;
-
+      case 'change':
+        doEditMeal(meal);
+        break;
       default:
         console.error(`Unsupported action: ${action}`);
     }
@@ -139,20 +178,28 @@ export default function Plan() {
         </Modal>
       </Portal>
 
-      {swapSource && <></>}
-
       {!plannerGridData
         && <LoadingSpinner message="Fetching meal plan" />}
 
       {plannerGridData && (
-        <PlannerGrid
-          selectedWeek={selectedWeek}
-          swapSource={swapSource}
-          onWeekSelected={(week) => setSelectedWeek(week)}
-          onMealSelected={onMealSelected}
-          gridData={plannerGridData[selectedWeek]}
-        />
+        <>
+          <View style={{ marginTop: 0, marginLeft: 30, marginRight: 30 }}>
+            <RecipeSearch recipes={recipes} inputRef={inputRef} onSelect={(recipe) => onSearchEntry(recipe)} />
+            <View style={{ marginTop: 100 }}>
+              <PlannerGrid
+                selectedWeek={selectedWeek}
+                swapSource={swapSource}
+                onWeekSelected={(week) => setSelectedWeek(week)}
+                onMealSelected={onMealSelected}
+                gridData={plannerGridData[selectedWeek]}
+              />
+            </View>
+            <Glass visible={glassVisible} />
+          </View>
+        </>
       )}
+
+
       <Snackbar
         visible={snackBarVisible}
         onDismiss={() => setSnackBarVisible(false)}

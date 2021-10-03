@@ -6,7 +6,7 @@ function toNaturalWeekOrder(entries) {
   const headers = [{ id: 'blank', isHeader: true, name: '' }, { id: 'lunch', isHeader: true, name: 'Lunch' }, { id: 'dinner', isHeader: true, name: 'Dinner' }];
   const first3Days = entries.slice(0, 0 + 9);
   const remaining4Days = entries.slice(0 + 9, 0 + 9 + 12);
-  return headers.concat(remaining4Days).concat(first3Days);
+  return [].concat(remaining4Days).concat(first3Days);
 }
 
 // Marhsalls the Meal Plan's '/plan' API response into a view ready data structure

@@ -8,7 +8,6 @@ import Home from './Home';
 import Plan from './Plan';
 import MealInfo from './MealInfo';
 import { MealPlanServiceCtx } from '../service/context';
-import Recipes from './Recipes';
 
 const HomeStack = createNativeStackNavigator();
 
@@ -20,10 +19,6 @@ const HomeRoute = () => (
 );
 const PlanRoute = () => (
   <Plan />
-);
-
-const RecpiesRoute = () => (
-  <Recipes />
 );
 
 const ListRoute = () => (
@@ -41,16 +36,12 @@ export default function DefaultContainer() {
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
-    { key: 'home', title: 'Home', icon: 'home' },
     { key: 'plan', title: 'Plan', icon: 'calendar' },
-    { key: 'recipes', title: 'Recipes', icon: 'silverware-fork-knife' },
-    { key: 'list', title: 'List', icon: 'view-list' },
+    { key: 'list', title: 'Lists', icon: 'view-list' },
   ]);
 
   const renderScene = BottomNavigation.SceneMap({
-    home: HomeRoute,
     plan: PlanRoute,
-    recipes: RecpiesRoute,
     list: ListRoute,
   });
 

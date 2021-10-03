@@ -10,10 +10,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'stretch',
+    marginTop: 20,
     marginBottom: 20,
   },
   plannerGridContainer: {
-    padding: 20,
   },
   planListLabel: {
     width: 40,

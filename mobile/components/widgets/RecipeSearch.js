@@ -1,34 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
-import AutoComplete from 'react-native-autocomplete-input';
 import { kebab } from '../helpers/kebab';
+import AutocompleteInput from './AutoComplete';
 
 const styles = StyleSheet.create({
-  viewContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  clearButton: {
-    fontSize: 32,
-  },
   autocompleteContainer: {
     flex: 1,
+    top: 1,
+    left: 1,
     position: 'absolute',
-    zIndex: 1,
+    zIndex: 100,
     padding: 5,
+    backgroundColor: 'white',
     width: '100%',
   },
   itemText: {
     fontSize: 18,
-    margin: 4,
+    margin: 8,
     color: 'black',
+    backgroundColor: 'white',
   },
 });
 
-export function RecipeSearch({ recipes, onSelect }) {
+export function RecipeSearch({ recipes, onSelect, inputRef }) {
   const [query, setQuery] = useState('');
+  const [selectedQuery, setSelectedQuery] = useState('');
 
   const queryRecipes = (searchTerm) => {
     if (!recipes?.length || searchTerm.trim().length < 3) {
@@ -41,50 +38,45 @@ export function RecipeSearch({ recipes, onSelect }) {
   const cmp = (str1, str2) => str1.toLowerCase().trim() === str2.toLowerCase().trim();
 
   const queriedRecipes = queryRecipes(query);
-  const hasExactRecipeMatch = queriedRecipes?.length === 1 && cmp(queriedRecipes[0].name, query);
+  const matchedRecipe = queriedRecipes.find((item) => cmp(item.name, selectedQuery)) || null;
   const isLoading = !recipes?.length;
   const placeholder = (isLoading) ? 'Loading data...' : 'Enter recipe name';
 
   useEffect(() => {
     if (query?.trim() === '') {
       onSelect(null);
-    } else if (hasExactRecipeMatch) {
-      onSelect(queriedRecipes[0]);
     }
   }, [query]);
+  useEffect(() => {
+    if (matchedRecipe) {
+      onSelect(matchedRecipe);
+    }
+    setQuery('');
+    setSelectedQuery('');
+  }, [selectedQuery]);
 
   const renderSearchSuggestion = ({ item: { name } }) => (
-    <TouchableOpacity onPress={() => setQuery(name)}>
+    <TouchableOpacity onPress={() => setSelectedQuery(name)}>
       <Text style={styles.itemText}>{name}</Text>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.viewContainer}>
-      <View style={{ width: '90%' }}>
-        <View style={styles.autocompleteContainer}>
-          <AutoComplete
-            editable={!isLoading}
-            autoCorrect={false}
-            data={hasExactRecipeMatch ? [] : queriedRecipes}
-            value={query}
-            onChangeText={setQuery}
-            placeholder={placeholder}
-            flatListProps={{
-              keyboardShouldPersistTaps: 'always',
-              keyExtractor: (recipe) => kebab(recipe.name),
-              renderItem: renderSearchSuggestion,
-            }}
-          />
-        </View>
-      </View>
-      <View>
-        <Button
-          icon="close-circle"
-          onPress={() => setQuery('')}
-          labelStyle={styles.clearButton}
-        />
-      </View>
+    <View style={styles.autocompleteContainer}>
+      <AutocompleteInput
+        editable={!isLoading}
+        autoCorrect={false}
+        innerRef={inputRef}
+        data={queriedRecipes}
+        value={query}
+        onChangeText={setQuery}
+        placeholder={placeholder}
+        flatListProps={{
+          keyboardShouldPersistTaps: 'always',
+          keyExtractor: (recipe) => kebab(recipe.name),
+          renderItem: renderSearchSuggestion,
+        }}
+      />
     </View>
   );
 }
