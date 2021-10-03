@@ -4,21 +4,17 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import Home from './Home';
 import Plan from './Plan';
-import MealInfo from './MealInfo';
 import { MealPlanServiceCtx } from '../service/context';
+import RecipeInfo from './RecipeInfo';
 
-const HomeStack = createNativeStackNavigator();
+const PlanStack = createNativeStackNavigator();
 
-const HomeRoute = () => (
-  <HomeStack.Navigator screenOptions={{ headerShown: false }}>
-    <HomeStack.Screen name="Home" component={Home} />
-    <HomeStack.Screen name="MealInfo" component={MealInfo} />
-  </HomeStack.Navigator>
-);
 const PlanRoute = () => (
-  <Plan />
+  <PlanStack.Navigator screenOptions={{ headerShown: false }}>
+    <PlanStack.Screen name="Plan" component={Plan} />
+    <PlanStack.Screen name="RecipeInfo" component={RecipeInfo} />
+  </PlanStack.Navigator>
 );
 
 const ListRoute = () => (

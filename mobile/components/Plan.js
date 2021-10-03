@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/core';
 import React, { useState, useEffect, useRef } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Portal, Modal, Snackbar } from 'react-native-paper';
@@ -14,7 +15,6 @@ import { SelectedMealModal } from './widgets/SelectedMealModal';
 const styles = StyleSheet.create({
   viewContainer: {
     flex: 1,
-    justifyContent: 'center',
   },
   modalContainer: {
     padding: 20,
@@ -28,12 +28,12 @@ const styles = StyleSheet.create({
 });
 
 export default function Plan() {
-  // const navigation = useNavigation();
-
+  const navigation = useNavigation();
   const inputRef = useRef();
 
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
   const [selectedMeal, setSelectedMeal] = useState(null);
+  const [selectedMealRecipe, setSelectedMealRecipe] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [glassVisible, setGlassVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
@@ -51,6 +51,11 @@ export default function Plan() {
     mealPlanService.getRecipes()
       .then((response) => setRecipes(response));
   }, []);
+
+  useEffect(() => {
+    const smr = recipes?.find((recipe) => recipe.name === selectedMeal.name);
+    setSelectedMealRecipe(smr || null);
+  }, [selectedMeal]);
 
   const mutateGridData = (mutations) => {
     const newGridData = { ...plannerGridData };
@@ -148,9 +153,9 @@ export default function Plan() {
     console.log(`onSearchEntry: ${recipe.name}`);
     if (swapSource) {
       doSetMeal(recipe);
-      return;
+    } else {
+      navigation.navigate('RecipeInfo', { recipe });
     }
-    console.log("Lol");
   };
 
   const onAction = (action, meal) => {
@@ -165,6 +170,9 @@ export default function Plan() {
       case 'change':
         doEditMeal(meal);
         break;
+      case 'show-recipe':
+        navigation.navigate('RecipeInfo', { recipe: selectedMealRecipe });
+        break;
       default:
         console.error(`Unsupported action: ${action}`);
     }
@@ -174,7 +182,7 @@ export default function Plan() {
     <SafeAreaView style={styles.viewContainer}>
       <Portal>
         <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modalContainer}>
-          {selectedMeal && <SelectedMealModal meal={selectedMeal} onAction={onAction} />}
+          {selectedMeal && <SelectedMealModal meal={selectedMeal} hasRecipe={!!selectedMealRecipe} onAction={onAction} />}
         </Modal>
       </Portal>
 

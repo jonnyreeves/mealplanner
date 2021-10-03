@@ -17,10 +17,10 @@ export function toPlannerGridData(planEntries) {
     // The label item is used to denote the day of the week in the planner grid.
     allGridData.push({ id: item.date, name: getShortDayOfTheWeek(item.date), isLabel: true });
     allGridData.push({
-      id: `${item.date}-lunch`, name: item.lunch.name, slot: 'lunch', date: item.date,
+      id: `${item.date}-lunch`, name: item.lunch.name, slot: 'lunch', date: item.date, recipe: item.lunch.recipe,
     });
     allGridData.push({
-      id: `${item.date}-dinner`, name: item.dinner.name, slot: 'dinner', date: item.date,
+      id: `${item.date}-dinner`, name: item.dinner.name, slot: 'dinner', date: item.date, recipe: item.dinner.recipe,
     });
   });
 

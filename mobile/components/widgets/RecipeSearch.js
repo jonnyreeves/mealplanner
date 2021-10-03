@@ -7,17 +7,16 @@ import AutocompleteInput from './AutoComplete';
 const styles = StyleSheet.create({
   autocompleteContainer: {
     flex: 1,
-    top: 1,
-    left: 1,
+    top: 0,
+    left: 0,
     position: 'absolute',
     zIndex: 100,
-    padding: 5,
-    backgroundColor: 'white',
+    backgroundColor: 'whitesmoke',
     width: '100%',
   },
   itemText: {
     fontSize: 18,
-    margin: 8,
+    padding: 8,
     color: 'black',
     backgroundColor: 'white',
   },
@@ -55,6 +54,13 @@ export function RecipeSearch({ recipes, onSelect, inputRef }) {
     setSelectedQuery('');
   }, [selectedQuery]);
 
+  const onKeyPress = (event) => {
+    console.log(event.key);
+    if (event.key === 'Enter') {
+      onSelect({ name: query });
+    }
+  };
+
   const renderSearchSuggestion = ({ item: { name } }) => (
     <TouchableOpacity onPress={() => setSelectedQuery(name)}>
       <Text style={styles.itemText}>{name}</Text>
@@ -70,6 +76,7 @@ export function RecipeSearch({ recipes, onSelect, inputRef }) {
         data={queriedRecipes}
         value={query}
         onChangeText={setQuery}
+        onKeyPress={onKeyPress}
         placeholder={placeholder}
         flatListProps={{
           keyboardShouldPersistTaps: 'always',
