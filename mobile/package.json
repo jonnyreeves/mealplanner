@@ -1,11 +1,12 @@
 {
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "concurrently --kill-others \"lcp --proxyUrl https://script.google.com\" \"expo start\"",
+    "start": "concurrently --raw --kill-others npm:cors-proxy \"expo start\"",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "cors-proxy": "node ./cors-proxy.js"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^6.0.5",
@@ -32,7 +33,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
-    "concurrently": "^6.2.1"
+    "concurrently": "^6.2.1",
+    "cors-anywhere": "^0.4.4"
   },
   "private": true
 }

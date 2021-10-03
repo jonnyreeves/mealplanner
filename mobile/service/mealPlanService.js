@@ -12,7 +12,7 @@ class MealPlanService {
   apiRoot() {
     let url = this._apiRoot;
     if (this._useProxy) {
-      url = url.replace('https://script.google.com/', 'http://localhost:8010/proxy/');
+      url = `http://localhost:1234/${url}`;
     }
     return url;
   }
@@ -25,6 +25,11 @@ class MealPlanService {
     return this._makeCachedRequest('/recipes');
   }
 
+  updatePlan(entryMap) {
+    const postData = { version: '1.0', entryMap };
+    return this.makeRequest({ resource: '/plan', postData });
+  }
+
   _makeCachedRequest(resource) {
     if (!this._promiseCache[resource]) {
       this._promiseCache[resource] = this.makeRequest({ resource });
@@ -32,14 +37,17 @@ class MealPlanService {
     return this._promiseCache[resource];
   }
 
-  makeRequest({ resource }) {
+  makeRequest({ resource, postData }) {
     const url = this.apiRoot() + resource;
+    const method = (postData) ? 'post' : 'get';
     console.log('Making Request, url:', url);
 
     return fetch(url, {
+      method,
       headers: new Headers({
         Authorization: `Bearer ${this._accessToken}`,
       }),
+      body: postData ? JSON.stringify(postData) : undefined,
     })
       .then((response) => response.json());
   }

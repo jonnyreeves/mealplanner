@@ -28,6 +28,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 8,
   },
+  planListEntrySwapSource: {
+    flex: 1,
+    height: 60,
+    color: 'white',
+    backgroundColor: DefaultTheme.colors.primary,
+    marginVertical: 4,
+    marginHorizontal: 4,
+    justifyContent: 'center',
+    padding: 8,
+  },
 });
 
 const PlannerGridLabel = ({ dayOfTheWeek }) => (
@@ -42,18 +52,6 @@ const PlannerGridMeaButton = ({ onPress, onLongPress, mealName }) => (
   </TouchableOpacity>
 );
 
-const plannerGridItemRenderer = ({ onMealSelected }) => ({ item }) => {
-  if (item.isHeader) {
-    return <Text>{item.name}</Text>;
-  }
-  if (item.isLabel) {
-    return <PlannerGridLabel dayOfTheWeek={item.name} />;
-  }
-  const onPress = () => onMealSelected(item);
-  const onLongPress = () => console.log(`You long pressed ${item.id}`);
-  return <PlannerGridMeaButton onPress={onPress} onLongPress={onLongPress} mealName={item.name} />;
-};
-
 const WeekSelectorButton = ({
   id, selectedWeek, style, onPress,
 }) => {
@@ -67,20 +65,44 @@ const WeekSelectorButton = ({
 };
 
 export const PlannerGrid = ({
-  selectedWeek, onWeekSelected, gridData, onMealSelected,
-}) => (
-  <>
-    <View style={styles.plannerGridContainer}>
-      <FlatList
-        data={gridData}
-        renderItem={plannerGridItemRenderer({ onMealSelected })}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-      />
-    </View>
-    <View style={styles.weekSelectorButtonContainer}>
-      <WeekSelectorButton id="thisWeek" selectedWeek={selectedWeek} onPress={onWeekSelected} style={{ marginRight: 10 }} />
-      <WeekSelectorButton id="nextWeek" selectedWeek={selectedWeek} onPress={onWeekSelected} />
-    </View>
-  </>
-);
+  selectedWeek, swapSource, onWeekSelected, gridData, onMealSelected,
+}) => {
+  const plannerGridItemRenderer = ({ item }) => {
+    if (item.isHeader) {
+      return <Text>{item.name}</Text>;
+    }
+    if (item.isLabel) {
+      return <PlannerGridLabel dayOfTheWeek={item.name} />;
+    }
+    if (swapSource && swapSource.id === item.id) {
+      return (
+        <TouchableOpacity style={styles.planListEntrySwapSource}>
+          <Text style={{ textAlign: 'center' }}>{item.name}</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    const onPress = () => onMealSelected(item);
+    const onLongPress = () => console.log(`You long pressed ${item.id}`);
+    return <PlannerGridMeaButton onPress={onPress} onLongPress={onLongPress} mealName={item.name} />;
+  };
+
+  return (
+    <>
+      <View style={styles.plannerGridContainer}>
+        <FlatList
+          data={gridData}
+          renderItem={plannerGridItemRenderer}
+          keyExtractor={(item) => item.id}
+          numColumns={3}
+          extraData={swapSource}
+        />
+      </View>
+      <View style={styles.weekSelectorButtonContainer}>
+        <WeekSelectorButton id="thisWeek" selectedWeek={selectedWeek} onPress={onWeekSelected} style={{ marginRight: 10 }} />
+        <WeekSelectorButton id="nextWeek" selectedWeek={selectedWeek} onPress={onWeekSelected} />
+      </View>
+    </>
+  )
+
+};
