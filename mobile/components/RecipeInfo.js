@@ -7,19 +7,20 @@ import { useNavigation } from '@react-navigation/native';
 
 const styles = StyleSheet.create({
   viewContainer: {
+    flex: 1,
+    flexDirection: 'column',
     padding: 20,
   },
 });
 
-export default function RecipeInfo({ route, showNav = true }) {
+export default function RecipeInfo({ route }) {
   const { recipe } = route.params;
   const navigation = useNavigation();
 
-  const NavHeader = () => (
-    <Appbar.Header>
-      <Appbar.BackAction onPress={navigation.goBack} />
-    </Appbar.Header>
-  );
+  const onAddToPlan = () => {
+    navigation.push('Home', { screen: 'Plan', params: { action: 'add', recipe } });
+  };
+
 
   const RecipeSourceCard = ({ source }) => {
     if (!source) return <></>;
@@ -48,14 +49,23 @@ export default function RecipeInfo({ route, showNav = true }) {
     </>
   );
 
-  console.log(recipe);
+  const TagsCard = () => (
+    <>
+      <Subheading style={{ paddingTop: 10 }}>Tags</Subheading>
+      <Text>{recipe.tags.join(', ')}</Text>
+    </>
+  );
+
   return (
     <Provider>
-      {showNav && <NavHeader />}
       <View style={styles.viewContainer}>
-        <Title>{recipe.name}</Title>
-        <RecipeSourceCard source={recipe.recipe} />
-        <IngredientsCard />
+        <View style={{ flex: 1 }}>
+          <Title>{recipe.name}</Title>
+          <RecipeSourceCard source={recipe.recipe} />
+          <IngredientsCard />
+          <TagsCard />
+        </View>
+        <Button onPress={() => onAddToPlan()} mode="outlined" style={{ marginBottom: 40 }}>Add to Plan</Button>
       </View>
     </Provider>
   );

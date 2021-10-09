@@ -4,6 +4,7 @@ import {
   StyleSheet, View, TouchableOpacity, FlatList,
 } from 'react-native';
 import { Text, Button, DefaultTheme } from 'react-native-paper';
+import { kebab } from '../helpers/kebab';
 
 const styles = StyleSheet.create({
   weekSelectorButtonContainer: {
@@ -83,7 +84,7 @@ export const PlannerGrid = ({
     }
 
     const onPress = () => onMealSelected(item);
-    const onLongPress = () => console.log(`You long pressed ${item.id}`);
+    const onLongPress = () => console.log(`You long pressed ${item.id}: ${item.name}`);
     return <PlannerGridMeaButton onPress={onPress} onLongPress={onLongPress} mealName={item.name} />;
   };
 
@@ -93,7 +94,7 @@ export const PlannerGrid = ({
         <FlatList
           data={gridData}
           renderItem={plannerGridItemRenderer}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => kebab(`${item.id}-${item.name}`)}
           numColumns={3}
           extraData={swapSource}
         />

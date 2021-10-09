@@ -1,20 +1,26 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useState, useEffect, useRef } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
-import { Portal, Modal, Snackbar } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import {
+  Platform, Pressable, StyleSheet, View,
+} from 'react-native';
+import { Portal, Modal, Snackbar, Searchbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MealPlanServiceCtx } from '../service/context';
+import { usePlanModifers } from '../service/mealPlanService';
 import { toPlannerGridData } from './helpers/planData';
-import { Glass } from './widgets/Glass';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { PlannerGrid } from './widgets/PlannerGrid';
-import { RecipeSearch } from './widgets/RecipeSearch';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
 
 const styles = StyleSheet.create({
   viewContainer: {
     flex: 1,
+    padding: 12,
+  },
+  plannerGridContainer: {
+    paddingHorizontal: 18,
+    paddingTop: 40,
   },
   modalContainer: {
     padding: 20,
@@ -27,15 +33,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Plan() {
-  const navigation = useNavigation();
-  const inputRef = useRef();
+export default function Plan({ route }) {
+  const { params } = route;
 
+  const navigation = useNavigation();
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [selectedMealRecipe, setSelectedMealRecipe] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [glassVisible, setGlassVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
 
   const [recipes, setRecipes] = useState(null);
@@ -44,117 +49,67 @@ export default function Plan() {
   const [deletedMeal, setDeletedMeal] = useState(null);
 
   const mealPlanService = React.useContext(MealPlanServiceCtx);
+  const api = usePlanModifers({ mealPlanService });
+
+  const refreshPlan = () => {
+    setPlannerGridData(null);
+    mealPlanService.getPlan()
+      .then((response) => {
+        const newGridData = toPlannerGridData(response);
+        setPlannerGridData(newGridData);
+      });
+  };
 
   useEffect(() => {
-    mealPlanService.getPlan()
-      .then((response) => setPlannerGridData(toPlannerGridData(response)));
     mealPlanService.getRecipes()
       .then((response) => setRecipes(response));
+    const unsub = navigation.addListener('focus', () => {
+      refreshPlan();
+    });
+    return () => unsub();
   }, []);
 
   useEffect(() => {
-    const smr = recipes?.find((recipe) => recipe.name === selectedMeal.name);
+    const smr = recipes?.find((recipe) => recipe.name === selectedMeal?.name);
     setSelectedMealRecipe(smr || null);
   }, [selectedMeal]);
 
-  const mutateGridData = (mutations) => {
-    const newGridData = { ...plannerGridData };
-    let dirty = false;
-
-    const gridDataMapper = (mutation) => (item) => {
-      const { mealId, mealName } = mutation;
-      if (item.id === mealId) {
-        dirty = true;
-        return { ...item, name: mealName };
-      }
-      return item;
-    };
-
-    mutations.forEach((mutation) => {
-      newGridData.thisWeek = newGridData.thisWeek.map(gridDataMapper(mutation));
-      newGridData.nextWeek = newGridData.nextWeek.map(gridDataMapper(mutation));
-    });
-
-    if (dirty) {
-      setPlannerGridData(newGridData);
-    }
-    return dirty;
-  };
-
   const doMealSwap = ({ source, target }) => {
-    mutateGridData([
-      { mealId: source.id, mealName: target.name },
-      { mealId: target.id, mealName: source.name },
-    ]);
     setSwapSource(null);
-
-    let entryMap;
-    if (source.date === target.date) {
-      entryMap = { [source.date]: { [source.slot]: target.name, [target.slot]: source.name } };
-    } else {
-      entryMap = {
-        [source.date]: { [source.slot]: target.name },
-        [target.date]: { [target.slot]: source.name },
-      };
-    }
-    mealPlanService.updatePlan(entryMap);
+    api.swapMeal({
+      src: { date: source.date, slot: source.slot, recipeName: source.name },
+      dest: { date: target.date, slot: target.slot, recipeName: target.name },
+    });
+    refreshPlan();
   };
 
   const doDeleteMeal = (meal) => {
-    const hasChange = mutateGridData([{ mealId: meal.id, mealName: '' }]);
-    if (hasChange) {
-      setDeletedMeal(meal);
-      setSnackBarVisible(true);
-      mealPlanService.updatePlan({
-        [meal.date]: { [meal.slot]: '' },
-      });
-    }
+    api.clearMeal({ date: meal.date, slot: meal.slot });
+    setDeletedMeal(meal);
+    setSnackBarVisible(true);
+    refreshPlan();
   };
 
   const doUndeleteMeal = () => {
-    const hasChange = mutateGridData([{ mealId: deletedMeal.id, mealName: deletedMeal.name }]);
-    if (hasChange) {
-      mealPlanService.updatePlan({
-        [deletedMeal.date]: { [deletedMeal.slot]: deletedMeal.name },
-      });
-    }
+    api.setMeal({ date: deletedMeal.date, slot: deletedMeal.slot, recipeName: deletedMeal.name });
+    setDeletedMeal(null);
+    refreshPlan();
+  };
+
+  const doAddRecipeToPlan = (meal, recipe) => {
+    api.setMeal({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
+    refreshPlan();
+    setTimeout(() => navigation.popToTop(), 1500);
   };
 
   const onMealSelected = (meal) => {
-    if (swapSource) {
+    if (params?.action === 'add' && params.recipe) {
+      doAddRecipeToPlan(meal, params.recipe);
+    } else if (swapSource) {
       doMealSwap({ source: swapSource, target: meal });
     } else {
       setSelectedMeal(meal);
       setModalVisible(true);
-    }
-  };
-
-  const doEditMeal = (meal) => {
-    setSwapSource(meal);
-    setGlassVisible(true);
-    inputRef.current.focus();
-  };
-
-  const doSetMeal = (recipe) => {
-    const hasChange = mutateGridData([{ mealId: swapSource.id, mealName: recipe.name }]);
-    if (hasChange) {
-      mealPlanService.updatePlan({
-        [swapSource.date]: { [swapSource.slot]: recipe.name },
-      });
-    }
-    setSwapSource(null);
-    setGlassVisible(false);
-  };
-
-  const onSearchEntry = (recipe) => {
-    if (!recipe) {
-      return;
-    }
-    console.log(`onSearchEntry: ${recipe.name}`);
-    if (swapSource) {
-      doSetMeal(recipe);
-    } else {
-      navigation.navigate('RecipeInfo', { recipe });
     }
   };
 
@@ -168,7 +123,7 @@ export default function Plan() {
         doDeleteMeal(meal);
         break;
       case 'change':
-        doEditMeal(meal);
+        navigation.push('ChooseRecipe', { action: 'select', meal });
         break;
       case 'show-recipe':
         navigation.navigate('RecipeInfo', { recipe: selectedMealRecipe });
@@ -178,22 +133,29 @@ export default function Plan() {
     }
   };
 
+  const FakeSearchbar = ({ onPress }) => (
+    <Pressable onPress={onPress}>
+      <View style={{ pointerEvents: 'none' }}>
+        <Searchbar editable={false} />
+      </View>
+    </Pressable>
+  );
+
   return (
-    <SafeAreaView style={styles.viewContainer}>
+    <SafeAreaView style={{ flex: 1 }}>
       <Portal>
         <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modalContainer}>
           {selectedMeal && <SelectedMealModal meal={selectedMeal} hasRecipe={!!selectedMealRecipe} onAction={onAction} />}
         </Modal>
       </Portal>
+      <View style={styles.viewContainer}>
+        {!plannerGridData
+          && <LoadingSpinner message="Fetching meal plan" />}
 
-      {!plannerGridData
-        && <LoadingSpinner message="Fetching meal plan" />}
-
-      {plannerGridData && (
-        <>
-          <View style={{ marginTop: 0, marginLeft: 30, marginRight: 30 }}>
-            <RecipeSearch recipes={recipes} inputRef={inputRef} onSelect={(recipe) => onSearchEntry(recipe)} />
-            <View style={{ marginTop: 100 }}>
+        {plannerGridData && (
+          <>
+            <FakeSearchbar onPress={() => navigation.navigate('Home', { screen: 'Browse' })} />
+            <View style={styles.plannerGridContainer}>
               <PlannerGrid
                 selectedWeek={selectedWeek}
                 swapSource={swapSource}
@@ -202,11 +164,9 @@ export default function Plan() {
                 gridData={plannerGridData[selectedWeek]}
               />
             </View>
-            <Glass visible={glassVisible} />
-          </View>
-        </>
-      )}
-
+          </>
+        )}
+      </View>
 
       <Snackbar
         visible={snackBarVisible}

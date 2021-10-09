@@ -87,8 +87,8 @@ export default function GoogleLogin({ onAccessTokenSet }) {
 
   return (
     <View style={styles.viewContainer}>
-      { !needsSignIn && <LoadingSpinner message="Authenticating" /> }
-      { needsSignIn && <SignInOptions /> }
+      {!needsSignIn && <LoadingSpinner delay={500} message="Authenticating" />}
+      {needsSignIn && <SignInOptions />}
     </View>
   );
 }

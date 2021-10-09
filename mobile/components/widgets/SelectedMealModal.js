@@ -24,7 +24,6 @@ const styles = StyleSheet.create({
 
 
 export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
-  console.log(meal.name);
   const ActionButton = ({ action, onPress }) => {
     const cfgMap = {
       delete: {
@@ -51,7 +50,6 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
   const title = `${mealSlot} on ${prettyDate(meal.date)}`;
   const subtitle = meal.name || 'Empty';
 
-  console.log(meal);
   const ViewRecipeInfo = () => (
     <Button onPress={() => onAction('show-recipe', meal)}>View Recipe</Button>
   );

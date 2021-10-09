@@ -1,24 +1,37 @@
 import React, { useEffect } from 'react';
-import { BottomNavigation, Text } from 'react-native-paper';
+import { DefaultTheme, Text } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Plan from './Plan';
+import Browse from './Browse';
 import { MealPlanServiceCtx } from '../service/context';
 import RecipeInfo from './RecipeInfo';
+import ChooseRecipe from './ChooseRecipe';
 
-const PlanStack = createNativeStackNavigator();
+const AppStack = createNativeStackNavigator();
 
-const PlanRoute = () => (
-  <PlanStack.Navigator screenOptions={{ headerShown: false }}>
-    <PlanStack.Screen name="Plan" component={Plan} />
-    <PlanStack.Screen name="RecipeInfo" component={RecipeInfo} />
-  </PlanStack.Navigator>
+const List = () => (
+  <Text>Shopping List</Text>
 );
 
-const ListRoute = () => (
-  <Text>Shopping List</Text>
+const tabOpts = ({ icon }) => ({
+  tabBarIcon: ({ focused }) => {
+    const iconColor = focused ? 'white' : 'grey';
+    return (<MaterialCommunityIcons name={icon} size={24} color={iconColor} />);
+  }
+});
+
+const Tab = createMaterialBottomTabNavigator();
+const HomeTabs = () => (
+  <Tab.Navigator initialRoute="Plan" barStyle={{ backgroundColor: DefaultTheme.colors.primary }}>
+    <Tab.Screen name="Plan" component={Plan} options={tabOpts({ icon: 'calendar' })} />
+    <Tab.Screen name="Browse" component={Browse} options={tabOpts({ icon: 'silverware-fork-knife' })} />
+    <Tab.Screen name="List" component={List} options={tabOpts({ icon: 'format-list-checkbox' })} />
+  </Tab.Navigator>
 );
 
 export default function DefaultContainer() {
@@ -30,25 +43,14 @@ export default function DefaultContainer() {
     mealPlanService.getRecipes();
   }, []);
 
-  const [index, setIndex] = React.useState(0);
-  const [routes] = React.useState([
-    { key: 'plan', title: 'Plan', icon: 'calendar' },
-    { key: 'list', title: 'Lists', icon: 'view-list' },
-  ]);
-
-  const renderScene = BottomNavigation.SceneMap({
-    plan: PlanRoute,
-    list: ListRoute,
-  });
-
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <BottomNavigation
-          navigationState={{ index, routes }}
-          onIndexChange={setIndex}
-          renderScene={renderScene}
-        />
+        <AppStack.Navigator>
+          <AppStack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
+          <AppStack.Screen name="RecipeInfo" component={RecipeInfo} options={{ headerTitle: 'Recipe Details' }} />
+          <AppStack.Screen name="ChooseRecipe" component={ChooseRecipe} />
+        </AppStack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
   );
