@@ -36,7 +36,8 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
   useImperativeHandle(ref, () => ({
     searchbar: {
       focus() {
-        searchbarRef.current.focus();
+        // TODO: Not sure why I need a timeout here, but I do :(
+        setTimeout(() => searchbarRef.current.focus(), 500);
       },
     },
   }));
@@ -112,6 +113,7 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
             ref={searchbarRef}
             onSubmitEditing={onSubmitEditing}
             autoCorrect={false}
+            placeholder="Recipe name"
             value={query}
             onChangeText={setQuery}
             returnKeyType={onSearchSubmitted ? 'done' : 'search'}

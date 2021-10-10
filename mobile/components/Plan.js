@@ -1,13 +1,15 @@
 import { useNavigation } from '@react-navigation/core';
 import React, { useState, useEffect } from 'react';
 import {
+  Linking,
   Platform, Pressable, StyleSheet, View,
 } from 'react-native';
-import { Portal, Modal, Snackbar, Searchbar } from 'react-native-paper';
+import { Portal, Modal, Snackbar, Searchbar, Text, Button, Card, Title, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MealPlanServiceCtx } from '../service/context';
 import { usePlanModifers } from '../service/mealPlanService';
+import { toShortISOString, today } from './helpers/date';
 import { useNavigationFocusListener } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
@@ -21,7 +23,7 @@ const styles = StyleSheet.create({
   },
   plannerGridContainer: {
     paddingHorizontal: 18,
-    paddingTop: 40,
+    paddingTop: 20,
   },
   modalContainer: {
     padding: 20,
@@ -32,6 +34,16 @@ const styles = StyleSheet.create({
       android: { flex: 0 },
     }),
   },
+  nextMealCard: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 0,
+  },
+  nextMealCardContent: {
+    flex: 1,
+    paddingLeft: 10,
+  },
 });
 
 export default function Plan({ route }) {
@@ -40,6 +52,7 @@ export default function Plan({ route }) {
   const navigation = useNavigation();
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
   const [selectedMeal, setSelectedMeal] = useState(null);
+  const [todaysMeal, setTodaysMeal] = useState(null);
   const [selectedMealRecipe, setSelectedMealRecipe] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
@@ -53,11 +66,10 @@ export default function Plan({ route }) {
   const api = usePlanModifers({ mealPlanService });
 
   const refreshPlan = () => {
-    setPlannerGridData(null);
     mealPlanService.getPlan()
       .then((response) => {
-        const newGridData = toPlannerGridData(response);
-        setPlannerGridData(newGridData);
+        setTodaysMeal(response.find((item) => item.date === toShortISOString(today())));
+        setPlannerGridData(toPlannerGridData(response));
       });
   };
 
@@ -95,16 +107,8 @@ export default function Plan({ route }) {
     refreshPlan();
   };
 
-  const doAddRecipeToPlan = (meal, recipe) => {
-    api.setMeal({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
-    refreshPlan();
-    setTimeout(() => navigation.popToTop(), 1500);
-  };
-
   const onMealSelected = (meal) => {
-    if (params?.action === 'add' && params.recipe) {
-      doAddRecipeToPlan(meal, params.recipe);
-    } else if (swapSource) {
+    if (swapSource) {
       doMealSwap({ source: swapSource, target: meal });
     } else {
       setSelectedMeal(meal);
@@ -125,7 +129,7 @@ export default function Plan({ route }) {
         navigation.push('ChooseRecipe', { action: 'select', meal });
         break;
       case 'show-recipe':
-        navigation.navigate('RecipeInfo', { recipe: selectedMealRecipe });
+        navigation.navigate('RecipeInfo', { recipe: selectedMealRecipe, showAddButton: false });
         break;
       default:
         console.error(`Unsupported action: ${action}`);
@@ -140,10 +144,37 @@ export default function Plan({ route }) {
   const FakeSearchbar = () => (
     <Pressable onPress={navigateToBrowseScreen}>
       <View style={{ pointerEvents: 'none' }}>
-        <Searchbar editable={false} />
+        <Searchbar editable={false} placeholder="Recipe name" />
       </View>
     </Pressable>
   );
+
+  const NextMealCard = () => {
+    const now = new Date();
+    const slot = (now.getHours() > 14) ? 'Dinner' : 'Lunch';
+    const entry = (slot === 'Dinner') ? todaysMeal.dinner : todaysMeal.lunch;
+    const recipe = recipes?.find((r) => r.name === entry.name);
+    const isRecipeUrl = recipe?.recipe?.substr(0, 4) === 'http';
+
+    const cardTitle = slot === 'Lunch' ? 'Today\'s Lunch' : 'Tonight\'s Dinner';
+    let nextText = entry.name || 'Nothing planned';
+    if (!isRecipeUrl && recipe?.recipe) {
+      nextText += ` -- 📖 ${recipe.recipe}`;
+    }
+    const recipeBtn = (
+      <Button style={{ marginTop: 'auto' }} compact onPress={() => Linking.openURL(recipe?.recipe)}>Open Recipe</Button>
+    );
+
+    return (
+      <Surface style={styles.nextMealCard}>
+        <View style={styles.nextMealCardContent}>
+          <Title style={{ fontSize: 16 }}>{cardTitle}</Title>
+          <Text>{nextText}</Text>
+        </View>
+        {isRecipeUrl && recipeBtn}
+      </Surface>
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -168,6 +199,7 @@ export default function Plan({ route }) {
                 gridData={plannerGridData[selectedWeek]}
               />
             </View>
+            <NextMealCard />
           </>
         )}
       </View>

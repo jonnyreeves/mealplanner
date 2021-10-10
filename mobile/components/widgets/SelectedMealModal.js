@@ -27,7 +27,7 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
   const ActionButton = ({ action, onPress }) => {
     const cfgMap = {
       delete: {
-        name: 'Delete',
+        name: 'Clear',
         icon: 'delete',
         style: styles.actionButton,
       },

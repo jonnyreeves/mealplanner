@@ -33,7 +33,7 @@ export default function Browse() {
   }, []);
 
   const onRecipePress = (recipe) => {
-    navigation.navigate('RecipeInfo', { recipe });
+    navigation.navigate('RecipeInfo', { recipe, showAddButton: true });
   };
 
   return (

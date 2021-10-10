@@ -11,6 +11,7 @@ import Browse from './Browse';
 import { MealPlanServiceCtx } from '../service/context';
 import RecipeInfo from './RecipeInfo';
 import ChooseRecipe from './ChooseRecipe';
+import doAddRecipeToPlan from './AddRecipeToPlan';
 
 const AppStack = createNativeStackNavigator();
 
@@ -50,6 +51,7 @@ export default function DefaultContainer() {
           <AppStack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
           <AppStack.Screen name="RecipeInfo" component={RecipeInfo} options={{ headerTitle: 'Recipe Details' }} />
           <AppStack.Screen name="ChooseRecipe" component={ChooseRecipe} />
+          <AppStack.Screen name="AddRecipeToPlan" component={doAddRecipeToPlan} options={{ headerTitle: 'Add Recipe to Plan' }} />
         </AppStack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

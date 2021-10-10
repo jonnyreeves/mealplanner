@@ -28,10 +28,13 @@ const styles = StyleSheet.create({
   tagListItem: {
     margin: 3,
   },
+  addToPlanBtn: {
+    marginBottom: 80,
+  },
 });
 
 export default function RecipeInfo({ route }) {
-  const { recipe } = route.params;
+  const { recipe, showAddButton } = route.params;
   const navigation = useNavigation();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -50,7 +53,7 @@ export default function RecipeInfo({ route }) {
   }, [isEditing]);
 
   const onAddToPlan = () => {
-    navigation.push('Home', { screen: 'Plan', params: { action: 'add', recipe } });
+    navigation.push('AddRecipeToPlan', { recipe });
   };
 
   const IngredientsCard = () => (
@@ -103,6 +106,8 @@ export default function RecipeInfo({ route }) {
     </>
   );
 
+  const addToPlanButton = <Button onPress={() => onAddToPlan()} mode="outlined" style={styles.addToPlanBtn}>Add to Plan</Button>;
+
   return (
     <Provider>
       <View style={styles.viewContainer}>
@@ -112,7 +117,7 @@ export default function RecipeInfo({ route }) {
           <IngredientsCard />
           <TagsCard />
         </View>
-        {!isEditing && <Button onPress={() => onAddToPlan()} mode="outlined" style={{ marginBottom: 40 }}>Add to Plan</Button>}
+        {!isEditing && showAddButton && addToPlanButton}
         <FAB
           style={styles.fab}
           icon={isEditing ? 'content-save' : 'pencil-outline'}

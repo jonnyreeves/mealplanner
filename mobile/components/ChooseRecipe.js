@@ -37,6 +37,7 @@ export default function ChooseRecipe({ route }) {
 
   useNavigationFocusListener(navigation, () => {
     navigation.setOptions({ headerTitle: getHeaderTitle() });
+    console.log(recipeBrowserRef);
     recipeBrowserRef.current?.searchbar.focus();
   });
 
