@@ -89,11 +89,11 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     <View style={styles.tagListContainer}>
       {tags.map((tag) => {
         const isSelected = selectedTags.indexOf(tag) !== -1;
-        const mode = isSelected ? 'flat' : 'outlined';
         return (
           <Chip
             style={styles.tagListItem}
-            mode={mode}
+            mode="outlined"
+            selected={isSelected}
             key={kebab(tag)}
             onPress={() => toggleTag(tag)}
           >
