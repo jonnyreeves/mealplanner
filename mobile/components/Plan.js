@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MealPlanServiceCtx } from '../service/context';
 import { usePlanModifers } from '../service/mealPlanService';
+import { useNavigationFocusListener } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { PlannerGrid } from './widgets/PlannerGrid';
@@ -60,13 +61,11 @@ export default function Plan({ route }) {
       });
   };
 
+  useNavigationFocusListener(navigation, () => refreshPlan());
+
   useEffect(() => {
     mealPlanService.getRecipes()
       .then((response) => setRecipes(response));
-    const unsub = navigation.addListener('focus', () => {
-      refreshPlan();
-    });
-    return () => unsub();
   }, []);
 
   useEffect(() => {
@@ -133,8 +132,13 @@ export default function Plan({ route }) {
     }
   };
 
-  const FakeSearchbar = ({ onPress }) => (
-    <Pressable onPress={onPress}>
+  const navigateToBrowseScreen = () => {
+    mealPlanService.autoFocusRecipeSearchBar();
+    navigation.navigate('Home', { screen: 'Browse' });
+  };
+
+  const FakeSearchbar = () => (
+    <Pressable onPress={navigateToBrowseScreen}>
       <View style={{ pointerEvents: 'none' }}>
         <Searchbar editable={false} />
       </View>
@@ -154,7 +158,7 @@ export default function Plan({ route }) {
 
         {plannerGridData && (
           <>
-            <FakeSearchbar onPress={() => navigation.navigate('Home', { screen: 'Browse' })} />
+            <FakeSearchbar />
             <View style={styles.plannerGridContainer}>
               <PlannerGrid
                 selectedWeek={selectedWeek}

@@ -206,6 +206,7 @@ class MealPlannerDb {
       return {
         name: name.trim(),
         quantity,
+        value: val,
       };
     });
 
@@ -216,7 +217,7 @@ class MealPlannerDb {
         name: thisRow[0],
         recipe: thisRow[1],
         ingredients: ingredientMapper(thisRow[2]),
-        tags: (thisRow[3] || '').split(',').map((item) => item.trim()),
+        tags: (thisRow[3] || '').split(',').map((item) => item.trim()).filter((v) => v !== ''),
       };
     }
   }

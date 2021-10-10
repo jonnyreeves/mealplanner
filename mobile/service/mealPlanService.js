@@ -84,6 +84,17 @@ class MealPlanService {
     })
       .then((response) => response.json());
   }
+
+  // TODO: move this app state out of the mealPlanService as I'm just being lazy.
+  autoFocusRecipeSearchBar() {
+    this._af = true;
+  }
+
+  shouldAutoFocusRecipeSearchbar() {
+    const af = this._af;
+    this._af = false;
+    return af;
+  }
 }
 
 export function usePlanModifers({ mealPlanService }) {

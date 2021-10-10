@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useImperativeHandle } from 'react';
 import {
   FlatList, StyleSheet, TouchableOpacity, View,
 } from 'react-native';
@@ -6,9 +6,7 @@ import {
   Text, Chip, Searchbar,
 } from 'react-native-paper';
 
-
 import { kebab } from '../helpers/kebab';
-
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -29,9 +27,19 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function RecipeBrowser({ recipes, onRecipePress, autoFocusSearch }) {
+export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearchSubmitted }, ref) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [query, setQuery] = useState('');
+
+  const searchbarRef = useRef();
+
+  useImperativeHandle(ref, () => ({
+    searchbar: {
+      focus() {
+        searchbarRef.current.focus();
+      },
+    },
+  }));
 
   const tags = [...new Set(
     recipes.map((item) => item.tags)
@@ -65,6 +73,12 @@ export default function RecipeBrowser({ recipes, onRecipePress, autoFocusSearch 
     visibleRecipes = searchRecipes(visibleRecipes);
   }
 
+  const onSubmitEditing = () => {
+    if (typeof onSearchSubmitted === 'function') {
+      onSearchSubmitted(query);
+    }
+  };
+
   const renderRecipe = ({ item }) => (
     <TouchableOpacity onPress={() => { onRecipePress(item); }}>
       <Text style={styles.itemText}>{item.name}</Text>
@@ -89,11 +103,19 @@ export default function RecipeBrowser({ recipes, onRecipePress, autoFocusSearch 
       })}
     </View>
   );
+
   return (
     <FlatList
       ListHeaderComponent={(
         <>
-          <Searchbar autoFocus={autoFocusSearch} autoCorrect={false} value={query} onChangeText={setQuery} />
+          <Searchbar
+            ref={searchbarRef}
+            onSubmitEditing={onSubmitEditing}
+            autoCorrect={false}
+            value={query}
+            onChangeText={setQuery}
+            returnKeyType={onSearchSubmitted ? 'done' : 'search'}
+          />
           <TagList />
         </>
       )}
@@ -103,4 +125,4 @@ export default function RecipeBrowser({ recipes, onRecipePress, autoFocusSearch 
       extraData={selectedTags}
     />
   );
-}
+});

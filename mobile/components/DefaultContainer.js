@@ -22,7 +22,7 @@ const tabOpts = ({ icon }) => ({
   tabBarIcon: ({ focused }) => {
     const iconColor = focused ? 'white' : 'grey';
     return (<MaterialCommunityIcons name={icon} size={24} color={iconColor} />);
-  }
+  },
 });
 
 const Tab = createMaterialBottomTabNavigator();
