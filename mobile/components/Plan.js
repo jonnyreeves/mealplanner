@@ -65,20 +65,17 @@ export default function Plan({ route }) {
   const mealPlanService = React.useContext(MealPlanServiceCtx);
   const api = usePlanModifers({ mealPlanService });
 
-  const refreshPlan = () => {
+  const refresh = () => {
     mealPlanService.getPlan()
       .then((response) => {
         setTodaysMeal(response.find((item) => item.date === toShortISOString(today())));
         setPlannerGridData(toPlannerGridData(response));
       });
-  };
-
-  useNavigationFocusListener(navigation, () => refreshPlan());
-
-  useEffect(() => {
     mealPlanService.getRecipes()
       .then((response) => setRecipes(response));
-  }, []);
+  };
+
+  useNavigationFocusListener(navigation, () => refresh());
 
   useEffect(() => {
     const smr = recipes?.find((recipe) => recipe.name === selectedMeal?.name);
@@ -91,20 +88,20 @@ export default function Plan({ route }) {
       src: { date: source.date, slot: source.slot, recipeName: source.name },
       dest: { date: target.date, slot: target.slot, recipeName: target.name },
     });
-    refreshPlan();
+    refresh();
   };
 
   const doDeleteMeal = (meal) => {
     api.clearMeal({ date: meal.date, slot: meal.slot });
     setDeletedMeal(meal);
     setSnackBarVisible(true);
-    refreshPlan();
+    refresh();
   };
 
   const doUndeleteMeal = () => {
     api.setMeal({ date: deletedMeal.date, slot: deletedMeal.slot, recipeName: deletedMeal.name });
     setDeletedMeal(null);
-    refreshPlan();
+    refresh();
   };
 
   const onMealSelected = (meal) => {

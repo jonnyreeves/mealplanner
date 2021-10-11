@@ -2,9 +2,8 @@ import { useNavigation } from '@react-navigation/core';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { MealPlanServiceCtx } from '../service/context';
-import { usePlanModifers } from '../service/mealPlanService';
 import { toPlannerGridData } from './helpers/planData';
+import { usePlanApi } from './helpers/usePlanApi';
 import { PlannerGrid } from './widgets/PlannerGrid';
 
 const styles = StyleSheet.create({
@@ -20,23 +19,21 @@ const styles = StyleSheet.create({
 
 export default function doAddRecipeToPlan({ route }) {
   const { recipe } = route.params;
-
-  const mealPlanService = React.useContext(MealPlanServiceCtx);
+  const mealPlanApi = usePlanApi();
 
   const navigation = useNavigation();
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
   const [plannerGridData, setPlannerGridData] = useState(null);
-  const api = usePlanModifers({ mealPlanService });
 
   const refreshPlan = () => {
-    mealPlanService.getPlan()
+    mealPlanApi.getPlan()
       .then((response) => setPlannerGridData(toPlannerGridData(response)));
   };
 
   useEffect(() => refreshPlan(), []);
 
   const onMealSelected = (meal) => {
-    api.setMeal({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
+    mealPlanApi.setMeal({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
     refreshPlan();
     setTimeout(() => navigation.popToTop(), 750);
   };
@@ -59,5 +56,5 @@ export default function doAddRecipeToPlan({ route }) {
         </>
       )}
     </View>
-  )
+  );
 }

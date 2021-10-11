@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MealPlanServiceCtx } from '../service/context';
 import { RecipeBrowser } from './widgets/RecipeBrowser';
 import { useNavigationFocusListener } from './helpers/navigation';
+import { LoadingSpinner } from './widgets/LoadingSpinner';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -19,18 +20,27 @@ const styles = StyleSheet.create({
 export default function Browse() {
   const recipeBrowserRef = useRef();
   const navigation = useNavigation();
-  const mealPlanService = React.useContext(MealPlanServiceCtx);
   const [recipes, setRecipes] = useState([]);
 
+  const mealPlanService = React.useContext(MealPlanServiceCtx);
+
+  const refresh = () => {
+    console.log("refresh recipes");
+    mealPlanService.getRecipes().then((data) => {
+      setRecipes(data);
+    });
+  };
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
   useNavigationFocusListener(navigation, () => {
+    refresh();
     if (mealPlanService.shouldAutoFocusRecipeSearchbar()) {
       recipeBrowserRef.current?.searchbar.focus();
     }
   });
-
-  useEffect(() => {
-    mealPlanService.getRecipes().then((data) => setRecipes(data));
-  }, []);
 
   const onRecipePress = (recipe) => {
     navigation.navigate('RecipeInfo', { recipe, showAddButton: true });
@@ -38,9 +48,8 @@ export default function Browse() {
 
   return (
     <SafeAreaView style={styles.viewContainer}>
-      {recipes && (
-        <RecipeBrowser ref={recipeBrowserRef} recipes={recipes} onRecipePress={onRecipePress} />
-      )}
+      {!recipes?.length && <LoadingSpinner message="Fetching recipes" />}
+      {recipes?.length > 0 && <RecipeBrowser ref={recipeBrowserRef} recipes={recipes} onRecipePress={onRecipePress} />}
     </SafeAreaView>
   );
 }

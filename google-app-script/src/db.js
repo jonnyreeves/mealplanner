@@ -2,6 +2,14 @@
 
 const ROLLOVER_DAY_OF_WEEK = 5; // Friday.
 
+const RecipeCols = {
+  id: 0,
+  name: 1,
+  source: 2,
+  ingredients: 3,
+  tags: 4,
+};
+
 class MealPlannerDb {
   constructor(ss) {
     this.ss = ss;
@@ -163,6 +171,21 @@ class MealPlannerDb {
     return Object.values(this._mealCache);
   }
 
+  updateRecipe(id, fields) {
+    const recipe = this.getAllRecipes().find((v) => v.id === id);
+    if (!recipe) {
+      throw new Error(`No recipe found with id: ${id}`);
+    }
+    const updateValueIfPresent = (fieldName) => {
+      if (fields[fieldName] !== undefined) {
+        const colIdx = RecipeCols[fieldName] + 1;
+        this.sheets.meals().getRange(recipe.rowIdx, colIdx).setValue(fields[fieldName]);
+      }
+    };
+    updateValueIfPresent('name');
+    updateValueIfPresent('source');
+  }
+
   getMealsByIngredient(ingredient) {
     this._initMealCache();
     const meals = [];
@@ -189,7 +212,7 @@ class MealPlannerDb {
     for (let i = 0; i < values.length; i += 1) {
       const recipe = this._parseRecipeRow(values[i]);
       const mealCacheKey = String(recipe.name).toLowerCase();
-      this._mealCache[mealCacheKey] = recipe;
+      this._mealCache[mealCacheKey] = { ...recipe, rowIdx: (i + 2) };
     }
   }
 
@@ -217,12 +240,12 @@ class MealPlannerDb {
       };
     });
     return {
-      id: row[0],
-      name: row[1],
-      source: row[2],
-      recipe: row[2], // TODO: 'recipe' field is deprecated by 'source' field.
-      ingredients: ingredientMapper(row[3]),
-      tags: (row[4] || '').split(',').map((item) => item.trim()).filter((v) => v !== ''),
+      id: row[RecipeCols.id],
+      name: row[RecipeCols.name],
+      source: row[RecipeCols.source],
+      recipe: row[RecipeCols.source], // TODO: 'recipe' field is deprecated by 'source' field.
+      ingredients: ingredientMapper(row[RecipeCols.ingredients]),
+      tags: (row[RecipeCols.tags] || '').split(',').map((item) => item.trim()).filter((v) => v !== ''),
     };
   }
 

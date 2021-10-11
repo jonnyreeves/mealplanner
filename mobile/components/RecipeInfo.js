@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 import {
   Provider, Title, Button, Text, Subheading, FAB, Chip, TextInput,
@@ -6,6 +6,9 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { kebab } from './helpers/kebab';
+import { MealPlanServiceCtx } from '../service/context';
+import { usePlanModifers } from '../service/mealPlanService';
+import { usePlanApi } from './helpers/usePlanApi';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -35,13 +38,31 @@ const styles = StyleSheet.create({
 
 export default function RecipeInfo({ route }) {
   const { recipe, showAddButton } = route.params;
-  const navigation = useNavigation();
 
+  const navigation = useNavigation();
+  const mealPlanApi = usePlanApi();
+
+  const [editToggleCount, setEditToggleCount] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
-  const toggleEditingMode = () => setIsEditing(!isEditing);
 
   const [title, setTitle] = useState('');
   const [recipeSrc, setRecipeSrc] = useState('');
+
+  const toggleEditingMode = () => {
+    setEditToggleCount((v) => v + 1);
+    setIsEditing(!isEditing);
+  };
+
+  const computeModifiedFields = () => {
+    const result = {};
+    if (recipe.name !== title) {
+      result.name = title;
+    }
+    if (recipe.source !== recipeSrc) {
+      result.source = recipeSrc;
+    }
+    return result;
+  };
 
   useEffect(() => {
     setTitle(recipe.name);
@@ -50,6 +71,12 @@ export default function RecipeInfo({ route }) {
 
   useEffect(() => {
     navigation.setOptions({ headerTitle: isEditing ? 'Edit Recipe' : 'Recipe Details' });
+    if (!isEditing && editToggleCount > 0) {
+      const modifiedFields = computeModifiedFields();
+      if (Object.keys(modifiedFields).length > 0) {
+        mealPlanApi.updateRecipe({ recipeId: recipe.id, fields: modifiedFields });
+      }
+    }
   }, [isEditing]);
 
   const onAddToPlan = () => {
@@ -89,7 +116,7 @@ export default function RecipeInfo({ route }) {
 
   const titleCard = (
     <>
-      {!isEditing && <Title>{recipe.name}</Title>}
+      {!isEditing && <Title>{title}</Title>}
       {isEditing && <TextInput style={{ marginBottom: 10 }} label="Recipe Name" mode="flat" value={title} onChangeText={(text) => setTitle(text)} />}
     </>
   );

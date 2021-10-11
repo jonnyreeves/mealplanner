@@ -10,6 +10,7 @@ class MealPlanService {
     this._useProxy = useProxy;
     this._promiseCache = {};
     this._cachedPlan = null;
+    this._cachedRecipes = null;
   }
 
   setAccessToken(v) {
@@ -35,7 +36,13 @@ class MealPlanService {
   }
 
   getRecipes() {
-    return this._makeCachedRequest('/recipes').promise;
+    const { promise, wasCached } = this._makeCachedRequest('/recipes');
+    if (!wasCached) {
+      promise.then((data) => {
+        this._cachedRecipes = data;
+      });
+    }
+    return promise;
   }
 
   updatePlan(entryMap) {
@@ -43,6 +50,12 @@ class MealPlanService {
     this._mutateCachedPlan(entryMap);
     const postData = { version: '1.0', entryMap };
     return this.makeRequest({ resource: '/plan', postData });
+  }
+
+  updateRecipe(recipeId, fields) {
+    const postData = { version: '1.0', fields };
+    this._mutateCachedRecipes(recipeId, fields);
+    return this.makeRequest({ resource: `/recipe/${recipeId}`, postData });
   }
 
   _mutateCachedPlan(entryMap) {
@@ -59,6 +72,20 @@ class MealPlanService {
         }
       }
     });
+  }
+
+  // TODO: State management could do with a complete rewrite to not make it suck
+  // as mutations to the cached recipes array do not result in a re-render - I 
+  // should be using immatable models.
+  _mutateCachedRecipes(recipeId, fields) {
+    const target = this._cachedRecipes?.find((entry) => entry.id === recipeId);
+    if (target) {
+      console.log(`Mutating cached recipe: ${recipeId} -- ${target.name}`);
+      Object.keys(fields).forEach((fieldName) => {
+        console.log(` -- setting ${fieldName} to ${fields[fieldName]}`);
+        target[fieldName] = fields[fieldName];
+      });
+    }
   }
 
   _makeCachedRequest(resource) {
@@ -116,7 +143,10 @@ export function usePlanModifers({ mealPlanService }) {
     }
     return mealPlanService.updatePlan(entryMap);
   };
-  return { setMeal, clearMeal, swapMeal };
+  const updateRecipe = ({ recipeId, fields }) => {
+    return mealPlanService.updateRecipe(recipeId, fields);
+  }
+  return { setMeal, clearMeal, swapMeal, updateRecipe };
 }
 
 export default MealPlanService;

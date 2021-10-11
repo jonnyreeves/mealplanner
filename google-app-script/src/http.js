@@ -92,9 +92,10 @@ class HttpHandler {
     return {
       post: {
         plan: this.doModifyPlanRequest,
+        'recipe/*': this.doModifyRecipeRequest,
       },
       get: {
-        plan: this.doPlanRequest2,
+        plan: this.doPlanRequest,
         'plan/by-days/*': this.doPlanByDaysRequest,
         'plan/by-range/*': this.doPlanByRangeRequest,
         recipes: this.doRecipesRequest,
@@ -127,10 +128,10 @@ class HttpHandler {
   }
 
   doNoHandlerFound(req, resp) {
-    return resp.setContent({ error: `No handler registered for route: ${req.getRoute()}` });
+    return resp.setContent({ error: `No handler registered for route: ${req.getPath()}` });
   }
 
-  doPlanRequest2(req, resp) {
+  doPlanRequest(req, resp) {
     return resp.setContent(this._db.getPlan());
   }
 
@@ -180,5 +181,12 @@ class HttpHandler {
 
   doRecipesRequest(req, resp) {
     return resp.setContent(this._db.getAllRecipes());
+  }
+
+  doModifyRecipeRequest(req, resp) {
+    const [, recipeId] = req.getPathParts();
+    const payload = req.getJsonPayload();
+    this._db.updateRecipe(recipeId, payload.fields);
+    resp.setContent({ message: 'ok' });
   }
 }
