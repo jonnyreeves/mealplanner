@@ -185,8 +185,15 @@ class MealPlannerDb {
     this._mealCache = {};
     const values = this.sheets.meals().getDataRange().getValues();
     values.shift(); // Remove the header row
-    let thisRow;
 
+    for (let i = 0; i < values.length; i += 1) {
+      const recipe = this._parseRecipeRow(values[i]);
+      const mealCacheKey = String(recipe.name).toLowerCase();
+      this._mealCache[mealCacheKey] = recipe;
+    }
+  }
+
+  _parseRecipeRow(row) {
     const ingredientMapper = (str) => str.split(',').map((val) => {
       let quantity = '1';
       let name = val;
@@ -209,17 +216,14 @@ class MealPlannerDb {
         value: val,
       };
     });
-
-    for (let i = 0; i < values.length; i += 1) {
-      thisRow = values[i];
-      const mealName = String(thisRow[0]).toLowerCase();
-      this._mealCache[mealName] = {
-        name: thisRow[0],
-        recipe: thisRow[1],
-        ingredients: ingredientMapper(thisRow[2]),
-        tags: (thisRow[3] || '').split(',').map((item) => item.trim()).filter((v) => v !== ''),
-      };
-    }
+    return {
+      id: row[0],
+      name: row[1],
+      source: row[2],
+      recipe: row[2], // TODO: 'recipe' field is deprecated by 'source' field.
+      ingredients: ingredientMapper(row[3]),
+      tags: (row[4] || '').split(',').map((item) => item.trim()).filter((v) => v !== ''),
+    };
   }
 
   dayToRowIdx(jsDay) {
