@@ -8,7 +8,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 
 import Plan from './Plan';
 import Browse from './Browse';
-import { MealPlanServiceCtx } from '../service/context';
+import { MealPlanApiCtx } from '../service/context';
 import RecipeInfo from './RecipeInfo';
 import ChooseRecipe from './ChooseRecipe';
 import doAddRecipeToPlan from './AddRecipeToPlan';
@@ -36,12 +36,12 @@ const HomeTabs = () => (
 );
 
 export default function DefaultContainer() {
-  const mealPlanService = React.useContext(MealPlanServiceCtx);
+  const mealPlanApi = React.useContext(MealPlanApiCtx);
 
   // On mount, prefetch all API calls.
   useEffect(() => {
-    mealPlanService.getPlan();
-    mealPlanService.getRecipes();
+    mealPlanApi.fetchPlan();
+    mealPlanApi.fetchRecipes();
   }, []);
 
   return (

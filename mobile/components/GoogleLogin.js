@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Button } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 import * as GoogleAuthHelper from '../service/expoGooleAuthHelper';
-import { MealPlanServiceCtx } from '../service/context';
+import { MealPlanApiCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 
 const SECURE_STORE_KEY = 'rt_v1';
@@ -30,7 +30,7 @@ export default function GoogleLogin({ onAccessTokenSet }) {
   const [, refreshResponse, doRefresh] = GoogleAuthHelper.useGoogleTokenRefresh(authConfig);
   const [authRequest, authResponse, doAuthRequest] = GoogleAuthHelper.useGoogleSignIn(authConfig);
 
-  const mealPlanService = React.useContext(MealPlanServiceCtx);
+  const mealPlanApi = React.useContext(MealPlanApiCtx);
 
   // Handle refresh state changes.
   React.useEffect(() => {
@@ -40,7 +40,9 @@ export default function GoogleLogin({ onAccessTokenSet }) {
     if (type === 'success') {
       const { accessToken } = refreshResponse.authentication;
       console.log(`effect => refreshResponse. accessToken=${accessToken}`);
-      mealPlanService.setAccessToken(accessToken);
+
+      mealPlanApi.setAccessToken(accessToken);
+
       onAccessTokenSet();
     } else {
       setNeedsSignIn(true);
@@ -53,7 +55,8 @@ export default function GoogleLogin({ onAccessTokenSet }) {
     console.log(`effect => authResponse. type=${type}`);
     if (type === 'success') {
       const { accessToken, refreshToken } = authResponse.authentication;
-      mealPlanService.setAccessToken(accessToken);
+
+      mealPlanApi.setAccessToken(accessToken);
 
       // If we have a refresh token in the response, persist it to keep
       // the user signed in.

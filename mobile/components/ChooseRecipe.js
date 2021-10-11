@@ -1,12 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet, View,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { getDayOfTheWeek } from './helpers/date';
-import { MealPlanServiceCtx } from '../service/context';
-import { usePlanModifers } from '../service/mealPlanService';
+import { AppStateCtx } from '../service/context';
 import { RecipeBrowser } from './widgets/RecipeBrowser';
 import { useNavigationFocusListener } from './helpers/navigation';
 
@@ -23,11 +22,9 @@ export default function ChooseRecipe({ route }) {
 
   const recipeBrowserRef = useRef();
   const navigation = useNavigation();
+  const appState = useContext(AppStateCtx);
 
-  const mealPlanService = React.useContext(MealPlanServiceCtx);
   const [recipes, setRecipes] = useState([]);
-
-  const api = usePlanModifers({ mealPlanService });
 
   const getHeaderTitle = () => {
     const prettySlot = meal.slot.substring(0, 1).toUpperCase() + meal.slot.substring(1);
@@ -37,25 +34,22 @@ export default function ChooseRecipe({ route }) {
 
   useNavigationFocusListener(navigation, () => {
     navigation.setOptions({ headerTitle: getHeaderTitle() });
-    console.log(recipeBrowserRef);
     recipeBrowserRef.current?.searchbar.focus();
   });
 
   useEffect(() => {
-    mealPlanService.getRecipes().then((data) => setRecipes(data));
+    setRecipes(appState.getRecipes());
   }, []);
 
   const onRecipePress = (recipe) => {
-    console.log(`you tapped: ${recipe.name}`);
-    console.log(`setMeal => ${meal.date} - ${recipe.name}`);
-    api.setMeal({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
-    setTimeout(() => navigation.popToTop(), 4);
+    appState.setPlanEntry({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
+    navigation.popToTop();
   };
 
   // Process when the user inputs a freeform recipe name which is not associated with
   // a known recipe.
   const onSearchSubmitted = (recipeName) => {
-    api.setMeal({ date: meal.date, slot: meal.slot, recipeName });
+    appState.setPlanEntry({ date: meal.date, slot: meal.slot, recipeName });
     navigation.popToTop();
   };
 

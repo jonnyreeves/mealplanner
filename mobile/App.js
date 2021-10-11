@@ -3,19 +3,23 @@ import { Provider as PaperProvider } from 'react-native-paper';
 
 import DefaultContainer from './components/DefaultContainer';
 import GoogleLogin from './components/GoogleLogin';
-import { MealPlanServiceCtx } from './service/context';
+import { AppStateCtx, MealPlanApiCtx } from './service/context';
 
 export default function App() {
   const [appInitialised, setAppInitalised] = useState(false);
-  const mealPlanService = useContext(MealPlanServiceCtx);
+
+  const mealPlanApi = useContext(MealPlanApiCtx);
+  const appState = useContext(AppStateCtx);
 
   return (
     <PaperProvider>
-      <MealPlanServiceCtx.Provider value={mealPlanService}>
-        {!appInitialised
-          && <GoogleLogin onAccessTokenSet={() => { setAppInitalised(true); }} />}
-        {appInitialised && <DefaultContainer />}
-      </MealPlanServiceCtx.Provider>
+      <MealPlanApiCtx.Provider value={mealPlanApi}>
+        <AppStateCtx.Provider value={appState}>
+          {!appInitialised
+            && <GoogleLogin onAccessTokenSet={() => { setAppInitalised(true); }} />}
+          {appInitialised && <DefaultContainer />}
+        </AppStateCtx.Provider>
+      </MealPlanApiCtx.Provider>
     </PaperProvider>
   );
 }

@@ -1,9 +1,9 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
+import { AppStateCtx } from '../service/context';
 import { toPlannerGridData } from './helpers/planData';
-import { usePlanApi } from './helpers/usePlanApi';
 import { PlannerGrid } from './widgets/PlannerGrid';
 
 const styles = StyleSheet.create({
@@ -19,22 +19,29 @@ const styles = StyleSheet.create({
 
 export default function doAddRecipeToPlan({ route }) {
   const { recipe } = route.params;
-  const mealPlanApi = usePlanApi();
+
+  const appState = useContext(AppStateCtx);
 
   const navigation = useNavigation();
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
+  const [planData, setPlanData] = useState([]);
   const [plannerGridData, setPlannerGridData] = useState(null);
 
-  const refreshPlan = () => {
-    mealPlanApi.getPlan()
-      .then((response) => setPlannerGridData(toPlannerGridData(response)));
+  const refresh = () => {
+    const entries = appState.getPlanEntries();
+    setPlanData(entries);
+    setPlannerGridData(toPlannerGridData(entries));
   };
 
-  useEffect(() => refreshPlan(), []);
+  useEffect(() => {
+    const unsub = appState.addListener('plan_updated', () => refresh());
+    return () => unsub();
+  }, []);
+
+  useEffect(() => refresh(), []);
 
   const onMealSelected = (meal) => {
-    mealPlanApi.setMeal({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
-    refreshPlan();
+    appState.setPlanEntry({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
     setTimeout(() => navigation.popToTop(), 750);
   };
 
@@ -42,7 +49,7 @@ export default function doAddRecipeToPlan({ route }) {
 
   return (
     <View style={styles.viewContainer}>
-      {plannerGridData && (
+      {planData.length && (
         <>
           <Text>{title}</Text>
           <View style={styles.plannerGridContainer}>

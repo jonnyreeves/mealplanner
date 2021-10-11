@@ -1,4 +1,3 @@
-import { usePlanModifers } from '../../service/mealPlanService';
 import { getShortDayOfTheWeek, today, toShortISOString } from './date';
 
 // The Meal Plan API starts returning entries from the rollover date (Friday);

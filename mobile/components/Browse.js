@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   StyleSheet,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MealPlanServiceCtx } from '../service/context';
+import { AppStateCtx } from '../service/context';
 import { RecipeBrowser } from './widgets/RecipeBrowser';
 import { useNavigationFocusListener } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
@@ -22,22 +22,20 @@ export default function Browse() {
   const navigation = useNavigation();
   const [recipes, setRecipes] = useState([]);
 
-  const mealPlanService = React.useContext(MealPlanServiceCtx);
+  const appState = useContext(AppStateCtx);
 
   const refresh = () => {
-    console.log("refresh recipes");
-    mealPlanService.getRecipes().then((data) => {
-      setRecipes(data);
-    });
+    setRecipes(appState.getRecipes());
   };
 
   useEffect(() => {
-    refresh();
+    const unsub = appState.addListener('recipes_updated', () => refresh());
+    return () => unsub();
   }, []);
 
   useNavigationFocusListener(navigation, () => {
     refresh();
-    if (mealPlanService.shouldAutoFocusRecipeSearchbar()) {
+    if (appState.shouldAutoFocusRecipeSearchbar()) {
       recipeBrowserRef.current?.searchbar.focus();
     }
   });

@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Linking,
   Platform, Pressable, StyleSheet, View,
@@ -7,8 +7,7 @@ import {
 import { Portal, Modal, Snackbar, Searchbar, Text, Button, Card, Title, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { MealPlanServiceCtx } from '../service/context';
-import { usePlanModifers } from '../service/mealPlanService';
+import { AppStateCtx } from '../service/context';
 import { toShortISOString, today } from './helpers/date';
 import { useNavigationFocusListener } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
@@ -57,23 +56,33 @@ export default function Plan({ route }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
 
-  const [recipes, setRecipes] = useState(null);
+  const [recipes, setRecipes] = useState([]);
+  const [planEntries, setPlanEntries] = useState([]);
+
   const [plannerGridData, setPlannerGridData] = useState(null);
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
 
-  const mealPlanService = React.useContext(MealPlanServiceCtx);
-  const api = usePlanModifers({ mealPlanService });
+  const appState = useContext(AppStateCtx);
 
   const refresh = () => {
-    mealPlanService.getPlan()
-      .then((response) => {
-        setTodaysMeal(response.find((item) => item.date === toShortISOString(today())));
-        setPlannerGridData(toPlannerGridData(response));
-      });
-    mealPlanService.getRecipes()
-      .then((response) => setRecipes(response));
+    setRecipes(appState.getRecipes());
+
+    const entries = appState.getPlanEntries();
+    setPlanEntries(entries);
+    setTodaysMeal(entries.find((item) => item.date === toShortISOString(today())));
+    setPlannerGridData(toPlannerGridData(entries));
   };
+
+  useEffect(() => {
+    const unsub = appState.addListener('recipes_updated', () => refresh());
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    const unsub = appState.addListener('plan_updated', () => refresh());
+    return () => unsub();
+  }, []);
 
   useNavigationFocusListener(navigation, () => refresh());
 
@@ -84,7 +93,7 @@ export default function Plan({ route }) {
 
   const doMealSwap = ({ source, target }) => {
     setSwapSource(null);
-    api.swapMeal({
+    appState.swapPlanEntries({
       src: { date: source.date, slot: source.slot, recipeName: source.name },
       dest: { date: target.date, slot: target.slot, recipeName: target.name },
     });
@@ -92,14 +101,14 @@ export default function Plan({ route }) {
   };
 
   const doDeleteMeal = (meal) => {
-    api.clearMeal({ date: meal.date, slot: meal.slot });
+    appState.setPlanEntry({ date: meal.date, slot: meal.slot, recipeName: '' });
     setDeletedMeal(meal);
     setSnackBarVisible(true);
     refresh();
   };
 
   const doUndeleteMeal = () => {
-    api.setMeal({ date: deletedMeal.date, slot: deletedMeal.slot, recipeName: deletedMeal.name });
+    appState.setPlanEntry({ date: deletedMeal.date, slot: deletedMeal.slot, recipeName: deletedMeal.name });
     setDeletedMeal(null);
     refresh();
   };
@@ -134,7 +143,7 @@ export default function Plan({ route }) {
   };
 
   const navigateToBrowseScreen = () => {
-    mealPlanService.autoFocusRecipeSearchBar();
+    appState.autoFocusRecipeSearchbar();
     navigation.navigate('Home', { screen: 'Browse' });
   };
 
@@ -181,10 +190,9 @@ export default function Plan({ route }) {
         </Modal>
       </Portal>
       <View style={styles.viewContainer}>
-        {!plannerGridData
-          && <LoadingSpinner message="Fetching meal plan" />}
+        {!planEntries.length && <LoadingSpinner message="Fetching meal plan" />}
 
-        {plannerGridData && (
+        {planEntries.length > 0 && (
           <>
             <FakeSearchbar />
             <View style={styles.plannerGridContainer}>
@@ -196,7 +204,7 @@ export default function Plan({ route }) {
                 gridData={plannerGridData[selectedWeek]}
               />
             </View>
-            <NextMealCard />
+            {todaysMeal && <NextMealCard />}
           </>
         )}
       </View>

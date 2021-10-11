@@ -1,10 +1,15 @@
 import React from 'react';
 import { Platform } from 'react-native';
-import MealPlanApi from './mealPlanService';
+import MealPlanApi from '../state/MealPlanApi';
+import AppState from '../state/AppState';
 
-const api = new MealPlanApi({
+const mealPlanApi = new MealPlanApi({
   apiRoot: 'https://script.google.com/a/macros/jonnyreeves.co.uk/s/AKfycbw0L6ysbPjm-J1jv5siRukYXG57MuLnGkGWQHbZnWrb/dev',
   useProxy: Platform.OS === 'web',
 });
+export const MealPlanApiCtx = React.createContext(mealPlanApi);
 
-export const MealPlanServiceCtx = React.createContext(api);
+const appState = new AppState({
+  api: mealPlanApi,
+});
+export const AppStateCtx = React.createContext(appState);

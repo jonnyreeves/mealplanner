@@ -6,9 +6,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { kebab } from './helpers/kebab';
-import { MealPlanServiceCtx } from '../service/context';
-import { usePlanModifers } from '../service/mealPlanService';
-import { usePlanApi } from './helpers/usePlanApi';
+import { AppStateCtx } from '../service/context';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -40,7 +38,7 @@ export default function RecipeInfo({ route }) {
   const { recipe, showAddButton } = route.params;
 
   const navigation = useNavigation();
-  const mealPlanApi = usePlanApi();
+  const appState = useContext(AppStateCtx);
 
   const [editToggleCount, setEditToggleCount] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
@@ -74,7 +72,7 @@ export default function RecipeInfo({ route }) {
     if (!isEditing && editToggleCount > 0) {
       const modifiedFields = computeModifiedFields();
       if (Object.keys(modifiedFields).length > 0) {
-        mealPlanApi.updateRecipe({ recipeId: recipe.id, fields: modifiedFields });
+        appState.updateRecipe(recipe.id, modifiedFields);
       }
     }
   }, [isEditing]);
