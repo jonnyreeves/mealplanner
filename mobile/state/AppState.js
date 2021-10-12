@@ -1,3 +1,5 @@
+import cloneDeep from 'clone-deep';
+
 export default class AppState {
   constructor({ api }) {
     this._api = api;
@@ -44,9 +46,11 @@ export default class AppState {
   }
 
   swapPlanEntries({ src, dest }) {
+    console.log("before....");
+    console.log(this._planByDate);
     let entryMap;
     if (src.date === dest.date) {
-      const prevEntry = { ...this._planByDate[src.date] };
+      const prevEntry = cloneDeep(this._planByDate[src.date]);
       this._planByDate = {
         ...this._planByDate,
         [src.date]: {
@@ -57,8 +61,8 @@ export default class AppState {
       };
       entryMap = { [src.date]: { [src.slot]: dest.recipeName, [dest.slot]: src.recipeName } };
     } else {
-      const prevSrc = { ...this._planByDate[src.date] };
-      const prevDest = { ...this._planByDate[dest.date] };
+      const prevSrc = cloneDeep(this._planByDate[src.date]);
+      const prevDest = cloneDeep(this._planByDate[dest.date]);
       this._planByDate = {
         ...this._planByDate,
         [src.date]: {
@@ -82,6 +86,9 @@ export default class AppState {
       };
     }
     this._dispatch('plan_updated');
+    console.log("after....");
+    console.log(this._planByDate);
+
     return this._api.updatePlan(entryMap);
   }
 
@@ -108,7 +115,7 @@ export default class AppState {
   }
 
   shouldAutoFocusRecipeSearchbar() {
-    const af = this._af;
+    const af = this._aFRS;
     this._aFRS = false;
     return af;
   }

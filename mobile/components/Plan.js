@@ -162,7 +162,7 @@ export default function Plan({ route }) {
     const recipe = recipes?.find((r) => r.name === entry.name);
     const isRecipeUrl = recipe?.recipe?.substr(0, 4) === 'http';
 
-    const cardTitle = slot === 'Lunch' ? 'Today\'s Lunch' : 'Tonight\'s Dinner';
+    const cardTitle = slot === 'Lunch' ? 'Today\'s Lunch...' : 'Tonight\'s Dinner...';
     let nextText = entry.name || 'Nothing planned';
     if (!isRecipeUrl && recipe?.recipe) {
       nextText += ` -- 📖 ${recipe.recipe}`;
