@@ -4,13 +4,12 @@ import {
   Linking,
   Platform, Pressable, StyleSheet, View,
 } from 'react-native';
-import { Portal, Modal, Snackbar, Searchbar, Text, Button, Card, Title, Surface } from 'react-native-paper';
+import { Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppStateCtx } from '../service/context';
 import { toShortISOString, today } from './helpers/date';
 import { useNavigationFocusListener } from './helpers/navigation';
-import { toPlannerGridData } from './helpers/planData';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { PlannerGrid } from './widgets/PlannerGrid';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
@@ -49,7 +48,7 @@ export default function Plan({ route }) {
   const { params } = route;
 
   const navigation = useNavigation();
-  const [selectedWeek, setSelectedWeek] = useState('thisWeek');
+
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [todaysMeal, setTodaysMeal] = useState(null);
   const [selectedMealRecipe, setSelectedMealRecipe] = useState(null);
@@ -57,9 +56,8 @@ export default function Plan({ route }) {
   const [snackBarVisible, setSnackBarVisible] = useState(false);
 
   const [recipes, setRecipes] = useState([]);
-  const [planEntries, setPlanEntries] = useState([]);
+  const [planData, setPlanData] = useState(null);
 
-  const [plannerGridData, setPlannerGridData] = useState(null);
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
 
@@ -68,10 +66,8 @@ export default function Plan({ route }) {
   const refresh = () => {
     setRecipes(appState.getRecipes());
 
-    const entries = appState.getPlanEntries();
-    setPlanEntries(entries);
-    setTodaysMeal(entries.find((item) => item.date === toShortISOString(today())));
-    setPlannerGridData(toPlannerGridData(entries));
+    setPlanData(appState.getPlanData());
+    setTodaysMeal(appState.getPlanData()[toShortISOString(today())]);
   };
 
   useEffect(() => {
@@ -90,6 +86,8 @@ export default function Plan({ route }) {
     const smr = recipes?.find((recipe) => recipe.name === selectedMeal?.name);
     setSelectedMealRecipe(smr || null);
   }, [selectedMeal]);
+
+  const hasPlanData = planData && Object.keys(planData).length > 0;
 
   const doMealSwap = ({ source, target }) => {
     setSwapSource(null);
@@ -190,18 +188,16 @@ export default function Plan({ route }) {
         </Modal>
       </Portal>
       <View style={styles.viewContainer}>
-        {!planEntries.length && <LoadingSpinner message="Fetching meal plan" />}
+        {!hasPlanData && <LoadingSpinner message="Fetching meal plan" />}
 
-        {planEntries.length > 0 && (
+        {hasPlanData && (
           <>
             <FakeSearchbar />
             <View style={styles.plannerGridContainer}>
               <PlannerGrid
-                selectedWeek={selectedWeek}
                 swapSource={swapSource}
-                onWeekSelected={(week) => setSelectedWeek(week)}
                 onMealSelected={onMealSelected}
-                gridData={plannerGridData[selectedWeek]}
+                planData={planData}
               />
             </View>
             {todaysMeal && <NextMealCard />}

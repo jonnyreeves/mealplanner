@@ -23,14 +23,10 @@ export default function doAddRecipeToPlan({ route }) {
   const appState = useContext(AppStateCtx);
 
   const navigation = useNavigation();
-  const [selectedWeek, setSelectedWeek] = useState('thisWeek');
-  const [planData, setPlanData] = useState([]);
-  const [plannerGridData, setPlannerGridData] = useState(null);
+  const [planData, setPlanData] = useState(null);
 
   const refresh = () => {
-    const entries = appState.getPlanEntries();
-    setPlanData(entries);
-    setPlannerGridData(toPlannerGridData(entries));
+    setPlanData(appState.getPlanData());
   };
 
   useEffect(() => {
@@ -46,18 +42,17 @@ export default function doAddRecipeToPlan({ route }) {
   };
 
   const title = `Select a slot for ${recipe.name}`;
+  const hasPlanData = planData && Object.keys(planData).length > 0;
 
   return (
     <View style={styles.viewContainer}>
-      {planData.length && (
+      {hasPlanData && (
         <>
           <Text>{title}</Text>
           <View style={styles.plannerGridContainer}>
             <PlannerGrid
-              selectedWeek={selectedWeek}
-              onWeekSelected={(week) => setSelectedWeek(week)}
               onMealSelected={onMealSelected}
-              gridData={plannerGridData[selectedWeek]}
+              planData={planData}
             />
           </View>
         </>

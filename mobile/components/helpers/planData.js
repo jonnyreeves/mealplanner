@@ -9,20 +9,29 @@ function toNaturalWeekOrder(entries) {
   return [].concat(remaining4Days).concat(first3Days);
 }
 
+function sortEntriesByDate(a, b) {
+  const aa = a.date.split('/').join();
+  const bb = b.date.split('/').join();
+  // eslint-disable-next-line no-nested-ternary
+  return aa < bb ? -1 : (aa > bb ? 1 : 0);
+}
+
 // Marhsalls the Meal Plan's '/plan' API response into a view ready data structure
 // with the entries grouped by 'this week' and 'next week'.
 export function toPlannerGridData(planEntries) {
   const allGridData = [];
-  (planEntries).forEach((item) => {
-    // The label item is used to denote the day of the week in the planner grid.
-    allGridData.push({ id: item.date, name: getShortDayOfTheWeek(item.date), isLabel: true });
-    allGridData.push({
-      id: `${item.date}-lunch`, name: item.lunch.name, slot: 'lunch', date: item.date, recipe: item.lunch.recipe,
+  (planEntries)
+    .sort(sortEntriesByDate)
+    .forEach((item) => {
+      // The label item is used to denote the day of the week in the planner grid.
+      allGridData.push({ id: item.date, name: getShortDayOfTheWeek(item.date), isLabel: true });
+      allGridData.push({
+        id: `${item.date}-lunch`, name: item.lunch.name, slot: 'lunch', date: item.date, recipe: item.lunch.recipe,
+      });
+      allGridData.push({
+        id: `${item.date}-dinner`, name: item.dinner.name, slot: 'dinner', date: item.date, recipe: item.dinner.recipe,
+      });
     });
-    allGridData.push({
-      id: `${item.date}-dinner`, name: item.dinner.name, slot: 'dinner', date: item.date, recipe: item.dinner.recipe,
-    });
-  });
 
   return {
     thisWeek: toNaturalWeekOrder(allGridData.slice(0, allGridData.length / 2)),

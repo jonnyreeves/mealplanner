@@ -25,6 +25,10 @@ export default class AppState {
     };
   }
 
+  getPlanData() {
+    return this._planByDate;
+  }
+
   getPlanEntries() {
     return Object.values(this._planByDate);
   }

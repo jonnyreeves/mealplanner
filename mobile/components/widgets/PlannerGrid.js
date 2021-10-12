@@ -1,10 +1,11 @@
 /* eslint-disable import/prefer-default-export */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import {
   StyleSheet, View, TouchableOpacity, FlatList,
 } from 'react-native';
 import { Text, Button, DefaultTheme } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
+import { toPlannerGridData } from '../helpers/planData';
 
 const styles = StyleSheet.create({
   weekSelectorButtonContainer: {
@@ -66,8 +67,10 @@ const WeekSelectorButton = ({
 };
 
 export const PlannerGrid = ({
-  selectedWeek, swapSource, onWeekSelected, gridData, onMealSelected,
+  swapSource, planData, onMealSelected,
 }) => {
+  const [selectedWeek, setSelectedWeek] = useState('thisWeek');
+
   const plannerGridItemRenderer = ({ item }) => {
     if (item.isHeader) {
       return <Text>{item.name}</Text>;
@@ -88,6 +91,20 @@ export const PlannerGrid = ({
     return <PlannerGridMeaButton onPress={onPress} onLongPress={onLongPress} mealName={item.name} />;
   };
 
+  const onWeekSelected = (value) => {
+    setSelectedWeek(value);
+  };
+
+  const gridData = toPlannerGridData(Object.values(planData))[selectedWeek];
+  console.log(gridData);
+
+  const weekSelectorBtns = (
+    <>
+      <WeekSelectorButton id="thisWeek" selectedWeek={selectedWeek} onPress={() => onWeekSelected('thisWeek')} style={{ marginRight: 10 }} />
+      <WeekSelectorButton id="nextWeek" selectedWeek={selectedWeek} onPress={() => onWeekSelected('nextWeek')} />
+    </>
+  );
+
   return (
     <>
       <View style={styles.plannerGridContainer}>
@@ -100,10 +117,8 @@ export const PlannerGrid = ({
         />
       </View>
       <View style={styles.weekSelectorButtonContainer}>
-        <WeekSelectorButton id="thisWeek" selectedWeek={selectedWeek} onPress={onWeekSelected} style={{ marginRight: 10 }} />
-        <WeekSelectorButton id="nextWeek" selectedWeek={selectedWeek} onPress={onWeekSelected} />
+        {weekSelectorBtns}
       </View>
     </>
-  )
-
+  );
 };

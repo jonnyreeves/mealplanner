@@ -73,6 +73,13 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
   if (query.trim().length > 0) {
     visibleRecipes = searchRecipes(visibleRecipes);
   }
+  visibleRecipes = visibleRecipes.sort((a, b) => {
+    const aa = a.name.toLowerCase().charCodeAt(0);
+    const bb = b.name.toLowerCase().charCodeAt(0);
+    if (aa === bb) return 0;
+    if (aa > bb) return 1;
+    return -1;
+  });
 
   const onSubmitEditing = () => {
     if (typeof onSearchSubmitted === 'function') {
