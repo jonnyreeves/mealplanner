@@ -50,8 +50,6 @@ export default class AppState {
   }
 
   swapPlanEntries({ src, dest }) {
-    console.log("before....");
-    console.log(this._planByDate);
     let entryMap;
     if (src.date === dest.date) {
       const prevEntry = cloneDeep(this._planByDate[src.date]);
@@ -89,8 +87,6 @@ export default class AppState {
         [dest.date]: { [dest.slot]: src.recipeName },
       };
     }
-    this._dispatch('plan_updated');
-    console.log("after....");
     console.log(this._planByDate);
 
     return this._api.updatePlan(entryMap);
@@ -100,8 +96,21 @@ export default class AppState {
     return Object.values(this._recipesById);
   }
 
+  getRecipeById(recipeId) {
+    return this._recipesById[recipeId] || null;
+  }
+
+  getAllTags() {
+    return [...new Set(
+      this.getRecipes()
+        .map((item) => item.tags)
+        .flat()
+        .filter((item) => item !== ''),
+    )];
+  }
+
   findRecipeByName(recipeName) {
-    return this.getRecipes().find((v) => v.name.toLowerCase() === recipeName.toLowerCase());
+    return this.getRecipes().find((v) => v.name.toLowerCase() === recipeName.toLowerCase()) || null;
   }
 
   updateRecipe(recipeId, fields) {

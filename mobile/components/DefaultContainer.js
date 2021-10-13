@@ -9,9 +9,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Plan from './Plan';
 import Browse from './Browse';
 import { MealPlanApiCtx } from '../service/context';
-import RecipeInfo from './RecipeInfo';
+import ViewRecipe from './ViewRecipe';
+import EditRecipe from './EditRecipe';
 import ChooseRecipe from './ChooseRecipe';
 import doAddRecipeToPlan from './AddRecipeToPlan';
+import { Routes } from '../constants';
 
 const AppStack = createNativeStackNavigator();
 
@@ -49,7 +51,8 @@ export default function DefaultContainer() {
       <NavigationContainer>
         <AppStack.Navigator>
           <AppStack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
-          <AppStack.Screen name="RecipeInfo" component={RecipeInfo} options={{ headerTitle: 'Recipe Details' }} />
+          <AppStack.Screen name={Routes.ViewRecipe} component={ViewRecipe} options={{ headerTitle: 'Recipe Details' }} />
+          <AppStack.Screen name={Routes.EditRecipe} component={EditRecipe} options={{ headerTitle: 'Edit Recipe' }} />
           <AppStack.Screen name="ChooseRecipe" component={ChooseRecipe} />
           <AppStack.Screen name="AddRecipeToPlan" component={doAddRecipeToPlan} options={{ headerTitle: 'Add Recipe to Plan' }} />
         </AppStack.Navigator>

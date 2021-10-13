@@ -179,11 +179,13 @@ class MealPlannerDb {
     const updateValueIfPresent = (fieldName) => {
       if (fields[fieldName] !== undefined) {
         const colIdx = RecipeCols[fieldName] + 1;
-        this.sheets.meals().getRange(recipe.rowIdx, colIdx).setValue(fields[fieldName]);
+        const newValue = Array.isArray(fields[fieldName]) ? fields[fieldName].join(',') : fields[fieldName];
+        this.sheets.meals().getRange(recipe.rowIdx, colIdx).setValue(newValue);
       }
     };
     updateValueIfPresent('name');
     updateValueIfPresent('source');
+    updateValueIfPresent('tags');
   }
 
   getMealsByIngredient(ingredient) {

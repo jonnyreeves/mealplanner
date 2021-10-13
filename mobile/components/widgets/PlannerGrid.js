@@ -96,7 +96,6 @@ export const PlannerGrid = ({
   };
 
   const gridData = toPlannerGridData(Object.values(planData))[selectedWeek];
-  console.log(gridData);
 
   const weekSelectorBtns = (
     <>

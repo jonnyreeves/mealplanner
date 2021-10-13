@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Routes } from '../constants';
 
 import { AppStateCtx } from '../service/context';
 import { toShortISOString, today } from './helpers/date';
@@ -83,8 +84,7 @@ export default function Plan({ route }) {
   useNavigationFocusListener(navigation, () => refresh());
 
   useEffect(() => {
-    const smr = recipes?.find((recipe) => recipe.name === selectedMeal?.name);
-    setSelectedMealRecipe(smr || null);
+    setSelectedMealRecipe(appState.findRecipeByName(selectedMeal?.name));
   }, [selectedMeal]);
 
   const hasPlanData = planData && Object.keys(planData).length > 0;
@@ -133,7 +133,7 @@ export default function Plan({ route }) {
         navigation.push('ChooseRecipe', { action: 'select', meal });
         break;
       case 'show-recipe':
-        navigation.navigate('RecipeInfo', { recipe: selectedMealRecipe, showAddButton: false });
+        navigation.navigate(Routes.ViewRecipe, { recipeId: selectedMealRecipe.id, showAddButton: false });
         break;
       default:
         console.error(`Unsupported action: ${action}`);

@@ -1,12 +1,13 @@
-import React, { useState, useRef, useImperativeHandle } from 'react';
+import React, { useState, useRef, useImperativeHandle, useEffect } from 'react';
 import {
   FlatList, StyleSheet, TouchableOpacity, View,
 } from 'react-native';
 import {
-  Text, Chip, Searchbar,
+  Text, Chip, Searchbar, Button,
 } from 'react-native-paper';
 
 import { kebab } from '../helpers/kebab';
+import { useNavigationFocusListener } from '../helpers/navigation';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -21,9 +22,15 @@ const styles = StyleSheet.create({
     alignContent: 'flex-start',
     flexDirection: 'row',
     flexWrap: 'wrap',
+    paddingTop: 10,
   },
   tagListItem: {
     margin: 3,
+  },
+  noResultsFoundContainer: {
+    flex: 1,
+    textAlign: 'center',
+    marginTop: 100,
   },
 });
 
@@ -112,6 +119,21 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     </View>
   );
 
+
+  const noRecipes = (
+    <View style={styles.noResultsFoundContainer}>
+      <Text>No recipes match your query</Text>
+      <Button onPress={() => {
+        setSelectedTags([]);
+        setQuery('');
+      }}
+      >
+        Reset Filters
+      </Button>
+    </View>
+  );
+
+
   return (
     <FlatList
       ListHeaderComponent={(
@@ -126,6 +148,7 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
             returnKeyType={onSearchSubmitted ? 'done' : 'search'}
           />
           <TagList />
+          {visibleRecipes.length === 0 && noRecipes}
         </>
       )}
       data={visibleRecipes}

@@ -59,11 +59,11 @@ function _getMealMap(app) {
   const mealsData = mealsSheet.getRange(2, 1, lastRowIdx, 4).getValues();
   const result = {};
   for (let i = 0; i < mealsData.length; i++) {
-    const mealName = mealsData[i][0];
+    const mealName = mealsData[i][1];
     result[mealName.toLowerCase()] = {
       name: mealName,
-      recipe: mealsData[i][1],
-      ingredients: _parseMealIngredient(mealsData[i][2]).filter((v) => v !== null),
+      recipe: mealsData[i][2],
+      ingredients: _parseMealIngredient(mealsData[i][3]).filter((v) => v !== null),
     };
   }
   return result;

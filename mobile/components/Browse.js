@@ -9,6 +9,7 @@ import { AppStateCtx } from '../service/context';
 import { RecipeBrowser } from './widgets/RecipeBrowser';
 import { useNavigationFocusListener } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
+import { Routes } from '../constants';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -41,7 +42,7 @@ export default function Browse() {
   });
 
   const onRecipePress = (recipe) => {
-    navigation.navigate('RecipeInfo', { recipe, showAddButton: true });
+    navigation.navigate(Routes.ViewRecipe, { recipeId: recipe.id, showAddButton: true });
   };
 
   return (
