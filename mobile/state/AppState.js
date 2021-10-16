@@ -109,18 +109,53 @@ export default class AppState {
     )];
   }
 
+  getAllIngredients() {
+    return [...new Set(
+      this.getRecipes()
+        .map((item) => item.ingredients.map((ing) => ing.name))
+        .flat()
+        .filter((item) => item !== ''),
+    )];
+  }
+
   findRecipeByName(recipeName) {
     return this.getRecipes().find((v) => v.name.toLowerCase() === recipeName.toLowerCase()) || null;
   }
 
   updateRecipe(recipeId, fields) {
     const srcRecipe = this._recipesById[recipeId];
+    const fieldsCopy = { ...fields };
+    fieldsCopy.ingredients = fieldsCopy.ingredients.map((ing) => {
+      let qty = parseInt(ing.split(' ')[0], 10);
+      if (Number.isNaN(qty)) {
+        qty = 1;
+      }
+      return {
+        value: ing,
+        qty,
+      };
+    });
     this._recipesById = {
       ...this._recipesById,
-      [recipeId]: { ...srcRecipe, ...fields },
+      [recipeId]: { ...srcRecipe, ...fieldsCopy },
     };
     this._dispatch('recipes_updated');
     this._api.updateRecipe(recipeId, fields);
+  }
+
+  updateRecipeModificationState(fields) {
+    this._recipeModificationState = {
+      ...this._recipeModificationState,
+      ...fields,
+    };
+  }
+
+  getRecipeModificationState() {
+    return this._recipeModificationState;
+  }
+
+  clearRecipeModificationState() {
+    this._recipeModificationState = {};
   }
 
   autoFocusRecipeSearchbar() {

@@ -7,7 +7,6 @@ import {
 } from 'react-native-paper';
 
 import { kebab } from '../helpers/kebab';
-import { useNavigationFocusListener } from '../helpers/navigation';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -118,7 +117,6 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
       })}
     </View>
   );
-
 
   const noRecipes = (
     <View style={styles.noResultsFoundContainer}>

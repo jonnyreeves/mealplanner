@@ -80,6 +80,11 @@ export default function ViewRecipe({ route }) {
 
   const addToPlanButton = <Button onPress={() => onAddToPlan()} mode="outlined" style={styles.addToPlanBtn}>Add to Plan</Button>;
 
+  const editRecipe = () => {
+    appState.clearRecipeModificationState();
+    navigation.push(Routes.EditRecipe, { recipeId });
+  };
+
   return (
     <Provider>
       <View style={styles.viewContainer}>
@@ -93,7 +98,7 @@ export default function ViewRecipe({ route }) {
         <FAB
           style={styles.fab}
           icon="pencil-outline"
-          onPress={() => navigation.push(Routes.EditRecipe, { recipeId })}
+          onPress={() => editRecipe()}
         />
       </View>
     </Provider>

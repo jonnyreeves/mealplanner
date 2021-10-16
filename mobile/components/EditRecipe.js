@@ -1,15 +1,16 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { AppState, Keyboard, KeyboardAvoidingView, Linking, StyleSheet, View } from 'react-native';
 import {
   Provider, Title, Button, Text, Subheading, FAB, Chip, TextInput, Portal, Modal, IconButton,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/core';
 
 import { kebab } from './helpers/kebab';
 import { AppStateCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
+import { Routes } from '../constants';
+import { useNavigationFocusListener } from './helpers/navigation';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -38,9 +39,6 @@ export default function EditRecipe({ route }) {
 
   const [recipe, setRecipe] = useState(null);
 
-  const [tagModalVisible, setTagModalVisible] = useState(false);
-  const [newTagTextEntry, setNewTagTextEntry] = useState('');
-
   const [title, setTitle] = useState('');
   const [source, setSource] = useState('');
   const [tags, setTags] = useState([]);
@@ -58,21 +56,21 @@ export default function EditRecipe({ route }) {
       result.tags = tags;
     }
     if (recipe.ingredients.map((v) => v.value).toString() !== ingredientValues.toString()) {
-      result.ingredientValues = ingredientValues;
+      result.ingredients = ingredientValues;
     }
     return result;
   };
 
-  const onNewTag = (newTag) => {
-    if (!tags.includes(newTag)) {
-      setTags([...tags, newTag]);
+  useNavigationFocusListener(navigation, React.useCallback(() => {
+    const modState = appState.getRecipeModificationState();
+    console.log('applying modification state', modState);
+    if (modState?.tags) {
+      setTags(modState.tags);
     }
-    setNewTagTextEntry('');
-  };
-
-  useEffect(() => {
-    setNewTagTextEntry('');
-  }, [tagModalVisible]);
+    if (modState?.ingredientValues) {
+      setIngredientValues(modState.ingredientValues);
+    }
+  }, [appState.getRecipeModificationState()]));
 
   useEffect(React.useCallback(() => {
     const r = appState.getRecipeById(recipeId);
@@ -91,7 +89,7 @@ export default function EditRecipe({ route }) {
       console.log(modifiedFields);
       appState.updateRecipe(recipe.id, modifiedFields);
     }
-    navigation.goBack();
+    navigation.popToTop();
   };
 
   if (!recipe) return (<LoadingSpinner message="Fetching recipe details" />);
@@ -102,7 +100,7 @@ export default function EditRecipe({ route }) {
     };
 
     const onAddIngredient = () => {
-      console.log('You want to add an ingredient');
+      navigation.push(Routes.EditRecipeIngredients, { recipeId });
     };
 
     return (
@@ -122,8 +120,8 @@ export default function EditRecipe({ route }) {
       setTags(tags.filter((v) => v !== tagName));
     };
 
-    const onAddTag = () => {
-      setTagModalVisible(true);
+    const onEditTags = () => {
+      navigation.push(Routes.EditRecipeTags, { recipeId });
     };
 
     return (
@@ -131,7 +129,7 @@ export default function EditRecipe({ route }) {
         <Subheading style={{ paddingTop: 10 }}>Tags</Subheading>
         <ChipList
           items={tags}
-          onAdd={onAddTag}
+          onAdd={onEditTags}
           onClose={onDeleteTag}
         />
       </>
@@ -150,37 +148,10 @@ export default function EditRecipe({ route }) {
     </>
   );
 
-  const addTagModal = (
-    <Portal>
-      <Modal visible={tagModalVisible} onDismiss={() => setTagModalVisible(false)} contentContainerStyle={styles.addTagModalContainer}>
-        <View>
-          <Title>Modify tags</Title>
-          <ChipList
-            containerStyle={{ paddingTop: 10, paddingBottom: 10, justifyContent: 'center' }}
-            items={[...new Set([...appState.getAllTags(), ...tags])]}
-            selectedItems={tags}
-            onPress={(tag) => onNewTag(tag)}
-          />
-          <TextInput
-            mode="flat"
-            dense
-            placeholder="Create new tag"
-            value={newTagTextEntry}
-            onChangeText={((text) => setNewTagTextEntry(text))}
-            onSubmitEditing={() => onNewTag(newTagTextEntry)}
-          />
-        </View>
-        <View style={{ flex: 1, flexDirection: 'row-reverse' }}>
-          <Button style={{ paddingTop: 10 }} onPress={() => setTagModalVisible(false)}>Close</Button>
-        </View>
-      </Modal>
-    </Portal>
-  );
 
   return (
     <Provider>
       <View style={styles.viewContainer}>
-        {tagModalVisible && addTagModal}
         <View style={{ flex: 1 }}>
           {titleCard}
           {sourceCard}

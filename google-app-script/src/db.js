@@ -186,6 +186,7 @@ class MealPlannerDb {
     updateValueIfPresent('name');
     updateValueIfPresent('source');
     updateValueIfPresent('tags');
+    updateValueIfPresent('ingredients');
   }
 
   getMealsByIngredient(ingredient) {

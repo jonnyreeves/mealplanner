@@ -30,7 +30,7 @@ export const ChipList = ({ containerStyle, items, onClose, onAdd, onPress, selec
     </Chip>
   ));
   if (typeof onAdd === 'function') {
-    chips.push(<Chip style={styles.chipListItem} onPress={onAdd} icon="plus" mode="outlined" key="add">Add</Chip>);
+    chips.push(<Chip style={styles.chipListItem} onPress={onAdd} icon="pencil" mode="outlined" key="add">Edit</Chip>);
   }
   return <View style={[styles.chipListContainer, containerStyle]}>{chips}</View>;
 };
