@@ -220,7 +220,8 @@ class MealPlannerDb {
   }
 
   _parseRecipeRow(row) {
-    const ingredientMapper = (str) => str.split(',').map((val) => {
+    const ingredientMapper = (str) => str.split(',').map((v) => {
+      const val = v.trim();
       let quantity = '1';
       let name = val;
 

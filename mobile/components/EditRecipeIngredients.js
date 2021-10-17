@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { AppState, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   Text, Title, Searchbar, TextInput, Portal, Modal,
 } from 'react-native-paper';
@@ -16,8 +16,16 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     padding: 20,
   },
+  searchbar: {
+    marginBottom: 10,
+  },
   itemText: {
     fontSize: 18,
+  },
+  queryTooShortText: {
+    textAlign: 'center',
+    fontSize: 18,
+    marginTop: 50,
   },
   qtyModalStyle: {
     backgroundColor: 'white',
@@ -25,6 +33,8 @@ const styles = StyleSheet.create({
     margin: 20,
   },
 });
+
+const MinSearchLength = 2;
 
 export default function EditRecipeIngredients({ route }) {
   const { recipeId } = route.params;
@@ -37,6 +47,7 @@ export default function EditRecipeIngredients({ route }) {
   const [query, setQuery] = useState('');
   const [qtyModalVisible, setQtyModalVisible] = useState(false);
 
+  const [allIngredients, setAllIngredients] = useState([]);
   const [newIngredientName, setNewIngredientName] = useState('');
   const [newIngredientQty, setNewIngredientQty] = useState('1');
 
@@ -61,6 +72,8 @@ export default function EditRecipeIngredients({ route }) {
   };
 
   useEffect(React.useCallback(() => {
+    console.log("mount ing...");
+    setAllIngredients(appState.getAllIngredients());
     const r = appState.getRecipeById(recipeId);
     if (r) {
       setRecipe(r);
@@ -81,7 +94,6 @@ export default function EditRecipeIngredients({ route }) {
     return source.filter((ingredient) => ingredient.search(re) >= 0);
   };
 
-
   const onSubmitEditing = () => {
     setNewIngredientName(query);
     setQtyModalVisible(true);
@@ -98,7 +110,7 @@ export default function EditRecipeIngredients({ route }) {
     </TouchableOpacity>
   );
 
-  const noIngredients = (
+  const createNewIngredient = (
     <TouchableOpacity onPress={() => { onSubmitEditing(); }}>
       <Text style={styles.itemText}>{query} (create new)</Text>
     </TouchableOpacity>
@@ -106,17 +118,27 @@ export default function EditRecipeIngredients({ route }) {
 
   if (!recipe) return (<LoadingSpinner message="Fetching recipe details" />);
 
-  let visibleIngredients = appState.getAllIngredients();
-  if (query.trim().length > 0) {
-    visibleIngredients = searchIngredients(visibleIngredients);
+  let visibleIngredients = [];
+  if (query.trim().length >= MinSearchLength) {
+    visibleIngredients = searchIngredients(allIngredients)
+      .sort((a, b) => {
+        const aa = a.toLowerCase().charCodeAt(0);
+        const bb = b.toLowerCase().charCodeAt(0);
+        if (aa === bb) return 0;
+        if (aa > bb) return 1;
+        return -1;
+      });
   }
-  visibleIngredients = visibleIngredients.sort((a, b) => {
-    const aa = a.toLowerCase().charCodeAt(0);
-    const bb = b.toLowerCase().charCodeAt(0);
-    if (aa === bb) return 0;
-    if (aa > bb) return 1;
-    return -1;
-  });
+
+  const QueryTooShort = () => {
+    const msg = `Enter at least ${MinSearchLength} characters`;
+    return (
+      <Text style={styles.queryTooShortText}>{msg}</Text>
+    );
+  };
+
+  const showCreateNewIngredient = query.trim().length >= MinSearchLength && !visibleIngredients.includes(query.trim());
+  const showQueryTooShort = query.trim().length < MinSearchLength;
 
   return (
 
@@ -143,6 +165,7 @@ export default function EditRecipeIngredients({ route }) {
           ListHeaderComponent={(
             <>
               <Searchbar
+                style={styles.searchbar}
                 onSubmitEditing={onSubmitEditing}
                 autoCorrect={false}
                 placeholder="Search or add a new ingredient"
@@ -150,11 +173,12 @@ export default function EditRecipeIngredients({ route }) {
                 onChangeText={setQuery}
                 returnKeyType={'done'}
               />
-              {visibleIngredients.length === 0 && noIngredients}
+              {showCreateNewIngredient && createNewIngredient}
+              {showQueryTooShort && <QueryTooShort />}
             </>
           )}
           data={visibleIngredients}
-          keyExtractor={(ingredient) => kebab(ingredient)}
+          keyExtractor={(ingredient) => kebab(ingredient || '-')}
           renderItem={(renderIngredient)}
         />
 

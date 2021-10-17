@@ -96,7 +96,9 @@ export default function EditRecipe({ route }) {
 
   const IngredientsCard = () => {
     const onDeleteIngredient = (ingredientValue) => {
-      setIngredientValues(ingredientValues.filter((v) => v !== ingredientValue));
+      const newIngredientValues = ingredientValues.filter((v) => v !== ingredientValue);
+      appState.updateRecipeModificationState({ ingredientValues: newIngredientValues });
+      setIngredientValues(newIngredientValues);
     };
 
     const onAddIngredient = () => {
@@ -117,7 +119,9 @@ export default function EditRecipe({ route }) {
 
   const TagsCard = () => {
     const onDeleteTag = (tagName) => {
-      setTags(tags.filter((v) => v !== tagName));
+      const newTags = tags.filter((v) => v !== tagName);
+      appState.updateRecipeModificationState({ tags: newTags });
+      setTags(newTags);
     };
 
     const onEditTags = () => {
