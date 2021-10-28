@@ -51,7 +51,7 @@ export default function EditRecipeIngredients({ route }) {
   const [newIngredientName, setNewIngredientName] = useState('');
   const [newIngredientQty, setNewIngredientQty] = useState('1');
 
-  const [ingredientValues, setIngredientValues] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
 
   const onNewIngredientAdded = () => {
     let newValue = '';
@@ -61,30 +61,37 @@ export default function EditRecipeIngredients({ route }) {
     } else {
       newValue = `${newIngredientQty} ${newIngredientName}`;
     }
-    console.log(newValue);
 
-    if (!ingredientValues.includes(newValue)) {
-      appState.updateRecipeModificationState({ ingredientValues: [...ingredientValues, newValue] });
+    const newIngredient = {
+      name: newIngredientName,
+      quantity: newIngredientQty,
+      value: newValue,
+    };
+    console.log(newIngredient);
+
+    const targetIdx = ingredients.findIndex((ing) => ing.value === newValue);
+    if (targetIdx === -1) {
+      appState.updateRecipeModificationState({ ingredients: [...ingredients, newIngredient] });
     }
+
     setNewIngredientName('');
     setNewIngredientQty('');
     navigation.goBack();
   };
 
   useEffect(React.useCallback(() => {
-    console.log("mount ing...");
     setAllIngredients(appState.getAllIngredients());
     const r = appState.getRecipeById(recipeId);
     if (r) {
       setRecipe(r);
-      setIngredientValues(r.ingredients.map((ing) => ing.value));
+      setIngredients(r.ingredients);
     }
   }), []);
 
   useNavigationFocusListener(navigation, () => {
     const modState = appState.getRecipeModificationState();
-    if (modState?.ingredientValues) {
-      setIngredientValues(modState.ingredientValues);
+    if (modState?.ingredients) {
+      setIngredients(modState.ingredients);
     }
   });
 

@@ -124,24 +124,17 @@ export default class AppState {
 
   updateRecipe(recipeId, fields) {
     const srcRecipe = this._recipesById[recipeId];
-    const fieldsCopy = { ...fields };
-    if (fieldsCopy.ingredients) {
-      fieldsCopy.ingredients = fieldsCopy.ingredients.map((value) => {
-        const qty = parseInt(value.split(' ')[0], 10);
-        const name = Number.isNaN(qty) ? value : value.split(' ').slice(1).join(' ');
-        return {
-          value,
-          name,
-          qty: Number.isNaN(qty) ? 1 : qty,
-        };
-      });
-    }
     this._recipesById = {
       ...this._recipesById,
-      [recipeId]: { ...srcRecipe, ...fieldsCopy },
+      [recipeId]: { ...srcRecipe, ...fields },
     };
     this._dispatch('recipes_updated');
-    this._api.updateRecipe(recipeId, fields);
+
+    const updateFields = { ...fields };
+    if ('ingredients' in updateFields) {
+      updateFields.ingredients = updateFields.ingredients.map((ing) => ing.value);
+    }
+    this._api.updateRecipe(recipeId, updateFields);
   }
 
   updateRecipeModificationState(fields) {

@@ -25,9 +25,7 @@ export default function Browse() {
 
   const appState = useContext(AppStateCtx);
 
-  const refresh = () => {
-    setRecipes(appState.getRecipes());
-  };
+  const refresh = () => setRecipes(appState.getRecipes());
 
   useEffect(() => {
     const unsub = appState.addListener('recipes_updated', () => refresh());
@@ -45,10 +43,12 @@ export default function Browse() {
     navigation.navigate(Routes.ViewRecipe, { recipeId: recipe.id, showAddButton: true });
   };
 
+  const hasRecipes = recipes.length > 0;
+
   return (
     <SafeAreaView style={styles.viewContainer}>
-      {!recipes?.length && <LoadingSpinner message="Fetching recipes" />}
-      {recipes?.length > 0 && <RecipeBrowser ref={recipeBrowserRef} recipes={recipes} onRecipePress={onRecipePress} />}
+      {!hasRecipes && <LoadingSpinner message="Fetching recipes" />}
+      {hasRecipes && <RecipeBrowser ref={recipeBrowserRef} recipes={recipes} onRecipePress={onRecipePress} />}
     </SafeAreaView>
   );
 }

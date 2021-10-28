@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View, ScrollView } from 'react-native';
 import {
   Provider, Title, Button, Text, Subheading, FAB, Chip, TextInput,
 } from 'react-native-paper';
@@ -10,6 +10,8 @@ import { AppStateCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
 import { Routes } from '../constants';
+import { IngredientsTable, Table } from './widgets/Table';
+import { kebab } from './helpers/kebab';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -49,7 +51,7 @@ export default function ViewRecipe({ route }) {
   const IngredientsCard = () => (
     <>
       <Subheading style={{ paddingTop: 10 }}>Ingredients</Subheading>
-      <ChipList items={recipe.ingredients.map((ing) => ing.value)} />
+      <IngredientsTable ingredients={recipe.ingredients} />
     </>
   );
 
@@ -86,21 +88,21 @@ export default function ViewRecipe({ route }) {
   };
 
   return (
-    <Provider>
-      <View style={styles.viewContainer}>
+    <>
+      <ScrollView style={styles.viewContainer} contentContainerStyle={{ paddingBottom: 140 }}>
         <View style={{ flex: 1 }}>
           {titleCard}
           {sourceCard}
-          <IngredientsCard />
           <TagsCard />
+          <IngredientsCard />
         </View>
         {showAddButton && addToPlanButton}
-        <FAB
-          style={styles.fab}
-          icon="pencil-outline"
-          onPress={() => editRecipe()}
-        />
-      </View>
-    </Provider>
+      </ScrollView>
+      <FAB
+        style={styles.fab}
+        icon="pencil-outline"
+        onPress={() => editRecipe()}
+      />
+    </>
   );
 }

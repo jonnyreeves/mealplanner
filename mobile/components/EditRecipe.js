@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { AppState, Keyboard, KeyboardAvoidingView, Linking, StyleSheet, View } from 'react-native';
+import { BackHandler, ScrollView, StyleSheet, View } from 'react-native';
 import {
-  Provider, Title, Button, Text, Subheading, FAB, Chip, TextInput, Portal, Modal, IconButton,
+  Provider, Subheading, FAB, Chip, TextInput, Portal, Modal, IconButton, Dialog, Button,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
@@ -11,6 +11,8 @@ import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
 import { Routes } from '../constants';
 import { useNavigationFocusListener } from './helpers/navigation';
+import { IngredientsTable } from './widgets/Table';
+import deepEqual from 'deep-equal';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -29,6 +31,13 @@ const styles = StyleSheet.create({
     padding: 20,
     margin: 20,
   },
+  subheadingContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    alignItems: 'center',
+  },
 });
 
 export default function EditRecipe({ route }) {
@@ -38,27 +47,39 @@ export default function EditRecipe({ route }) {
   const appState = useContext(AppStateCtx);
 
   const [recipe, setRecipe] = useState(null);
-
   const [title, setTitle] = useState('');
   const [source, setSource] = useState('');
   const [tags, setTags] = useState([]);
-  const [ingredientValues, setIngredientValues] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [saveChangesDialogVisible, setSaveChangesDialogVisible] = useState(false);
 
   const computeModifiedFields = () => {
     const result = {};
-    if (recipe.name !== title) {
-      result.name = title;
+    const r = appState.getRecipeById(recipeId);
+    const modState = appState.getRecipeModificationState();
+    if (!r) {
+      return result;
     }
-    if (recipe.source !== source) {
-      result.source = source;
+    if ('title' in modState && r.name !== modState.title) {
+      result.name = modState.title;
     }
-    if (recipe.tags.toString() !== tags.toString()) {
+    if ('source' in modState && r.source !== modState.source) {
+      result.source = modState.source;
+    }
+    if ('tags' in modState && !deepEqual(modState.tags, r.tags)) {
       result.tags = tags;
     }
-    if (recipe.ingredients.map((v) => v.value).toString() !== ingredientValues.toString()) {
-      result.ingredients = ingredientValues;
+    if ('ingredients' in modState && !deepEqual(modState.ingredients, r.ingredients)) {
+      result.ingredients = modState.ingredients;
     }
     return result;
+  };
+
+  const onBeforeRemove = (event) => {
+    if (Object.keys(computeModifiedFields()).length > 0) {
+      event.preventDefault();
+      setSaveChangesDialogVisible(true);
+    }
   };
 
   useNavigationFocusListener(navigation, React.useCallback(() => {
@@ -67,8 +88,8 @@ export default function EditRecipe({ route }) {
     if (modState?.tags) {
       setTags(modState.tags);
     }
-    if (modState?.ingredientValues) {
-      setIngredientValues(modState.ingredientValues);
+    if (modState?.ingredients) {
+      setIngredients(modState.ingredients);
     }
   }, [appState.getRecipeModificationState()]));
 
@@ -79,8 +100,9 @@ export default function EditRecipe({ route }) {
       setTitle(r.name);
       setSource(r.source);
       setTags(r.tags);
-      setIngredientValues(r.ingredients.map((ing) => ing.value));
+      setIngredients(r.ingredients);
     }
+    navigation.addListener('beforeRemove', (e) => onBeforeRemove(e));
   }), []);
 
   const onSave = () => {
@@ -89,16 +111,28 @@ export default function EditRecipe({ route }) {
       console.log(modifiedFields);
       appState.updateRecipe(recipe.id, modifiedFields);
     }
-    navigation.popToTop();
+    navigation.navigate(Routes.ViewRecipe, { recipeId });
+  };
+
+  const onTitleChanged = (text) => {
+    appState.updateRecipeModificationState({ title: text });
+    setTitle(text);
+  };
+
+  const onSourceChanged = (text) => {
+    appState.updateRecipeModificationState({ source: text });
+    setSource(text);
   };
 
   if (!recipe) return (<LoadingSpinner message="Fetching recipe details" />);
 
   const IngredientsCard = () => {
     const onDeleteIngredient = (ingredientValue) => {
-      const newIngredientValues = ingredientValues.filter((v) => v !== ingredientValue);
-      appState.updateRecipeModificationState({ ingredientValues: newIngredientValues });
-      setIngredientValues(newIngredientValues);
+      console.log(`delete: ${ingredientValue}`);
+      const newIngredients = ingredients.filter((ing) => ing.value !== ingredientValue);
+      console.log(newIngredients);
+      appState.updateRecipeModificationState({ ingredients: newIngredients });
+      setIngredients(newIngredients);
     };
 
     const onAddIngredient = () => {
@@ -107,11 +141,13 @@ export default function EditRecipe({ route }) {
 
     return (
       <>
-        <Subheading style={{ paddingTop: 10 }}>Ingredients</Subheading>
-        <ChipList
-          items={ingredientValues}
-          onClose={onDeleteIngredient}
-          onAdd={onAddIngredient}
+        <View style={styles.subheadingContainer}>
+          <Subheading>Ingredients</Subheading>
+          <Button compact icon="plus" onPress={() => onAddIngredient()}>Add Ingredient</Button>
+        </View>
+        <IngredientsTable
+          ingredients={ingredients}
+          onDelete={(ingredient) => onDeleteIngredient(ingredient.value)}
         />
       </>
     );
@@ -130,7 +166,9 @@ export default function EditRecipe({ route }) {
 
     return (
       <>
-        <Subheading style={{ paddingTop: 10 }}>Tags</Subheading>
+        <View style={styles.subheadingContainer}>
+          <Subheading>Tags</Subheading>
+        </View>
         <ChipList
           items={tags}
           onAdd={onEditTags}
@@ -142,32 +180,62 @@ export default function EditRecipe({ route }) {
 
   const titleCard = (
     <>
-      <TextInput style={{ marginBottom: 10 }} label="Recipe Name" mode="flat" value={title} onChangeText={(text) => setTitle(text)} />
+      <TextInput
+        style={{ marginBottom: 10 }}
+        label="Recipe Name"
+        mode="flat"
+        value={title}
+        onChangeText={(text) => onTitleChanged(text)}
+        multiline
+        blurOnSubmit
+      />
     </>
   );
 
   const sourceCard = (
     <>
-      <TextInput label="Recipe Source" mode="flat" value={source} onChangeText={(text) => setSource(text)} />
+      <TextInput
+        label="Recipe Source"
+        mode="flat"
+        value={source}
+        onChangeText={(text) => onSourceChanged(text)}
+        multiline
+        blurOnSubmit
+      />
     </>
   );
 
+  const hideSaveChangesDialog = () => setSaveChangesDialogVisible(false);
+  const saveChanges = () => onSave();
+  const cancelChanges = () => {
+    appState.clearRecipeModificationState();
+    navigation.navigate(Routes.ViewRecipe, { recipeId });
+  };
 
   return (
-    <Provider>
-      <View style={styles.viewContainer}>
+    <>
+      <Portal>
+        <Dialog visible={saveChangesDialogVisible} onDismiss={hideSaveChangesDialog}>
+          <Dialog.Title>Save Changes?</Dialog.Title>
+          <Dialog.Actions>
+            <Button onPress={() => cancelChanges()}>Cancel</Button>
+            <Button onPress={() => saveChanges()}>Save</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+      <ScrollView style={styles.viewContainer} contentContainerStyle={{ paddingBottom: 120 }} overScrollMode="never">
         <View style={{ flex: 1 }}>
           {titleCard}
           {sourceCard}
-          <IngredientsCard />
           <TagsCard />
+          <IngredientsCard />
         </View>
-        <FAB
-          style={styles.fab}
-          icon="content-save"
-          onPress={() => onSave()}
-        />
-      </View>
-    </Provider>
+      </ScrollView>
+      <FAB
+        style={styles.fab}
+        icon="content-save"
+        onPress={() => onSave()}
+      />
+    </>
   );
 }

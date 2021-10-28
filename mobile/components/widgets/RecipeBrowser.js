@@ -80,12 +80,14 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     visibleRecipes = searchRecipes(visibleRecipes);
   }
   visibleRecipes = visibleRecipes.sort((a, b) => {
-    const aa = a.name.toLowerCase().charCodeAt(0);
-    const bb = b.name.toLowerCase().charCodeAt(0);
+    const aa = a.name.toLowerCase();
+    const bb = b.name.toLowerCase();
     if (aa === bb) return 0;
     if (aa > bb) return 1;
     return -1;
   });
+
+  console.log(visibleRecipes.map((r) => r.name));
 
   const onSubmitEditing = () => {
     if (typeof onSearchSubmitted === 'function') {
@@ -131,7 +133,6 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     </View>
   );
 
-
   return (
     <FlatList
       ListHeaderComponent={(
@@ -150,7 +151,7 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
         </>
       )}
       data={visibleRecipes}
-      keyExtractor={(recipe) => kebab(recipe.name)}
+      keyExtractor={(recipe) => recipe.id}
       renderItem={renderRecipe}
       extraData={selectedTags}
     />
