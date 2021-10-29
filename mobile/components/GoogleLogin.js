@@ -5,7 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as GoogleAuthHelper from '../service/expoGooleAuthHelper';
 import { MealPlanApiCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
-import { authConfig } from '../state/auth';
+import { authConfig, hasRefreshToken } from '../state/auth';
 
 const SECURE_STORE_KEY = 'rt_v1';
 
@@ -33,7 +33,6 @@ export default function GoogleLogin({ onAccessTokenSet }) {
     console.log(`effect => refreshResponse. type=${type}`);
     if (type === 'success') {
       const { accessToken } = refreshResponse.authentication;
-      console.log(`effect => refreshResponse. accessToken=${accessToken}`);
       mealPlanApi.setAccessToken(accessToken);
       onAccessTokenSet();
     } else {
@@ -63,13 +62,10 @@ export default function GoogleLogin({ onAccessTokenSet }) {
     }
   }, [authResponse]);
 
-  // On mount, try to fetch a cached refresh token from Secure Storage; this will either
-  // complete in a succesul login flow, or fail and require us to prompt the user to sign in.
   React.useEffect(() => {
-    console.log('effect => [mount]. Querying storage...');
-    SecureStore.getItemAsync(SECURE_STORE_KEY)
-      .then((rToken) => doRefresh(rToken))
-      .catch(() => doRefresh(null));
+    (async () => {
+      if (await hasRefreshToken()) { doRefresh(); } else { setNeedsSignIn(true); }
+    })();
   }, []);
 
   const SignInOptions = () => (

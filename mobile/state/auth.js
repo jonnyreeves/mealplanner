@@ -26,6 +26,14 @@ async function readRefreshToken() {
   return SecureStore.getItemAsync(SECURE_STORE_KEY);
 }
 
+export async function hasRefreshToken() {
+  try {
+    return (await readRefreshToken()).length > 0;
+  } catch {
+    return false;
+  }
+}
+
 export async function doRefresh() {
   const refreshToken = await readRefreshToken();
   const config = {

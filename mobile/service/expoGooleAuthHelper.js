@@ -56,14 +56,8 @@ export function useGoogleSignIn(authConfig) {
 export function useGoogleTokenRefresh() {
   const [refreshRequest, setRefreshRequest] = React.useState(true);
   const [refreshResult, setRefreshResult] = React.useState(null);
-  const refreshAsync = (refreshToken) => {
-    if (!refreshToken) {
-      return setRefreshResult({
-        type: 'cancelled',
-      });
-    }
+  const refreshAsync = () => {
     setRefreshRequest(false);
-
     return doRefresh()
       .then((res) => {
         setRefreshResult({
