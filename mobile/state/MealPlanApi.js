@@ -1,7 +1,12 @@
+import { doRefresh } from './auth';
+
 export default class MealPlanApi {
   constructor({ apiRoot, useProxy }) {
     this._apiRootUrl = apiRoot;
     this._useProxy = useProxy;
+
+    this._accessToken = '';
+    this._queuedRequests = [];
 
     this._listenerMap = {
       recipes_fetched: [],
@@ -33,8 +38,8 @@ export default class MealPlanApi {
     return this._makeRequest({ resource: '/plan', postData });
   }
 
-  setAccessToken(v) {
-    this._accessToken = v;
+  setAccessToken(at) {
+    this._accessToken = at;
   }
 
   _apiRoot() {
@@ -45,16 +50,58 @@ export default class MealPlanApi {
     return url;
   }
 
-  async _makeRequest({ resource, postData }) {
-    const url = this._apiRoot() + resource;
-    const method = (postData) ? 'post' : 'get';
-    console.log(`Making Request, method=${method}, resource=${resource}`);
-
-    const response = await fetch(url, {
-      method,
-      headers: new Headers({ Authorization: `Bearer ${this._accessToken}` }),
-      body: postData ? JSON.stringify(postData) : undefined,
+  async _refreshAccessToken() {
+    this._isRefreshingToken = true;
+    this._refreshPromise = new Promise((resolve, reject) => {
+      console.log('refreshing access token...');
+      doRefresh()
+        .then((result) => {
+          if (result.accessToken) {
+            this._accessToken = result.accessToken;
+          } else {
+            this._accessToken = '';
+          }
+          resolve();
+        })
+        .catch((err) => reject(err));
     });
-    return response.json();
+  }
+
+  async _makeRequest({ resource, postData }) {
+    return new Promise((resolve, reject) => {
+      const url = this._apiRoot() + resource;
+      const method = (postData) ? 'post' : 'get';
+
+      const execReq = ({ withRefresh, retryCount }) => {
+        console.log(`Making Request, method=${method}, resource=${resource}, retryCount=${retryCount} withRefresh=${withRefresh}`);
+        return fetch(url, {
+          method,
+          headers: new Headers({ Authorization: `Bearer ${this._accessToken}` }),
+          body: postData ? JSON.stringify(postData) : undefined,
+        })
+          .then((response) => {
+            if (response.ok) {
+              response.json().then((data) => resolve(data));
+            } else if (response.status === 401) {
+              if (!withRefresh) {
+                reject(new Error('Request status was 401 but withRefresh was false'));
+              } else {
+                if (!this._isRefreshingToken) {
+                  this._refreshAccessToken();
+                }
+                this._refreshPromise
+                  .then(() => execReq({ withRefresh: false, retryCount }))
+                  .catch((err) => reject(err));
+              }
+            } else if (retryCount >= 2) {
+              reject(new Error(`Request failed, status=${response.status}, retryCount=${retryCount}`));
+            } else {
+              setTimeout(() => execReq({ withRefresh, retryCount: retryCount + 1 }), 2000 * (retryCount + 1));
+            }
+          });
+      };
+
+      execReq({ withRefresh: true, retryCount: 0 });
+    });
   }
 }

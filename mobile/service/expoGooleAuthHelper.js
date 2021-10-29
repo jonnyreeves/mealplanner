@@ -2,19 +2,8 @@ import * as React from 'react';
 import * as GoogleWebAuth from 'expo-auth-session/providers/google';
 import * as GoogleAppAuth from 'expo-google-app-auth';
 import * as WebBrowser from 'expo-web-browser';
-import * as AppAuth from 'expo-app-auth';
 import { Platform } from 'react-native';
-import Constants, { AppOwnership } from 'expo-constants';
-
-function getRefreshClientId(authConfig) {
-  const isStandalone = Constants.appOwnership === AppOwnership.Standalone;
-  const { androidStandaloneAppClientId, androidClientId } = authConfig;
-  if (Platform.OS === 'android') {
-    return (isStandalone) ? androidStandaloneAppClientId : androidClientId;
-  }
-  console.warn(`Could not determine refresh clientId for platform: ${Platform.OS}`);
-  return '';
-}
+import { doRefresh } from '../state/auth';
 
 // Call this function once in your Component which handles the Google authentication
 // flow; typically done outside of the component decleration (ie: just after your
@@ -64,7 +53,7 @@ export function useGoogleSignIn(authConfig) {
 // Initialises the state required to perform a Google Refresh Token exchange
 // (refreshRequest and refreshResult), and returns a func which will perform the
 // refresh token exchange (refreshAsync).
-export function useGoogleTokenRefresh(authConfig) {
+export function useGoogleTokenRefresh() {
   const [refreshRequest, setRefreshRequest] = React.useState(true);
   const [refreshResult, setRefreshResult] = React.useState(null);
   const refreshAsync = (refreshToken) => {
@@ -75,13 +64,7 @@ export function useGoogleTokenRefresh(authConfig) {
     }
     setRefreshRequest(false);
 
-    const clientId = getRefreshClientId(authConfig);
-    const config = {
-      issuer: 'https://accounts.google.com',
-      clientId,
-      scopes: authConfig.scopes,
-    };
-    return AppAuth.refreshAsync(config, refreshToken)
+    return doRefresh()
       .then((res) => {
         setRefreshResult({
           type: 'success',

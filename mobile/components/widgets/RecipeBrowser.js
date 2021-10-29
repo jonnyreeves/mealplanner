@@ -87,8 +87,6 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     return -1;
   });
 
-  console.log(visibleRecipes.map((r) => r.name));
-
   const onSubmitEditing = () => {
     if (typeof onSearchSubmitted === 'function') {
       onSearchSubmitted(query);

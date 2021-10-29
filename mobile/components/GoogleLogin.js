@@ -5,6 +5,7 @@ import * as SecureStore from 'expo-secure-store';
 import * as GoogleAuthHelper from '../service/expoGooleAuthHelper';
 import { MealPlanApiCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
+import { authConfig } from '../state/auth';
 
 const SECURE_STORE_KEY = 'rt_v1';
 
@@ -19,15 +20,8 @@ const styles = StyleSheet.create({
 GoogleAuthHelper.maybeCompleteAuthSession();
 
 export default function GoogleLogin({ onAccessTokenSet }) {
-  const authConfig = {
-    webClientId: '509061346774-n1jj6659echchulhkd9tl2t81hq0lb5q.apps.googleusercontent.com',
-    androidClientId: '509061346774-psfmklgo6svn9eictqc60qumlh5m6bkj.apps.googleusercontent.com',
-    androidStandaloneAppClientId: '509061346774-br2k8o3ipa5rateshvja7ic0h0m9abra.apps.googleusercontent.com',
-    scopes: ['https://www.googleapis.com/auth/drive'],
-  };
-
   const [needsSignIn, setNeedsSignIn] = React.useState(false);
-  const [, refreshResponse, doRefresh] = GoogleAuthHelper.useGoogleTokenRefresh(authConfig);
+  const [, refreshResponse, doRefresh] = GoogleAuthHelper.useGoogleTokenRefresh();
   const [authRequest, authResponse, doAuthRequest] = GoogleAuthHelper.useGoogleSignIn(authConfig);
 
   const mealPlanApi = React.useContext(MealPlanApiCtx);
@@ -40,9 +34,7 @@ export default function GoogleLogin({ onAccessTokenSet }) {
     if (type === 'success') {
       const { accessToken } = refreshResponse.authentication;
       console.log(`effect => refreshResponse. accessToken=${accessToken}`);
-
       mealPlanApi.setAccessToken(accessToken);
-
       onAccessTokenSet();
     } else {
       setNeedsSignIn(true);
