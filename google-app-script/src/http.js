@@ -92,6 +92,7 @@ class HttpHandler {
     return {
       post: {
         plan: this.doModifyPlanRequest,
+        recipe: this.doCreateRecipeRequest,
         'recipe/*': this.doModifyRecipeRequest,
       },
       get: {
@@ -117,9 +118,14 @@ class HttpHandler {
         return -1;
       });
 
-    const handlerName = routePriority.find((r) => new RegExp(r).test(req.getPath()));
-    if (handlerName) {
-      handlerMap[handlerName].apply(this, [req, resp]);
+    let handlerFunc = handlerMap[req.getPath()];
+    if (typeof handlerFunc !== 'function') {
+      const handlerName = routePriority.find((r) => new RegExp(r).test(req.getPath()));
+      handlerFunc = handlerMap[handlerName];
+    }
+
+    if (typeof handlerFunc === 'function') {
+      handlerFunc.apply(this, [req, resp]);
     } else {
       this.doNoHandlerFound(req, resp);
     }
@@ -181,6 +187,15 @@ class HttpHandler {
 
   doRecipesRequest(req, resp) {
     return resp.setContent(this._db.getAllRecipes());
+  }
+
+  doCreateRecipeRequest(req, resp) {
+    const payload = req.getJsonPayload();
+    const recipe = this._db.createRecipe(payload.fields);
+    resp.setContent({
+      message: 'ok',
+      recipe,
+    });
   }
 
   doModifyRecipeRequest(req, resp) {

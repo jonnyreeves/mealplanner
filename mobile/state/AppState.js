@@ -122,6 +122,18 @@ export default class AppState {
     return this.getRecipes().find((v) => v.name.toLowerCase() === recipeName.toLowerCase()) || null;
   }
 
+  async createRecipe(fields) {
+    const { recipe } = await this._api.createRecipe(fields);
+    if (recipe) {
+      this._recipesById = {
+        ...this._recipesById,
+        [recipe.id]: recipe,
+      };
+      this._dispatch('recipes_updated');
+    }
+    return recipe;
+  }
+
   updateRecipe(recipeId, fields) {
     const srcRecipe = this._recipesById[recipeId];
     this._recipesById = {

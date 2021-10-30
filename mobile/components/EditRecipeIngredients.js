@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useLayoutEffect, useState } from 'react';
 import { AppState, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
 import {
   Text, Title, Searchbar, TextInput, Portal, Modal,
@@ -36,13 +36,9 @@ const styles = StyleSheet.create({
 
 const MinSearchLength = 2;
 
-export default function EditRecipeIngredients({ route }) {
-  const { recipeId } = route.params;
-
+export default function EditRecipeIngredients() {
   const navigation = useNavigation();
   const appState = useContext(AppStateCtx);
-
-  const [recipe, setRecipe] = useState(null);
 
   const [query, setQuery] = useState('');
   const [qtyModalVisible, setQtyModalVisible] = useState(false);
@@ -67,7 +63,6 @@ export default function EditRecipeIngredients({ route }) {
       quantity: newIngredientQty,
       value: newValue,
     };
-    console.log(newIngredient);
 
     const targetIdx = ingredients.findIndex((ing) => ing.value === newValue);
     if (targetIdx === -1) {
@@ -79,21 +74,13 @@ export default function EditRecipeIngredients({ route }) {
     navigation.goBack();
   };
 
-  useEffect(React.useCallback(() => {
+  useLayoutEffect(() => {
     setAllIngredients(appState.getAllIngredients());
-    const r = appState.getRecipeById(recipeId);
-    if (r) {
-      setRecipe(r);
-      setIngredients(r.ingredients);
-    }
-  }), []);
-
-  useNavigationFocusListener(navigation, () => {
     const modState = appState.getRecipeModificationState();
-    if (modState?.ingredients) {
-      setIngredients(modState.ingredients);
+    if (modState) {
+      setIngredients(modState.ingredients || []);
     }
-  });
+  }, [appState.getRecipeModificationState()]);
 
   const searchIngredients = (source) => {
     const sanatized = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
@@ -122,8 +109,6 @@ export default function EditRecipeIngredients({ route }) {
       <Text style={styles.itemText}>{query} (create new)</Text>
     </TouchableOpacity>
   );
-
-  if (!recipe) return (<LoadingSpinner message="Fetching recipe details" />);
 
   let visibleIngredients = [];
   if (query.trim().length >= MinSearchLength) {
@@ -178,7 +163,7 @@ export default function EditRecipeIngredients({ route }) {
                 placeholder="Search or add a new ingredient"
                 value={query}
                 onChangeText={setQuery}
-                returnKeyType={'done'}
+                returnKeyType="done"
               />
               {showCreateNewIngredient && createNewIngredient}
               {showQueryTooShort && <QueryTooShort />}
@@ -188,8 +173,6 @@ export default function EditRecipeIngredients({ route }) {
           keyExtractor={(ingredient) => kebab(ingredient || '-')}
           renderItem={(renderIngredient)}
         />
-
-
       </View>
     </>
   );

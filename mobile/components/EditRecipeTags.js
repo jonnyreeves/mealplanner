@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   Provider, Title, Button, Text, Subheading, FAB, Chip, TextInput, Portal, Modal,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
-import { kebab } from './helpers/kebab';
 import { AppStateCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
@@ -19,13 +18,9 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function EditRecipeTags({ route }) {
-  const { recipeId } = route.params;
-
+export default function EditRecipeTags() {
   const navigation = useNavigation();
   const appState = useContext(AppStateCtx);
-
-  const [recipe, setRecipe] = useState(null);
 
   const [newTagTextEntry, setNewTagTextEntry] = useState('');
   const [tags, setTags] = useState([]);
@@ -37,32 +32,22 @@ export default function EditRecipeTags({ route }) {
     setNewTagTextEntry('');
   };
 
-  useEffect(React.useCallback(() => {
-    const r = appState.getRecipeById(recipeId);
-    if (r) {
-      setRecipe(r);
-      setTags(r.tags);
-    }
-  }), []);
-
-  useNavigationFocusListener(navigation, () => {
+  useLayoutEffect(() => {
     const modState = appState.getRecipeModificationState();
-    if (modState?.tags) {
-      setTags(modState.tags);
+    if (modState) {
+      setTags(modState.tags || []);
     }
-  });
+  }, [appState.getRecipeModificationState()]);
 
   const onSave = () => {
     appState.updateRecipeModificationState({ tags });
     navigation.goBack();
   };
 
-  if (!recipe) return (<LoadingSpinner message="Fetching recipe details" />);
-
   return (
     <Provider>
       <View style={styles.viewContainer}>
-        <Title>{recipe.name}</Title>
+        <Title>{appState.getRecipeModificationState()?.title}</Title>
         <ChipList
           containerStyle={{ paddingTop: 10, paddingBottom: 10, justifyContent: 'center' }}
           items={[...new Set([...appState.getAllTags(), ...tags])]}

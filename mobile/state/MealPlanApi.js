@@ -28,6 +28,11 @@ export default class MealPlanApi {
     this._listenerMap.recipes_fetched.forEach((handlerFn) => handlerFn(response));
   }
 
+  async createRecipe(fields) {
+    const postData = { version: '1.0', fields };
+    return this._makeRequest({ resource: '/recipe', postData });
+  }
+
   async updateRecipe(recipeId, fields) {
     const postData = { version: '1.0', fields };
     return this._makeRequest({ resource: `/recipe/${recipeId}`, postData });
@@ -80,7 +85,7 @@ export default class MealPlanApi {
           body: postData ? JSON.stringify(postData) : undefined,
         })
           .then((response) => {
-            if (response.ok) {
+            if (response.ok && response.headers.get('content-type').includes('application/json')) {
               response.json().then((data) => resolve(data));
             } else if (response.status === 401) {
               if (!withRefresh) {

@@ -1,4 +1,4 @@
-/* global dateUtils */
+/* global dateUtils uuidv4 */
 
 const ROLLOVER_DAY_OF_WEEK = 5; // Friday.
 
@@ -169,6 +169,25 @@ class MealPlannerDb {
   getAllRecipes() {
     this._initMealCache();
     return Object.values(this._mealCache);
+  }
+
+  createRecipe(fields) {
+    if (!fields.name || String(fields.name).trim() === '') {
+      throw new Error('recipe name must not be empty');
+    }
+    const existing = this.getAllRecipes().find((v) => v.name === fields.name);
+    if (existing) {
+      throw new Error(`a recipe named '${fields.name}' already exists'`);
+    }
+    const newId = uuidv4();
+    const tagStr = fields.tags.join(',');
+    const ingredientsStr = fields.ingredients.map((ing) => ing.value).join(',');
+    this.sheets.meals().appendRow([newId, fields.name, fields.source, ingredientsStr, tagStr]);
+
+    return {
+      id: newId,
+      ...fields,
+    };
   }
 
   updateRecipe(id, fields) {

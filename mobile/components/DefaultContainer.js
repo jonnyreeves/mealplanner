@@ -18,6 +18,7 @@ import { Routes } from '../constants';
 import { Keyboard } from 'react-native';
 import EditRecipeTags from './EditRecipeTags';
 import EditRecipeIngredients from './EditRecipeIngredients';
+import CreateRecipe from './CreateRecipe';
 
 const AppStack = createNativeStackNavigator();
 
@@ -45,7 +46,7 @@ export default function DefaultContainer() {
   const HomeTabs = () => (
     <Tab.Navigator initialRoute="Plan" barStyle={{ backgroundColor: DefaultTheme.colors.primary }}>
       <Tab.Screen name="Plan" component={Plan} options={tabOpts({ icon: 'calendar' })} />
-      <Tab.Screen name="Browse" component={Browse} options={tabOpts({ icon: 'silverware-fork-knife' })} />
+      <Tab.Screen name={Routes.Browse} component={Browse} options={tabOpts({ icon: 'silverware-fork-knife' })} />
       <Tab.Screen name="List" component={List} options={tabOpts({ icon: 'format-list-checkbox' })} />
     </Tab.Navigator>
   );
@@ -57,8 +58,9 @@ export default function DefaultContainer() {
           <AppStack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
           <AppStack.Screen name={Routes.ViewRecipe} component={ViewRecipe} options={{ headerTitle: 'Recipe Details' }} />
           <AppStack.Screen name={Routes.EditRecipe} component={EditRecipe} options={{ headerTitle: 'Edit Recipe' }} />
+          <AppStack.Screen name={Routes.CreateRecipe} component={CreateRecipe} options={{ headerTitle: 'Create Recipe' }} />
           <AppStack.Screen name={Routes.EditRecipeTags} component={EditRecipeTags} options={{ headerTitle: 'Edit Recipe Tags' }} />
-          <AppStack.Screen name={Routes.EditRecipeIngredients} component={EditRecipeIngredients} options={{ headerTitle: 'Add Ingredient' }} />
+          <AppStack.Screen name={Routes.EditRecipeIngredients} component={EditRecipeIngredients} options={{ headerTitle: 'Add Recipe Ingredient' }} />
           <AppStack.Screen name="ChooseRecipe" component={ChooseRecipe} />
           <AppStack.Screen name="AddRecipeToPlan" component={doAddRecipeToPlan} options={{ headerTitle: 'Add Recipe to Plan' }} />
         </AppStack.Navigator>
