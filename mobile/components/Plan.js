@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginHorizontal: 0,
+    borderRadius: 12,
   },
   nextMealCardContent: {
     flex: 1,

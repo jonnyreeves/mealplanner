@@ -56,8 +56,8 @@ export default class MealPlanApi {
   }
 
   async _refreshAccessToken() {
-    this._isRefreshingToken = true;
     this._refreshPromise = new Promise((resolve, reject) => {
+      this._isRefreshingToken = true;
       console.log('refreshing access token...');
       doRefresh()
         .then((result) => {
@@ -66,6 +66,7 @@ export default class MealPlanApi {
           } else {
             this._accessToken = '';
           }
+          this._isRefreshingToken = false;
           resolve();
         })
         .catch((err) => reject(err));
@@ -96,10 +97,10 @@ export default class MealPlanApi {
                 }
                 this._refreshPromise
                   .then(() => execReq({ withRefresh: false, retryCount }))
-                  .catch((err) => reject(err));
+                  .catch((err) => reject(new Error(`Request failed due to refresh exchange failure: ${err}`)));
               }
             } else if (retryCount >= 2) {
-              reject(new Error(`Request failed, status=${response.status}, retryCount=${retryCount}`));
+              reject(new Error(`Request failed, resource=${resource} status=${response.status}, retryCount=${retryCount}`));
             } else {
               setTimeout(() => execReq({ withRefresh, retryCount: retryCount + 1 }), 2000 * (retryCount + 1));
             }
@@ -107,6 +108,7 @@ export default class MealPlanApi {
       };
 
       execReq({ withRefresh: true, retryCount: 0 });
-    });
+    })
+      .catch((err) => console.error(err.toString()));
   }
 }

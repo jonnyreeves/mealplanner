@@ -15,7 +15,6 @@ import { Routes } from '../constants';
 const styles = StyleSheet.create({
   viewContainer: {
     flex: 1,
-    padding: 12,
   },
   addRecipeFAB: {
     position: 'absolute',

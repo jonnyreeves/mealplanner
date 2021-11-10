@@ -9,12 +9,9 @@ import {
 import { kebab } from '../helpers/kebab';
 
 const styles = StyleSheet.create({
-  viewContainer: {
-    flex: 1,
-    padding: 12,
-  },
   itemText: {
     fontSize: 18,
+    paddingBottom: 4,
   },
   tagListContainer: {
     justifyContent: 'center',
@@ -148,6 +145,7 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
           {visibleRecipes.length === 0 && noRecipes}
         </>
       )}
+      contentContainerStyle={{ padding: 12 }}
       data={visibleRecipes}
       keyExtractor={(recipe) => recipe.id}
       renderItem={renderRecipe}

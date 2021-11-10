@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Provider as PaperProvider } from 'react-native-paper';
+import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
 import DefaultContainer from './components/DefaultContainer';
 import GoogleLogin from './components/GoogleLogin';
@@ -11,8 +11,16 @@ export default function App() {
   const mealPlanApi = useContext(MealPlanApiCtx);
   const appState = useContext(AppStateCtx);
 
+  const theme = {
+    ...DefaultTheme,
+    roundness: 24,
+    colors: {
+      ...DefaultTheme.colors,
+    },
+  };
+
   return (
-    <PaperProvider>
+    <PaperProvider theme={theme}>
       <MealPlanApiCtx.Provider value={mealPlanApi}>
         <AppStateCtx.Provider value={appState}>
           {!appInitialised

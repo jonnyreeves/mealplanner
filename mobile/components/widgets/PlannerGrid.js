@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 60,
     backgroundColor: DefaultTheme.colors.accent,
+    borderRadius: 12,
     marginVertical: 4,
     marginHorizontal: 4,
     justifyContent: 'center',
