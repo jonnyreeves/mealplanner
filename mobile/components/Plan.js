@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   plannerGridContainer: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 12,
     paddingTop: 20,
   },
   modalContainer: {
