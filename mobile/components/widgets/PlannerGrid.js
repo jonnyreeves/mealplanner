@@ -3,7 +3,7 @@ import React, { Fragment, useState } from 'react';
 import {
   StyleSheet, View, TouchableOpacity, FlatList,
 } from 'react-native';
-import { Text, Button, DefaultTheme } from 'react-native-paper';
+import { Text, Button, withTheme } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
 import { toPlannerGridData } from '../helpers/planData';
 
@@ -24,7 +24,6 @@ const styles = StyleSheet.create({
   planListEntry: {
     flex: 1,
     height: 60,
-    backgroundColor: DefaultTheme.colors.accent,
     borderRadius: 12,
     marginVertical: 4,
     marginHorizontal: 4,
@@ -35,7 +34,6 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 60,
     color: 'white',
-    backgroundColor: DefaultTheme.colors.primary,
     marginVertical: 4,
     marginHorizontal: 4,
     justifyContent: 'center',
@@ -49,28 +47,15 @@ const PlannerGridLabel = ({ dayOfTheWeek }) => (
   </View>
 );
 
-const PlannerGridMeaButton = ({ onPress, onLongPress, mealName }) => (
-  <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.planListEntry]}>
-    <Text style={{ textAlign: 'center' }}>{mealName}</Text>
-  </TouchableOpacity>
-);
-
-const WeekSelectorButton = ({
-  id, selectedWeek, style, onPress,
-}) => {
-  const label = (id === 'thisWeek') ? 'This Week' : 'Next Week';
-  const mode = (id === selectedWeek) ? 'contained' : 'outlined';
-  return (
-    <Button mode={mode} style={style} onPress={() => onPress(id)}>
-      {label}
-    </Button>
-  );
-};
-
-export const PlannerGrid = ({
-  swapSource, planData, onMealSelected,
-}) => {
+export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelected }) => {
+  const { colors } = theme;
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
+
+  const PlannerGridMeaButton = ({ onPress, onLongPress, mealName }) => (
+    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.planListEntry, { backgroundColor: colors.accent }]}>
+      <Text style={{ textAlign: 'center' }}>{mealName}</Text>
+    </TouchableOpacity>
+  );
 
   const plannerGridItemRenderer = ({ item }) => {
     if (item.isHeader) {
@@ -81,7 +66,7 @@ export const PlannerGrid = ({
     }
     if (swapSource && swapSource.id === item.id) {
       return (
-        <TouchableOpacity style={styles.planListEntrySwapSource}>
+        <TouchableOpacity style={[styles.planListEntrySwapSource, { backgroundColor: colors.primary }]}>
           <Text style={{ textAlign: 'center' }}>{item.name}</Text>
         </TouchableOpacity>
       );
@@ -92,18 +77,12 @@ export const PlannerGrid = ({
     return <PlannerGridMeaButton onPress={onPress} onLongPress={onLongPress} mealName={item.name} />;
   };
 
-  const onWeekSelected = (value) => {
-    setSelectedWeek(value);
-  };
-
   const gridData = toPlannerGridData(Object.values(planData))[selectedWeek];
 
-  const weekSelectorBtns = (
-    <>
-      <WeekSelectorButton id="thisWeek" selectedWeek={selectedWeek} onPress={() => onWeekSelected('thisWeek')} style={{ marginRight: 10 }} />
-      <WeekSelectorButton id="nextWeek" selectedWeek={selectedWeek} onPress={() => onWeekSelected('nextWeek')} />
-    </>
-  );
+  const thisWeekOn = <Button mode="contained" style={{ marginRight: 10 }} onPress={() => false}>This Week</Button>;
+  const thisWeekOff = <Button mode="outlined" style={{ marginRight: 10 }} onPress={() => setSelectedWeek('thisWeek')}>This Week</Button>;
+  const nextWeekOn = <Button mode="contained" onPress={() => false}>Next Week</Button>;
+  const nextWeekOff = <Button mode="outlined" onPress={() => setSelectedWeek('nextWeek')}>Next Week</Button>;
 
   return (
     <>
@@ -117,8 +96,21 @@ export const PlannerGrid = ({
         />
       </View>
       <View style={styles.weekSelectorButtonContainer}>
-        {weekSelectorBtns}
+        {selectedWeek === 'thisWeek'
+          && (
+            <>
+              {thisWeekOn}
+              {nextWeekOff}
+            </>
+          )}
+        {selectedWeek === 'nextWeek'
+          && (
+            <>
+              {thisWeekOff}
+              {nextWeekOn}
+            </>
+          )}
       </View>
     </>
   );
-};
+});

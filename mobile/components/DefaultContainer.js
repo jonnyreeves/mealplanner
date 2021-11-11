@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { DefaultTheme, Text } from 'react-native-paper';
+import { DefaultTheme, Text, withTheme } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -28,12 +28,13 @@ const List = () => (
 
 const tabOpts = ({ icon }) => ({
   tabBarIcon: ({ focused }) => {
-    const iconColor = focused ? 'white' : 'grey';
+    const iconColor = focused ? 'white' : '#283618';
     return (<MaterialCommunityIcons name={icon} size={24} color={iconColor} />);
   },
 });
 
-export default function DefaultContainer() {
+export const DefaultContainer = withTheme(({ theme }) => {
+  const { colors } = theme;
   const mealPlanApi = React.useContext(MealPlanApiCtx);
 
   // On mount, prefetch all API calls.
@@ -44,7 +45,7 @@ export default function DefaultContainer() {
 
   const Tab = createMaterialBottomTabNavigator();
   const HomeTabs = () => (
-    <Tab.Navigator initialRoute="Plan" barStyle={{ backgroundColor: DefaultTheme.colors.primary }}>
+    <Tab.Navigator initialRoute="Plan" inactiveColor="#ccd5ae" barStyle={{ backgroundColor: colors.primary }}>
       <Tab.Screen name="Plan" component={Plan} options={tabOpts({ icon: 'calendar' })} />
       <Tab.Screen name={Routes.Browse} component={Browse} options={tabOpts({ icon: 'silverware-fork-knife' })} />
       <Tab.Screen name="List" component={List} options={tabOpts({ icon: 'format-list-checkbox' })} />
@@ -67,4 +68,4 @@ export default function DefaultContainer() {
       </NavigationContainer>
     </SafeAreaProvider>
   );
-}
+});

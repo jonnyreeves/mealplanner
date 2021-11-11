@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
-import DefaultContainer from './components/DefaultContainer';
+import { DefaultContainer } from './components/DefaultContainer';
 import GoogleLogin from './components/GoogleLogin';
 import { AppStateCtx, MealPlanApiCtx } from './service/context';
 
@@ -16,6 +16,17 @@ export default function App() {
     roundness: 24,
     colors: {
       ...DefaultTheme.colors,
+      primary: '#606c38',
+      // background: '#000000',
+      // surface: '#fefae0',
+      accent: '#d8e2dc',
+      // error: '',
+      // text: '',
+      // onSurface: '',
+      // disabled: '',
+      // placeholder: '',
+      // backdrop: '#fefae0',
+      // notification: '',
     },
   };
 
