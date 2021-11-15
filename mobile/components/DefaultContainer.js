@@ -19,12 +19,9 @@ import { Keyboard } from 'react-native';
 import EditRecipeTags from './EditRecipeTags';
 import EditRecipeIngredients from './EditRecipeIngredients';
 import CreateRecipe from './CreateRecipe';
+import List from './List';
 
 const AppStack = createNativeStackNavigator();
-
-const List = () => (
-  <Text>Shopping List</Text>
-);
 
 const tabOpts = ({ icon }) => ({
   tabBarIcon: ({ focused }) => {
