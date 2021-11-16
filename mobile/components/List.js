@@ -37,8 +37,6 @@ export default function List() {
     ]);
   };
 
-  useNavigationFocusListener(navigation, () => refresh());
-
   useEffect(() => {
     const unsub = appState.addListener('recipes_updated', () => refresh());
     return () => unsub();
