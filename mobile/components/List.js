@@ -1,12 +1,13 @@
 import { useNavigation } from '@react-navigation/core';
 import React, { useContext, useState, useEffect } from 'react';
 import { SectionList, StyleSheet, View } from 'react-native';
-import { Button, Subheading, Text } from 'react-native-paper';
+import { Button, IconButton, Subheading, Text, Title } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppStateCtx } from '../service/context';
 import { toIngredientList } from './helpers/ingredientList';
 import { useNavigationFocusListener } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
+import { WeekSelector } from './widgets/WeekSelector';
 
 const styles = StyleSheet.create({
   weekSelectorButtonContainer: {
@@ -30,11 +31,15 @@ export default function List() {
     const planData = appState.getPlanData();
     const gridData = toPlannerGridData(Object.values(planData));
 
-    const ingredientsList = toIngredientList(gridData[selectedWeek], recipes);
-    setListData([
-      { title: 'Ingredients', data: ingredientsList.knownIngredients },
-      { title: 'Meals', data: ingredientsList.unknownMeals },
-    ]);
+    const sectionData = [];
+    const { ingredients, meals } = toIngredientList(gridData[selectedWeek], recipes);
+    if (ingredients.length > 0) {
+      sectionData.push({ title: 'Ingredients', data: ingredients });
+    }
+    if (meals.length > 0) {
+      sectionData.push({ title: 'Meals', data: meals });
+    }
+    setListData(sectionData);
   };
 
   useEffect(() => {
@@ -51,13 +56,8 @@ export default function List() {
     refresh();
   }, [selectedWeek]);
 
-  const thisWeekOn = <Button mode="contained" style={{ marginRight: 10 }} onPress={() => false}>This Week</Button>;
-  const thisWeekOff = <Button mode="outlined" style={{ marginRight: 10 }} onPress={() => setSelectedWeek('thisWeek')}>This Week</Button>;
-  const nextWeekOn = <Button mode="contained" onPress={() => false}>Next Week</Button>;
-  const nextWeekOff = <Button mode="outlined" onPress={() => setSelectedWeek('nextWeek')}>Next Week</Button>;
-
   const SectionHeader = ({ section }) => (
-    <Subheading style={{ fontSize: 18 }}>{section.title}</Subheading>
+    <Subheading style={{ fontSize: 18, textDecorationLine: 'underline' }}>{section.title}</Subheading>
   );
 
   const MealList = ({ meals }) => (
@@ -92,32 +92,40 @@ export default function List() {
     );
   };
 
+  const EmptyShoppingList = () => {
+    const week = (selectedWeek === 'thisWeek') ? 'this week' : 'next week';
+    const msg = `There's nothing on ${week}'s plan`;
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <IconButton icon="calendar-alert" color="#d8e2dc" size={128} />
+        <Text>{msg}</Text>
+      </View>
+    );
+  };
+
+  const ListTitle = () => {
+    const week = (selectedWeek === 'thisWeek') ? 'This Week' : 'Next Week';
+    const msg = `${week}'s Shopping List`;
+    return <Title>{msg}</Title>;
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
-        <SectionList
-          contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
-          sections={listData}
-          keyExtractor={(entry, index) => `${entry.ingredient || entry.name}-${index}`}
-          renderItem={({ item }) => <Item item={item} />}
-          renderSectionHeader={({ section }) => <SectionHeader section={section} />}
-        />
-        <View style={styles.weekSelectorButtonContainer}>
-          {selectedWeek === 'thisWeek'
-            && (
-              <>
-                {thisWeekOn}
-                {nextWeekOff}
-              </>
-            )}
-          {selectedWeek === 'nextWeek'
-            && (
-              <>
-                {thisWeekOff}
-                {nextWeekOn}
-              </>
-            )}
-        </View>
+      <View style={{ flex: 1, justifyContent: 'space-between' }}>
+        {listData.length > 0 && (
+          <SectionList
+            ListHeaderComponent={<ListTitle />}
+            contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
+            sections={listData}
+            keyExtractor={(entry, index) => `${entry.ingredient || entry.name}-${index}`}
+            renderItem={({ item }) => <Item item={item} />}
+            renderSectionHeader={({ section }) => <SectionHeader section={section} />}
+          />
+        )}
+        {listData.length === 0 && (
+          <EmptyShoppingList />
+        )}
+        <WeekSelector selectedWeek={selectedWeek} onSelect={(value) => setSelectedWeek(value)} />
       </View>
     </SafeAreaView>
   );

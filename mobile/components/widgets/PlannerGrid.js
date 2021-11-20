@@ -6,15 +6,9 @@ import {
 import { Text, Button, withTheme } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
 import { toPlannerGridData } from '../helpers/planData';
+import { WeekSelector } from './WeekSelector';
 
 const styles = StyleSheet.create({
-  weekSelectorButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'stretch',
-    marginTop: 20,
-    marginBottom: 20,
-  },
   plannerGridContainer: {
   },
   planListLabel: {
@@ -79,11 +73,6 @@ export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelec
 
   const gridData = toPlannerGridData(Object.values(planData))[selectedWeek];
 
-  const thisWeekOn = <Button mode="contained" style={{ marginRight: 10 }} onPress={() => false}>This Week</Button>;
-  const thisWeekOff = <Button mode="outlined" style={{ marginRight: 10 }} onPress={() => setSelectedWeek('thisWeek')}>This Week</Button>;
-  const nextWeekOn = <Button mode="contained" onPress={() => false}>Next Week</Button>;
-  const nextWeekOff = <Button mode="outlined" onPress={() => setSelectedWeek('nextWeek')}>Next Week</Button>;
-
   return (
     <>
       <View style={styles.plannerGridContainer}>
@@ -95,22 +84,7 @@ export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelec
           extraData={swapSource}
         />
       </View>
-      <View style={styles.weekSelectorButtonContainer}>
-        {selectedWeek === 'thisWeek'
-          && (
-            <>
-              {thisWeekOn}
-              {nextWeekOff}
-            </>
-          )}
-        {selectedWeek === 'nextWeek'
-          && (
-            <>
-              {thisWeekOff}
-              {nextWeekOn}
-            </>
-          )}
-      </View>
+      <WeekSelector selectedWeek={selectedWeek} onSelect={(value) => setSelectedWeek(value)} />
     </>
   );
 });

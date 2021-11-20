@@ -40,14 +40,14 @@ export function toIngredientList(planEntries, recipes) {
     });
   });
 
-  const knownIngredients = Object.keys(byIngredient)
+  const ingredients = Object.keys(byIngredient)
     .map((ingName) => ({
       ingredient: ingName, qty: byIngredient[ingName].qty, meals: byIngredient[ingName].meals,
     }))
     .sort((a, b) => alphabetically(a.ingredient, b.ingredient));
 
   return {
-    knownIngredients,
-    unknownMeals,
+    ingredients,
+    meals: unknownMeals,
   };
 }

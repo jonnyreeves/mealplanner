@@ -37,7 +37,7 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
         style: styles.actionButton,
       },
       swap: {
-        name: 'Swap',
+        name: 'Move',
         icon: 'swap-horizontal',
         style: { ...styles.actionButton, marginRight: 0 },
       },
