@@ -7,8 +7,6 @@ import { useNavigation } from '@react-navigation/native';
 
 import { kebab } from './helpers/kebab';
 import { AppStateCtx } from '../service/context';
-import { LoadingSpinner } from './widgets/LoadingSpinner';
-import { useNavigationFocusListener } from './helpers/navigation';
 
 const styles = StyleSheet.create({
   viewContainer: {

@@ -3,25 +3,16 @@ import React, { useContext, useState, useEffect } from 'react';
 import { SectionList, StyleSheet, View } from 'react-native';
 import { Button, IconButton, Subheading, Text, Title } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AppStateCtx } from '../service/context';
 import { toIngredientList } from './helpers/ingredientList';
-import { useNavigationFocusListener } from './helpers/navigation';
+import { useAppState, usePlanUpdatedListener, useRecipesUpdatedListener } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
 import { WeekSelector } from './widgets/WeekSelector';
 
 const styles = StyleSheet.create({
-  weekSelectorButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'stretch',
-    marginTop: 20,
-    marginBottom: 20,
-  },
 });
 
 export default function List() {
-  const appState = useContext(AppStateCtx);
-  const navigation = useNavigation();
+  const appState = useAppState();
 
   const [listData, setListData] = useState([]);
   const [selectedWeek, setSelectedWeek] = useState('nextWeek');
@@ -42,19 +33,9 @@ export default function List() {
     setListData(sectionData);
   };
 
-  useEffect(() => {
-    const unsub = appState.addListener('recipes_updated', () => refresh());
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    const unsub = appState.addListener('plan_updated', () => refresh());
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, [selectedWeek]);
+  useRecipesUpdatedListener(() => refresh());
+  usePlanUpdatedListener(() => refresh());
+  useEffect(() => refresh(), [selectedWeek]);
 
   const SectionHeader = ({ section }) => (
     <Subheading style={{ fontSize: 18, textDecorationLine: 'underline' }}>{section.title}</Subheading>

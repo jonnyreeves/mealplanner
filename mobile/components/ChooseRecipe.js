@@ -5,9 +5,8 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { getDayOfTheWeek } from './helpers/date';
-import { AppStateCtx } from '../service/context';
 import { RecipeBrowser } from './widgets/RecipeBrowser';
-import { useNavigationFocusListener } from './helpers/navigation';
+import { useAppState, useNavigationFocusListener } from './helpers/navigation';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -22,7 +21,7 @@ export default function ChooseRecipe({ route }) {
 
   const recipeBrowserRef = useRef();
   const navigation = useNavigation();
-  const appState = useContext(AppStateCtx);
+  const appState = useAppState();
 
   const [recipes, setRecipes] = useState([]);
 
@@ -32,7 +31,7 @@ export default function ChooseRecipe({ route }) {
     return `Choose ${prettySlot} for ${dow}`;
   };
 
-  useNavigationFocusListener(navigation, () => {
+  useNavigationFocusListener(() => {
     navigation.setOptions({ headerTitle: getHeaderTitle() });
     recipeBrowserRef.current?.searchbar.focus();
   });

@@ -1,9 +1,8 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { AppStateCtx } from '../service/context';
-import { toPlannerGridData } from './helpers/planData';
+import { useAppState, usePlanUpdatedListener } from './helpers/navigation';
 import { PlannerGrid } from './widgets/PlannerGrid';
 
 const styles = StyleSheet.create({
@@ -20,20 +19,13 @@ const styles = StyleSheet.create({
 export default function doAddRecipeToPlan({ route }) {
   const { recipe } = route.params;
 
-  const appState = useContext(AppStateCtx);
-
+  const appState = useAppState();
   const navigation = useNavigation();
   const [planData, setPlanData] = useState(null);
 
-  const refresh = () => {
-    setPlanData(appState.getPlanData());
-  };
+  const refresh = () => setPlanData(appState.getPlanData());
 
-  useEffect(() => {
-    const unsub = appState.addListener('plan_updated', () => refresh());
-    return () => unsub();
-  }, []);
-
+  usePlanUpdatedListener(() => refresh());
   useEffect(() => refresh(), []);
 
   const onMealSelected = (meal) => {

@@ -6,9 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import { FAB, Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppStateCtx } from '../service/context';
 import { RecipeBrowser } from './widgets/RecipeBrowser';
-import { useNavigationFocusListener } from './helpers/navigation';
+import { useAppState, useNavigationFocusListener, useRecipesUpdatedListener } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { Routes } from '../constants';
 
@@ -33,24 +32,22 @@ export default function Browse({ route }) {
   const [recipes, setRecipes] = useState([]);
   const [addedRecipeNotificationVisible, setAddedRecipeNotificationVisible] = useState(false);
 
-  const appState = useContext(AppStateCtx);
+  const appState = useAppState();
 
   const refresh = () => setRecipes(appState.getRecipes());
 
-  useEffect(() => {
-    const unsub = appState.addListener('recipes_updated', () => refresh());
-    return () => unsub();
-  }, [appState]);
+  useRecipesUpdatedListener(() => refresh());
 
   useLayoutEffect(() => {
     setAddedRecipeNotificationVisible(!!createdRecipeTitle);
   }, [createdRecipeTitle]);
 
-  useNavigationFocusListener(navigation, () => {
+  useNavigationFocusListener(() => {
     refresh();
     if (appState.shouldAutoFocusRecipeSearchbar()) {
       recipeBrowserRef.current?.searchbar.focus();
     }
+    appState.clearRecipeModificationState();
   });
 
   const onRecipePress = (recipe) => {

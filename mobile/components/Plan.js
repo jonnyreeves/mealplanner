@@ -10,7 +10,7 @@ import { Routes } from '../constants';
 
 import { AppStateCtx } from '../service/context';
 import { toShortISOString, today } from './helpers/date';
-import { useNavigationFocusListener } from './helpers/navigation';
+import { useAppState, useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { PlannerGrid } from './widgets/PlannerGrid';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
@@ -63,29 +63,22 @@ export default function Plan({ route }) {
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
 
-  const appState = useContext(AppStateCtx);
+  const appState = useAppState();
 
   const refresh = () => {
     setRecipes(appState.getRecipes());
-
     setPlanData(appState.getPlanData());
     setTodaysMeal(appState.getPlanData()[toShortISOString(today())]);
   };
 
-  useEffect(() => {
-    const unsub = appState.addListener('recipes_updated', () => refresh());
-    return () => unsub();
-  }, []);
+  useRecipesUpdatedListener(() => refresh());
+  usePlanUpdatedListener(() => refresh());
+  useNavigationFocusListener(() => refresh());
 
   useEffect(() => {
-    const unsub = appState.addListener('plan_updated', () => refresh());
-    return () => unsub();
-  }, []);
-
-  useNavigationFocusListener(navigation, () => refresh());
-
-  useEffect(() => {
-    setSelectedMealRecipe(appState.findRecipeByName(selectedMeal?.name));
+    if (selectedMeal) {
+      setSelectedMealRecipe(appState.findRecipeByName(selectedMeal.name));
+    }
   }, [selectedMeal]);
 
   const hasPlanData = planData && Object.keys(planData).length > 0;

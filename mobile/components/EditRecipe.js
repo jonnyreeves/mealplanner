@@ -86,7 +86,7 @@ export default function EditRecipe({ route }) {
     return () => unsub();
   }, [navigation]);
 
-  useNavigationFocusListener(navigation, React.useCallback(() => {
+  useNavigationFocusListener(React.useCallback(() => {
     const modState = appState.getRecipeModificationState();
     if (modState) {
       setTitle(modState.title);

@@ -10,7 +10,7 @@ import { AppStateCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
 import { Routes } from '../constants';
-import { useNavigationFocusListener } from './helpers/navigation';
+import { useAppState, useNavigationFocusListener } from './helpers/navigation';
 import { IngredientsTable } from './widgets/Table';
 
 const styles = StyleSheet.create({
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
 
 export default function CreateRecipe() {
   const navigation = useNavigation();
-  const appState = useContext(AppStateCtx);
+  const appState = useAppState();
 
   const [title, setTitle] = useState('');
   const [source, setSource] = useState('');
@@ -61,7 +61,7 @@ export default function CreateRecipe() {
     }
   };
 
-  useNavigationFocusListener(navigation, React.useCallback(() => {
+  useNavigationFocusListener(React.useCallback(() => {
     const modState = appState.getRecipeModificationState();
     if (modState?.tags) {
       setTags(modState.tags);
@@ -205,7 +205,7 @@ export default function CreateRecipe() {
         <Dialog visible={saveChangesDialogVisible} onDismiss={hideSaveChangesDialog}>
           <Dialog.Title>Save Changes?</Dialog.Title>
           <Dialog.Actions>
-            <Button onPress={() => cancelChanges()}>Cancel</Button>
+            <Button onPress={() => cancelChanges()}>Discard</Button>
             <Button onPress={() => saveChanges()}>Save</Button>
           </Dialog.Actions>
         </Dialog>
