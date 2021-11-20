@@ -1,4 +1,5 @@
 import { doRefresh } from './auth';
+import { timeout } from '../utils';
 
 export default class MealPlanApi {
   constructor({ apiRoot, useProxy }) {
@@ -6,11 +7,12 @@ export default class MealPlanApi {
     this._useProxy = useProxy;
 
     this._accessToken = '';
-    this._queuedRequests = [];
+    this._refreshPromise = null;
 
     this._listenerMap = {
       recipes_fetched: [],
       plan_fetched: [],
+      api_error: [],
     };
   }
 
@@ -19,13 +21,23 @@ export default class MealPlanApi {
   }
 
   async fetchPlan() {
-    const response = await this._makeRequest({ resource: '/plan' });
-    this._listenerMap.plan_fetched.forEach((handlerFn) => handlerFn(response));
+    try {
+      const response = await this._makeRequest({ resource: '/plan' });
+      this._listenerMap.plan_fetched.forEach((handlerFn) => handlerFn(response));
+    } catch (err) {
+      console.error(err);
+      this._listenerMap.api_error.forEach((handlerFn) => handlerFn(err));
+    }
   }
 
   async fetchRecipes() {
-    const response = await this._makeRequest({ resource: '/recipes' });
-    this._listenerMap.recipes_fetched.forEach((handlerFn) => handlerFn(response));
+    try {
+      const response = await this._makeRequest({ resource: '/recipes' });
+      this._listenerMap.recipes_fetched.forEach((handlerFn) => handlerFn(response));
+    } catch (err) {
+      console.error(err);
+      this._listenerMap.api_error.forEach((handlerFn) => handlerFn(err));
+    }
   }
 
   async createRecipe(fields) {
@@ -56,59 +68,72 @@ export default class MealPlanApi {
   }
 
   async _refreshAccessToken() {
-    this._refreshPromise = new Promise((resolve, reject) => {
-      this._isRefreshingToken = true;
-      console.log('refreshing access token...');
-      doRefresh()
-        .then((result) => {
-          if (result.accessToken) {
-            this._accessToken = result.accessToken;
-          } else {
-            this._accessToken = '';
-          }
-          this._isRefreshingToken = false;
-          resolve();
-        })
-        .catch((err) => reject(err));
-    });
+    if (!this._refreshPromise) {
+      this._refreshPromise = new Promise((resolve, reject) => {
+        console.log('refreshing access token...');
+        doRefresh()
+          .then((refreshRes) => {
+            if (refreshRes.accessToken) {
+              this._accessToken = refreshRes.accessToken;
+              console.log('access token refreshed');
+              resolve();
+            } else {
+              reject(new Error('No access token supplied in result'));
+            }
+          })
+          .catch((err) => {
+            reject(err);
+          })
+          .finally(() => {
+            this._refreshPromise = null;
+          });
+      });
+    }
+    return this._refreshPromise;
   }
 
   async _makeRequest({ resource, postData }) {
-    return new Promise((resolve, reject) => {
-      const url = this._apiRoot() + resource;
-      const method = (postData) ? 'post' : 'get';
+    const url = this._apiRoot() + resource;
+    const method = (postData) ? 'post' : 'get';
 
-      const execReq = ({ withRefresh, retryCount }) => {
-        console.log(`Making Request, method=${method}, resource=${resource}, retryCount=${retryCount} withRefresh=${withRefresh}`);
-        return fetch(url, {
+    const execReq = async ({ withRefresh, retryCount }) => {
+      const retryOrFail = async (res) => {
+        if (retryCount >= 2) {
+          throw new Error(`Request failed, resource=${resource} status=${res?.status || 0}, retryCount=${retryCount}`);
+        } else {
+          await timeout(2000 * (retryCount + 1));
+          return execReq({ withRefresh, retryCount: retryCount + 1 });
+        }
+      };
+
+      console.log(`Making Request, method=${method}, resource=${resource}, retryCount=${retryCount} withRefresh=${withRefresh}`);
+
+      try {
+        const fetchRes = await fetch(url, {
           method,
           headers: new Headers({ Authorization: `Bearer ${this._accessToken}` }),
           body: postData ? JSON.stringify(postData) : undefined,
-        })
-          .then((response) => {
-            if (response.ok && response.headers.get('content-type').includes('application/json')) {
-              response.json().then((data) => resolve(data));
-            } else if (response.status === 401) {
-              if (!withRefresh) {
-                reject(new Error('Request status was 401 but withRefresh was false'));
-              } else {
-                if (!this._isRefreshingToken) {
-                  this._refreshAccessToken();
-                }
-                this._refreshPromise
-                  .then(() => execReq({ withRefresh: false, retryCount }))
-                  .catch((err) => reject(new Error(`Request failed due to refresh exchange failure: ${err}`)));
-              }
-            } else if (retryCount >= 2) {
-              reject(new Error(`Request failed, resource=${resource} status=${response.status}, retryCount=${retryCount}`));
-            } else {
-              setTimeout(() => execReq({ withRefresh, retryCount: retryCount + 1 }), 2000 * (retryCount + 1));
-            }
-          });
-      };
+        });
 
-      execReq({ withRefresh: true, retryCount: 0 });
-    })
-      .catch((err) => console.error(err.toString()));
+        if (fetchRes.ok && fetchRes.headers.get('content-type').includes('application/json')) {
+          return await fetchRes.json();
+        } if (fetchRes.status === 401) {
+          if (!withRefresh) {
+            throw new Error('Request status was 401 but withRefresh was false');
+          }
+          try {
+            await this._refreshAccessToken();
+          } catch (err) {
+            throw new Error(`Request failed due to refresh exchange failure: ${err}`);
+          }
+          return execReq({ withRefresh, retryCount });
+        }
+        return retryOrFail(fetchRes);
+      } catch (err) {
+        return retryOrFail(null);
+      }
+    };
+
+    return execReq({ withRefresh: true, retryCount: 0 });
   }
 }
