@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const StorageKeys = {
@@ -6,22 +7,39 @@ const StorageKeys = {
 };
 
 export default class LocalStorage {
-  constructor(appState) {
+  bind({ appState }) {
     this._appState = appState;
-  }
 
-  init() {
-    this._appState.addListener('recipes_updated', () => {
-      this._onRecipiesUpdate();
+    appState.addListener('recipes_updated', () => {
+      this._onRecipesUpdated();
     });
-    this._appState.addListener('plan_updated', () => {
+    appState.addListener('plan_updated', () => {
       this._onPlanUpdated();
     });
   }
 
-  async _onRecipiesUpdated() {
+  async _read(key) {
     try {
-      const jsonValue = JSON.stringify(this._appState.getRecipes());
+      const jsonStr = await AsyncStorage.getItem(key);
+      return JSON.parse(jsonStr);
+    } catch (e) {
+      console.error(`Failed to retrieve ${key}: ${e.message}`, e);
+      await AsyncStorage.removeItem(key);
+      return null;
+    }
+  }
+
+  async getRecipes() {
+    return this._read(StorageKeys.RECIPES);
+  }
+
+  async getPlanData() {
+    return this._read(StorageKeys.PLAN_DATA);
+  }
+
+  async _onRecipesUpdated() {
+    try {
+      const jsonValue = JSON.stringify(this._appState.getRecipesById());
       await AsyncStorage.setItem(StorageKeys.RECIPES, jsonValue);
     } catch (e) {
       console.error(`Failed to persist recipes: ${e.message}`, e);

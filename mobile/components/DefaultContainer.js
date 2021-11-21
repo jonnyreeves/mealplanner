@@ -20,6 +20,7 @@ import EditRecipeTags from './EditRecipeTags';
 import EditRecipeIngredients from './EditRecipeIngredients';
 import CreateRecipe from './CreateRecipe';
 import List from './List';
+import MovePlanEntry from './MovePlanEntry';
 
 const AppStack = createNativeStackNavigator();
 
@@ -61,6 +62,7 @@ export const DefaultContainer = withTheme(({ theme }) => {
           <AppStack.Screen name={Routes.EditRecipeIngredients} component={EditRecipeIngredients} options={{ headerTitle: 'Add Recipe Ingredient' }} />
           <AppStack.Screen name="ChooseRecipe" component={ChooseRecipe} />
           <AppStack.Screen name="AddRecipeToPlan" component={doAddRecipeToPlan} options={{ headerTitle: 'Add Recipe to Plan' }} />
+          <AppStack.Screen name={Routes.MovePlanEntry} component={MovePlanEntry} options={{ headerTitle: 'Move Meal' }} />
         </AppStack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

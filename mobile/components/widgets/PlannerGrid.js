@@ -25,13 +25,8 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   planListEntrySwapSource: {
-    flex: 1,
-    height: 60,
-    color: 'white',
-    marginVertical: 4,
-    marginHorizontal: 4,
-    justifyContent: 'center',
-    padding: 8,
+    borderStyle: 'dotted',
+    borderWidth: 4,
   },
 });
 
@@ -45,8 +40,8 @@ export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelec
   const { colors } = theme;
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
 
-  const PlannerGridMeaButton = ({ onPress, onLongPress, mealName }) => (
-    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.planListEntry, { backgroundColor: colors.accent }]}>
+  const PlannerGridMeaButton = ({ onPress, onLongPress, mealName, additionalStyles = [] }) => (
+    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.planListEntry, { backgroundColor: colors.accent }, ...additionalStyles]}>
       <Text style={{ textAlign: 'center' }}>{mealName}</Text>
     </TouchableOpacity>
   );
@@ -59,11 +54,7 @@ export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelec
       return <PlannerGridLabel dayOfTheWeek={item.name} />;
     }
     if (swapSource && swapSource.id === item.id) {
-      return (
-        <TouchableOpacity style={[styles.planListEntrySwapSource, { backgroundColor: colors.primary }]}>
-          <Text style={{ textAlign: 'center' }}>{item.name}</Text>
-        </TouchableOpacity>
-      );
+      return <PlannerGridMeaButton mealName={item.name} additionalStyles={[styles.planListEntrySwapSource, { borderColor: colors.primary }]} />;
     }
 
     const onPress = () => onMealSelected(item);

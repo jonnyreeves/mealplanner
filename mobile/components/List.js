@@ -1,7 +1,6 @@
-import { useNavigation } from '@react-navigation/core';
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SectionList, StyleSheet, View } from 'react-native';
-import { Button, IconButton, Subheading, Text, Title } from 'react-native-paper';
+import { IconButton, Subheading, Text, Title } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { toIngredientList } from './helpers/ingredientList';
 import { useAppState, usePlanUpdatedListener, useRecipesUpdatedListener } from './helpers/navigation';

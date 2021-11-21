@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  BackHandler,
   Linking,
   Platform, Pressable, StyleSheet, View,
 } from 'react-native';
@@ -8,7 +9,6 @@ import { Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface } from
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Routes } from '../constants';
 
-import { AppStateCtx } from '../service/context';
 import { toShortISOString, today } from './helpers/date';
 import { useAppState, useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
@@ -118,7 +118,8 @@ export default function Plan({ route }) {
     setModalVisible(false);
     switch (action) {
       case 'swap':
-        setSwapSource(meal);
+        // setSwapSource(meal);
+        navigation.navigate(Routes.MovePlanEntry, { meal });
         break;
       case 'delete':
         doDeleteMeal(meal);

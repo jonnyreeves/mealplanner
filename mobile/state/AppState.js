@@ -1,8 +1,10 @@
 import cloneDeep from 'clone-deep';
 
 export default class AppState {
-  constructor({ api }) {
+  constructor({ api, storage }) {
     this._api = api;
+    this._storage = storage;
+
     this._handlerMap = {
       recipes_updated: [],
       plan_updated: [],
@@ -13,6 +15,24 @@ export default class AppState {
 
     this._api.addListener('plan_fetched', (planData) => this._onPlanFetched(planData));
     this._api.addListener('recipes_fetched', (recipes) => this._onRecipesFetched(recipes));
+  }
+
+  async init() {
+    this._storage.bind({ appState: this });
+    return Promise.all([
+      (async () => {
+        const planData = await this._storage.getPlanData();
+        if (planData) {
+          this._setPlanByDate(planData);
+        }
+      })(),
+      (async () => {
+        const recipeData = await this._storage.getRecipes();
+        if (recipeData) {
+          this._setRecipesById(recipeData);
+        }
+      })(),
+    ]);
   }
 
   addListener(eventName, handlerFn) {
@@ -33,9 +53,9 @@ export default class AppState {
     return Object.values(this._planByDate);
   }
 
-  setPlanEntry({ date, slot, recipeName }) {
+  async setPlanEntry({ date, slot, recipeName }) {
     const srcEntry = this._planByDate[date];
-    this._planByDate = {
+    this._setPlanByDate({
       ...this._planByDate,
       [date]: {
         ...srcEntry,
@@ -44,28 +64,27 @@ export default class AppState {
           name: recipeName,
         },
       },
-    };
-    this._dispatch('plan_updated');
-    this._api.updatePlan({ [date]: { [slot]: recipeName } });
+    });
+    return this._api.updatePlan({ [date]: { [slot]: recipeName } });
   }
 
   swapPlanEntries({ src, dest }) {
     let entryMap;
     if (src.date === dest.date) {
       const prevEntry = cloneDeep(this._planByDate[src.date]);
-      this._planByDate = {
+      this._setPlanByDate({
         ...this._planByDate,
         [src.date]: {
           ...prevEntry,
           [src.slot]: { ...prevEntry[dest.slot] },
           [dest.slot]: { ...prevEntry[src.slot] },
         },
-      };
+      });
       entryMap = { [src.date]: { [src.slot]: dest.recipeName, [dest.slot]: src.recipeName } };
     } else {
       const prevSrc = cloneDeep(this._planByDate[src.date]);
       const prevDest = cloneDeep(this._planByDate[dest.date]);
-      this._planByDate = {
+      this._setPlanByDate({
         ...this._planByDate,
         [src.date]: {
           ...prevSrc,
@@ -81,19 +100,21 @@ export default class AppState {
             name: src.recipeName,
           },
         },
-      };
+      });
       entryMap = {
         [src.date]: { [src.slot]: dest.recipeName },
         [dest.date]: { [dest.slot]: src.recipeName },
       };
     }
-    console.log(this._planByDate);
-
     return this._api.updatePlan(entryMap);
   }
 
   getRecipes() {
     return Object.values(this._recipesById);
+  }
+
+  getRecipesById() {
+    return this._recipesById;
   }
 
   getRecipeById(recipeId) {
@@ -134,19 +155,18 @@ export default class AppState {
     return recipe;
   }
 
-  updateRecipe(recipeId, fields) {
+  async updateRecipe(recipeId, fields) {
     const srcRecipe = this._recipesById[recipeId];
-    this._recipesById = {
+    this._setRecipesById({
       ...this._recipesById,
       [recipeId]: { ...srcRecipe, ...fields },
-    };
-    this._dispatch('recipes_updated');
+    });
 
     const updateFields = { ...fields };
     if ('ingredients' in updateFields) {
       updateFields.ingredients = updateFields.ingredients.map((ing) => ing.value);
     }
-    this._api.updateRecipe(recipeId, updateFields);
+    return this._api.updateRecipe(recipeId, updateFields);
   }
 
   updateRecipeModificationState(fields) {
@@ -174,20 +194,30 @@ export default class AppState {
     return af;
   }
 
-  _onRecipesFetched(recipes) {
-    this._recipesById = {};
-    recipes.forEach((entry) => {
-      this._recipesById[entry.id] = entry;
-    });
+  _setRecipesById(value) {
+    this._recipesById = value;
     this._dispatch('recipes_updated');
   }
 
-  _onPlanFetched(planData) {
-    this._planByDate = {};
-    planData.forEach((entry) => {
-      this._planByDate[entry.date] = entry;
-    });
+  _setPlanByDate(value) {
+    this._planByDate = value;
     this._dispatch('plan_updated');
+  }
+
+  _onRecipesFetched(recipes) {
+    const byId = {};
+    recipes.forEach((entry) => {
+      byId[entry.id] = entry;
+    });
+    this._setRecipesById(byId);
+  }
+
+  _onPlanFetched(planData) {
+    const byDate = {};
+    planData.forEach((entry) => {
+      byDate[entry.date] = entry;
+    });
+    this._setPlanByDate(byDate);
   }
 
   _dispatch(eventName) {

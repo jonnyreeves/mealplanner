@@ -10,6 +10,14 @@ export const useNavigationFocusListener = (onFocus) => {
   }, [navigation]);
 };
 
+export const useNavigationBeforeRemove = (handler) => {
+  const navigation = useNavigation();
+  useEffect(() => {
+    const unsub = navigation.addListener('beforeRemove', (e) => handler(e));
+    return () => unsub();
+  }, [navigation]);
+};
+
 export const useAppState = () => useContext(AppStateCtx);
 
 export const useRecipesUpdatedListener = (onUpdated) => {
