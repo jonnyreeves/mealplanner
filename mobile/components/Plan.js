@@ -76,6 +76,16 @@ export default function Plan({ route }) {
   useNavigationFocusListener(() => refresh());
 
   useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', () => {
+      if (swapSource) {
+        setSwapSource(null);
+        return true;
+      }
+      return false;
+    });
+  }, []);
+
+  useEffect(() => {
     if (selectedMeal) {
       setSelectedMealRecipe(appState.findRecipeByName(selectedMeal.name));
     }
@@ -118,8 +128,7 @@ export default function Plan({ route }) {
     setModalVisible(false);
     switch (action) {
       case 'swap':
-        // setSwapSource(meal);
-        navigation.navigate(Routes.MovePlanEntry, { meal });
+        setSwapSource(meal);
         break;
       case 'delete':
         doDeleteMeal(meal);

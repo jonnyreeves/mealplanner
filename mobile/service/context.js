@@ -3,12 +3,15 @@ import { Platform } from 'react-native';
 import MealPlanApi from '../state/MealPlanApi';
 import AppState from '../state/AppState';
 import LocalStorage from '../state/LocalStorage';
+import SessionState from '../state/SessionState';
 
 const mealPlanApi = new MealPlanApi({
   apiRoot: 'https://script.google.com/a/macros/jonnyreeves.co.uk/s/AKfycbw0L6ysbPjm-J1jv5siRukYXG57MuLnGkGWQHbZnWrb/dev',
   useProxy: Platform.OS === 'web',
 });
 export const MealPlanApiCtx = React.createContext(mealPlanApi);
+
+export const SessionStateCtx = React.createContext(new SessionState());
 
 const appState = new AppState({
   api: mealPlanApi,
