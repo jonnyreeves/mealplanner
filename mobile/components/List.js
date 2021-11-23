@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { SectionList, StyleSheet, View } from 'react-native';
+import { SectionList, StyleSheet, View, Pressable } from 'react-native';
 import { IconButton, Subheading, Text, Title } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { toIngredientList } from './helpers/ingredientList';
 import { useAppState, usePlanUpdatedListener, useRecipesUpdatedListener } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
 import { WeekSelector } from './widgets/WeekSelector';
+import * as WebBrowser from 'expo-web-browser';
 
 const styles = StyleSheet.create({
 });
@@ -43,8 +44,9 @@ export default function List() {
   const MealList = ({ meals }) => (
     meals
       .map((m) => m.name)
-      .map((name) => (
-        <View key={name} style={{ flexDirection: 'row', paddingLeft: 24 }}>
+      .map((name, idx) => (
+        // eslint-disable-next-line react/no-array-index-key
+        <View key={`${name}-${idx}`} style={{ flexDirection: 'row', paddingLeft: 24 }}>
           <Text style={{ color: '#808080' }}>{'\u2022'}</Text>
           <Text style={{ flex: 1, paddingLeft: 5, color: '#808080' }}>{name}</Text>
         </View>
@@ -53,13 +55,16 @@ export default function List() {
 
   const Item = ({ item }) => {
     if (item.ingredient) {
+      const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(item.ingredient)}`;
       return (
         <View style={{ paddingBottom: 8, paddingLeft: 12 }}>
-          <Text style={{ fontSize: 16 }}>
-            {item.qty}
-            {' '}
-            {item.ingredient}
-          </Text>
+          <Pressable onPress={() => WebBrowser.openBrowserAsync(tescoUrl)}>
+            <Text style={{ fontSize: 16 }}>
+              {item.qty}
+              {' '}
+              {item.ingredient}
+            </Text>
+          </Pressable>
           <MealList meals={item.meals} />
         </View>
       );
