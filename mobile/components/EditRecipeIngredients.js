@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { kebab } from './helpers/kebab';
 import { AppStateCtx } from '../service/context';
+import { useAppState, useSessionState } from './helpers/navigation';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -36,7 +37,8 @@ const MinSearchLength = 2;
 
 export default function EditRecipeIngredients() {
   const navigation = useNavigation();
-  const appState = useContext(AppStateCtx);
+  const appState = useAppState();
+  const sessionState = useSessionState();
 
   const [query, setQuery] = useState('');
   const [qtyModalVisible, setQtyModalVisible] = useState(false);
@@ -64,7 +66,7 @@ export default function EditRecipeIngredients() {
 
     const targetIdx = ingredients.findIndex((ing) => ing.value === newValue);
     if (targetIdx === -1) {
-      appState.updateRecipeModificationState({ ingredients: [...ingredients, newIngredient] });
+      sessionState.updateRecipeModificationState({ ingredients: [...ingredients, newIngredient] });
     }
 
     setNewIngredientName('');
@@ -74,11 +76,11 @@ export default function EditRecipeIngredients() {
 
   useLayoutEffect(() => {
     setAllIngredients(appState.getAllIngredients());
-    const modState = appState.getRecipeModificationState();
+    const modState = sessionState.getRecipeModificationState();
     if (modState) {
       setIngredients(modState.ingredients || []);
     }
-  }, [appState.getRecipeModificationState()]);
+  }, [sessionState.getRecipeModificationState()]);
 
   const searchIngredients = (source) => {
     const sanatized = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string

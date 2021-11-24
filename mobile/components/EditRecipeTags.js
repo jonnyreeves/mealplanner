@@ -8,7 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AppStateCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
-import { useNavigationFocusListener } from './helpers/navigation';
+import { useAppState, useNavigationFocusListener, useSessionState } from './helpers/navigation';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -20,7 +20,8 @@ const styles = StyleSheet.create({
 
 export default function EditRecipeTags() {
   const navigation = useNavigation();
-  const appState = useContext(AppStateCtx);
+  const appState = useAppState();
+  const sessionState = useSessionState();
 
   const [newTagTextEntry, setNewTagTextEntry] = useState('');
   const [tags, setTags] = useState([]);
@@ -33,21 +34,21 @@ export default function EditRecipeTags() {
   };
 
   useLayoutEffect(() => {
-    const modState = appState.getRecipeModificationState();
+    const modState = sessionState.getRecipeModificationState();
     if (modState) {
       setTags(modState.tags || []);
     }
-  }, [appState.getRecipeModificationState()]);
+  }, [sessionState.getRecipeModificationState()]);
 
   const onSave = () => {
-    appState.updateRecipeModificationState({ tags });
+    sessionState.updateRecipeModificationState({ tags });
     navigation.goBack();
   };
 
   return (
     <Provider>
       <View style={styles.viewContainer}>
-        <Title>{appState.getRecipeModificationState()?.title}</Title>
+        <Title>{sessionState.getRecipeModificationState()?.title}</Title>
         <ChipList
           containerStyle={{ paddingTop: 10, paddingBottom: 10, justifyContent: 'center' }}
           items={[...new Set([...appState.getAllTags(), ...tags])]}

@@ -10,7 +10,7 @@ import { AppStateCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
 import { Routes } from '../constants';
-import { useNavigationFocusListener } from './helpers/navigation';
+import { useAppState, useNavigationFocusListener, useSessionState } from './helpers/navigation';
 import { IngredientsTable } from './widgets/Table';
 
 const styles = StyleSheet.create({
@@ -43,7 +43,8 @@ export default function EditRecipe({ route }) {
   const { recipeId } = route.params;
 
   const navigation = useNavigation();
-  const appState = useContext(AppStateCtx);
+  const appState = useAppState();
+  const sessionState = useSessionState();
 
   const [recipe, setRecipe] = useState(null);
   const [title, setTitle] = useState('');
@@ -55,7 +56,7 @@ export default function EditRecipe({ route }) {
   const computeModifiedFields = () => {
     const result = {};
     const r = appState.getRecipeById(recipeId);
-    const modState = appState.getRecipeModificationState();
+    const modState = sessionState.getRecipeModificationState();
     if (!r) {
       return result;
     }
@@ -87,20 +88,20 @@ export default function EditRecipe({ route }) {
   }, [navigation]);
 
   useNavigationFocusListener(React.useCallback(() => {
-    const modState = appState.getRecipeModificationState();
+    const modState = sessionState.getRecipeModificationState();
     if (modState) {
       setTitle(modState.title);
       setSource(modState.source);
       setTags(modState.tags);
       setIngredients(modState.ingredients);
     }
-  }, [appState.getRecipeModificationState()]));
+  }, [sessionState.getRecipeModificationState()]));
 
   useEffect(React.useCallback(() => {
     const r = appState.getRecipeById(recipeId);
     if (r) {
       setRecipe(r);
-      appState.updateRecipeModificationState({
+      sessionState.updateRecipeModificationState({
         title: r.name,
         source: r.source,
         tags: r.tags,
@@ -119,12 +120,12 @@ export default function EditRecipe({ route }) {
   };
 
   const onTitleChanged = (text) => {
-    appState.updateRecipeModificationState({ title: text });
+    sessionState.updateRecipeModificationState({ title: text });
     setTitle(text);
   };
 
   const onSourceChanged = (text) => {
-    appState.updateRecipeModificationState({ source: text });
+    sessionState.updateRecipeModificationState({ source: text });
     setSource(text);
   };
 
@@ -135,7 +136,7 @@ export default function EditRecipe({ route }) {
       console.log(`delete: ${ingredientValue}`);
       const newIngredients = ingredients.filter((ing) => ing.value !== ingredientValue);
       console.log(newIngredients);
-      appState.updateRecipeModificationState({ ingredients: newIngredients });
+      sessionState.updateRecipeModificationState({ ingredients: newIngredients });
       setIngredients(newIngredients);
     };
 
@@ -160,7 +161,7 @@ export default function EditRecipe({ route }) {
   const TagsCard = () => {
     const onDeleteTag = (tagName) => {
       const newTags = tags.filter((v) => v !== tagName);
-      appState.updateRecipeModificationState({ tags: newTags });
+      sessionState.updateRecipeModificationState({ tags: newTags });
       setTags(newTags);
     };
 
@@ -212,7 +213,7 @@ export default function EditRecipe({ route }) {
   const hideSaveChangesDialog = () => setSaveChangesDialogVisible(false);
   const saveChanges = () => onSave();
   const cancelChanges = () => {
-    appState.clearRecipeModificationState();
+    sessionState.clearRecipeModificationState();
     navigation.navigate(Routes.ViewRecipe, { recipeId });
   };
 

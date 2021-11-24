@@ -170,31 +170,6 @@ export default class AppState {
     return this._api.updateRecipe(recipeId, updateFields);
   }
 
-  updateRecipeModificationState(fields) {
-    this._recipeModificationState = {
-      ...this._recipeModificationState,
-      ...fields,
-    };
-  }
-
-  getRecipeModificationState() {
-    return this._recipeModificationState;
-  }
-
-  clearRecipeModificationState() {
-    this._recipeModificationState = {};
-  }
-
-  autoFocusRecipeSearchbar() {
-    this._aFRS = true;
-  }
-
-  shouldAutoFocusRecipeSearchbar() {
-    const af = this._aFRS;
-    this._aFRS = false;
-    return af;
-  }
-
   _setRecipesById(value) {
     if (!deepEqual(this._recipesById, value)) {
       this._recipesById = value;

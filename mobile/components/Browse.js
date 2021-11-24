@@ -7,7 +7,7 @@ import { FAB, Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RecipeBrowser } from './widgets/RecipeBrowser';
-import { useAppState, useNavigationFocusListener, useRecipesUpdatedListener } from './helpers/navigation';
+import { useAppState, useNavigationFocusListener, useRecipesUpdatedListener, useSessionState } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { Routes } from '../constants';
 
@@ -33,6 +33,7 @@ export default function Browse({ route }) {
   const [addedRecipeNotificationVisible, setAddedRecipeNotificationVisible] = useState(false);
 
   const appState = useAppState();
+  const sessionState = useSessionState();
 
   const refresh = () => setRecipes(appState.getRecipes());
 
@@ -44,10 +45,10 @@ export default function Browse({ route }) {
 
   useNavigationFocusListener(() => {
     refresh();
-    if (appState.shouldAutoFocusRecipeSearchbar()) {
+    if (sessionState.shouldAutoFocusRecipeSearchbar()) {
       recipeBrowserRef.current?.searchbar.focus();
     }
-    appState.clearRecipeModificationState();
+    sessionState.clearRecipeModificationState();
   });
 
   const onRecipePress = (recipe) => {

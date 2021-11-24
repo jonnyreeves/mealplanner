@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Routes } from '../constants';
 
 import { toShortISOString, today } from './helpers/date';
-import { useAppState, useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener } from './helpers/navigation';
+import { useAppState, useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener, useSessionState } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { PlannerGrid } from './widgets/PlannerGrid';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
@@ -64,6 +64,7 @@ export default function Plan({ route }) {
   const [deletedMeal, setDeletedMeal] = useState(null);
 
   const appState = useAppState();
+  const sessionState = useSessionState();
 
   const refresh = () => {
     setRecipes(appState.getRecipes());
@@ -145,7 +146,7 @@ export default function Plan({ route }) {
   };
 
   const navigateToBrowseScreen = () => {
-    appState.autoFocusRecipeSearchbar();
+    sessionState.autoFocusRecipeSearchbar();
     navigation.navigate('Home', { screen: 'Browse' });
   };
 
