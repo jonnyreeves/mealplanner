@@ -3,15 +3,17 @@ import {
   FlatList, StyleSheet, TouchableOpacity, View,
 } from 'react-native';
 import {
-  Text, Chip, Searchbar, Button,
+  Text, Chip, Searchbar, Button, Divider,
 } from 'react-native-paper';
 
 import { kebab } from '../helpers/kebab';
 
 const styles = StyleSheet.create({
+  recipeListItem: {
+    marginVertical: 8,
+  },
   itemText: {
     fontSize: 18,
-    paddingBottom: 4,
   },
   tagListContainer: {
     justifyContent: 'center',
@@ -19,6 +21,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingTop: 10,
+    paddingBottom: 4,
   },
   tagListItem: {
     margin: 3,
@@ -91,9 +94,11 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
   };
 
   const renderRecipe = ({ item }) => (
-    <TouchableOpacity onPress={() => { onRecipePress(item); }}>
-      <Text style={styles.itemText}>{item.name}</Text>
-    </TouchableOpacity>
+    <View style={styles.recipeListItem}>
+      <TouchableOpacity onPress={() => { onRecipePress(item); }}>
+        <Text style={styles.itemText}>{item.name}</Text>
+      </TouchableOpacity>
+    </View>
   );
 
   const TagList = () => (
@@ -128,6 +133,8 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     </View>
   );
 
+  const divvy = () => (<Divider />);
+
   return (
     <FlatList
       ListHeaderComponent={(
@@ -146,6 +153,7 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
         </>
       )}
       contentContainerStyle={{ padding: 12 }}
+      ItemSeparatorComponent={divvy}
       data={visibleRecipes}
       keyExtractor={(recipe) => recipe.id}
       renderItem={renderRecipe}
