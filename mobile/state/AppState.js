@@ -1,4 +1,5 @@
 import cloneDeep from 'clone-deep';
+import deepEqual from 'deep-equal';
 
 export default class AppState {
   constructor({ api, storage }) {
@@ -195,13 +196,17 @@ export default class AppState {
   }
 
   _setRecipesById(value) {
-    this._recipesById = value;
-    this._dispatch('recipes_updated');
+    if (!deepEqual(this._recipesById, value)) {
+      this._recipesById = value;
+      this._dispatch('recipes_updated');
+    }
   }
 
   _setPlanByDate(value) {
-    this._planByDate = value;
-    this._dispatch('plan_updated');
+    if (!deepEqual(this._planByDate, value)) {
+      this._planByDate = value;
+      this._dispatch('plan_updated');
+    }
   }
 
   _onRecipesFetched(recipes) {
