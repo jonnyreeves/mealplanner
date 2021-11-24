@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SectionList, StyleSheet, View, Pressable } from 'react-native';
 import { IconButton, Subheading, Text, Title } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +18,7 @@ export default function List() {
   const [selectedWeek, setSelectedWeek] = useState('nextWeek');
 
   const refresh = () => {
+    console.log('rebuilding shopping list');
     const recipes = appState.getRecipes();
     const planData = appState.getPlanData();
     const gridData = toPlannerGridData(Object.values(planData));

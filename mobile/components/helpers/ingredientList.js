@@ -33,7 +33,7 @@ export function toIngredientList(planEntries, recipes) {
           meals: [{ name: entry.name, date: entry.date, slot: entry.slot }],
         };
       } else {
-        const [num, unit] = /[0-9]+(.*)/.exec(e.qty) || [];
+        const [num, unit] = /[0-9]+(.*)/.exec(ing.quantity) || [];
         e.qty = `${parseInt(e.qty, 10) + parseInt(num, 10)}${unit}`;
         e.meals.push({ name: entry.name, date: entry.date, slot: entry.slot });
       }
