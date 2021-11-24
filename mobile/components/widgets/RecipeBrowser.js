@@ -10,10 +10,13 @@ import { kebab } from '../helpers/kebab';
 
 const styles = StyleSheet.create({
   recipeListItem: {
-    marginVertical: 8,
+    marginVertical: 10,
   },
-  itemText: {
+  recipeName: {
     fontSize: 18,
+  },
+  recipeIngredients: {
+    color: '#808080',
   },
   tagListContainer: {
     justifyContent: 'center',
@@ -93,13 +96,17 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     }
   };
 
-  const renderRecipe = ({ item }) => (
-    <View style={styles.recipeListItem}>
-      <TouchableOpacity onPress={() => { onRecipePress(item); }}>
-        <Text style={styles.itemText}>{item.name}</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const renderRecipe = ({ item }) => {
+    const ingredientsList = item.ingredients.map((ing) => ing.name).join(', ');
+    return (
+      <View style={styles.recipeListItem}>
+        <TouchableOpacity onPress={() => { onRecipePress(item); }}>
+          <Text style={styles.recipeName}>{item.name}</Text>
+          <Text style={styles.recipeIngredients}>{ingredientsList}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   const TagList = () => (
     <View style={styles.tagListContainer}>
