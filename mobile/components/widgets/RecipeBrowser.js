@@ -41,12 +41,23 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
   const [query, setQuery] = useState('');
 
   const searchbarRef = useRef();
+  const flatlistRef = useRef();
+
+  const resetFilters = () => {
+    setSelectedTags([]);
+    setQuery('');
+  };
 
   useImperativeHandle(ref, () => ({
     searchbar: {
       focus() {
-        // TODO: Not sure why I need a timeout here, but I do :(
-        setTimeout(() => searchbarRef.current.focus(), 500);
+        resetFilters();
+        flatlistRef.current.scrollToOffset({ animated: true, offset: 0 });
+        // TODO: Not sure why I need a timeout here, but I do otherwise the keyboard
+        // doesn't appear.
+        setTimeout(() => {
+          searchbarRef.current.focus();
+        }, 750);
       },
     },
   }));
@@ -130,11 +141,7 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
   const noRecipes = (
     <View style={styles.noResultsFoundContainer}>
       <Text>No recipes match your query</Text>
-      <Button onPress={() => {
-        setSelectedTags([]);
-        setQuery('');
-      }}
-      >
+      <Button onPress={() => resetFilters()}>
         Reset Filters
       </Button>
     </View>
@@ -159,6 +166,7 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
           {visibleRecipes.length === 0 && noRecipes}
         </>
       )}
+      ref={flatlistRef}
       contentContainerStyle={{ padding: 12 }}
       ItemSeparatorComponent={divvy}
       data={visibleRecipes}
