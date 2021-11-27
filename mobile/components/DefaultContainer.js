@@ -55,7 +55,14 @@ export const DefaultContainer = withTheme(({ theme }) => {
           <AppStack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
           <AppStack.Screen name={Routes.ViewRecipe} component={ViewRecipe} options={{ headerTitle: 'Recipe Details' }} />
           <AppStack.Screen name={Routes.EditRecipe} component={EditRecipe} options={{ headerTitle: 'Edit Recipe' }} />
-          <AppStack.Screen name={Routes.CreateRecipe} component={CreateRecipe} options={{ headerTitle: 'Create Recipe' }} />
+          <AppStack.Screen
+            name={Routes.CreateRecipe}
+            component={CreateRecipe}
+            options={{
+              headerLeft: () => (<></>),
+              headerTitle: 'Create Recipe',
+            }}
+          />
           <AppStack.Screen name={Routes.EditRecipeTags} component={EditRecipeTags} options={{ headerTitle: 'Edit Recipe Tags' }} />
           <AppStack.Screen name={Routes.EditRecipeIngredients} component={EditRecipeIngredients} options={{ headerTitle: 'Add Recipe Ingredient' }} />
           <AppStack.Screen name="ChooseRecipe" component={ChooseRecipe} />

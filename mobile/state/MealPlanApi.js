@@ -42,11 +42,13 @@ export default class MealPlanApi {
 
   async createRecipe(fields) {
     const postData = { version: '1.0', fields };
+    console.log(postData);
     return this._makeRequest({ resource: '/recipe', postData });
   }
 
   async updateRecipe(recipeId, fields) {
     const postData = { version: '1.0', fields };
+    console.log(postData);
     return this._makeRequest({ resource: `/recipe/${recipeId}`, postData });
   }
 

@@ -12,6 +12,7 @@ import { ChipList } from './helpers/chips';
 import { Routes } from '../constants';
 import { useAppState, useNavigationFocusListener, useSessionState } from './helpers/navigation';
 import { IngredientsTable } from './widgets/Table';
+import { SaveChangesDialog, ThemedTextInput, useUnsavedChangesDectector } from './widgets/RecipeEditor';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -51,17 +52,15 @@ export default function EditRecipe({ route }) {
   const [source, setSource] = useState('');
   const [tags, setTags] = useState([]);
   const [ingredients, setIngredients] = useState([]);
-  const [saveChangesDialogVisible, setSaveChangesDialogVisible] = useState(false);
 
-  const computeModifiedFields = () => {
+  const computeModifiedFields = (modState) => {
     const result = {};
     const r = appState.getRecipeById(recipeId);
-    const modState = sessionState.getRecipeModificationState();
     if (!r) {
       return result;
     }
-    if ('title' in modState && r.name !== modState.title) {
-      result.name = modState.title;
+    if ('name' in modState && r.name !== modState.name) {
+      result.name = modState.name;
     }
     if ('source' in modState && r.source !== modState.source) {
       result.source = modState.source;
@@ -75,34 +74,30 @@ export default function EditRecipe({ route }) {
     return result;
   };
 
-  const onBeforeRemove = (event) => {
-    if (Object.keys(computeModifiedFields()).length > 0) {
-      event.preventDefault();
-      setSaveChangesDialogVisible(true);
-    }
-  };
+  const changeDetector = (fields) => (Object.keys(computeModifiedFields(fields)).length > 0);
 
-  useEffect(() => {
-    const unsub = navigation.addListener('beforeRemove', (e) => onBeforeRemove(e));
-    return () => unsub();
-  }, [navigation]);
+  const [saveChanges, saveEnabled] = useUnsavedChangesDectector({
+    changeDetector,
+    presistChanges: (fields) => appState.updateRecipe(recipeId, computeModifiedFields(fields)),
+    onSaveComplete: () => navigation.navigate(Routes.ViewRecipe, { recipeId }),
+  });
 
-  useNavigationFocusListener(React.useCallback(() => {
+  useNavigationFocusListener(() => {
     const modState = sessionState.getRecipeModificationState();
     if (modState) {
-      setTitle(modState.title);
+      setTitle(modState.name);
       setSource(modState.source);
       setTags(modState.tags);
       setIngredients(modState.ingredients);
     }
-  }, [sessionState.getRecipeModificationState()]));
+  });
 
   useEffect(React.useCallback(() => {
     const r = appState.getRecipeById(recipeId);
     if (r) {
       setRecipe(r);
       sessionState.updateRecipeModificationState({
-        title: r.name,
+        name: r.name,
         source: r.source,
         tags: r.tags,
         ingredients: r.ingredients,
@@ -110,17 +105,8 @@ export default function EditRecipe({ route }) {
     }
   }), []);
 
-  const onSave = () => {
-    const modifiedFields = computeModifiedFields();
-    if (Object.keys(modifiedFields).length > 0) {
-      console.log(modifiedFields);
-      appState.updateRecipe(recipe.id, modifiedFields);
-    }
-    navigation.navigate(Routes.ViewRecipe, { recipeId });
-  };
-
   const onTitleChanged = (text) => {
-    sessionState.updateRecipeModificationState({ title: text });
+    sessionState.updateRecipeModificationState({ name: text });
     setTitle(text);
   };
 
@@ -184,50 +170,24 @@ export default function EditRecipe({ route }) {
   };
 
   const titleCard = (
-    <>
-      <TextInput
-        style={{ marginBottom: 10 }}
-        label="Recipe Name"
-        mode="flat"
-        value={title}
-        onChangeText={(text) => onTitleChanged(text)}
-        multiline
-        blurOnSubmit
-      />
-    </>
+    <ThemedTextInput
+      style={{ marginBottom: 10 }}
+      value={title}
+      label="Recipe Name"
+      onChangeText={(text) => onTitleChanged(text)}
+    />
   );
 
   const sourceCard = (
-    <>
-      <TextInput
-        label="Recipe Source"
-        mode="flat"
-        value={source}
-        onChangeText={(text) => onSourceChanged(text)}
-        multiline
-        blurOnSubmit
-      />
-    </>
+    <ThemedTextInput
+      label="Recipe Source"
+      value={source}
+      onChangeText={(text) => onSourceChanged(text)}
+    />
   );
-
-  const hideSaveChangesDialog = () => setSaveChangesDialogVisible(false);
-  const saveChanges = () => onSave();
-  const cancelChanges = () => {
-    sessionState.clearRecipeModificationState();
-    navigation.navigate(Routes.ViewRecipe, { recipeId });
-  };
 
   return (
     <>
-      <Portal>
-        <Dialog visible={saveChangesDialogVisible} onDismiss={hideSaveChangesDialog}>
-          <Dialog.Title>Save Changes?</Dialog.Title>
-          <Dialog.Actions>
-            <Button onPress={() => cancelChanges()}>Cancel</Button>
-            <Button onPress={() => saveChanges()}>Save</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
       <ScrollView style={styles.viewContainer} contentContainerStyle={{ paddingBottom: 120 }} overScrollMode="never">
         <View style={{ flex: 1 }}>
           {titleCard}
@@ -238,8 +198,9 @@ export default function EditRecipe({ route }) {
       </ScrollView>
       <FAB
         style={styles.fab}
+        disabled={!saveEnabled}
         icon="content-save"
-        onPress={() => onSave()}
+        onPress={() => saveChanges()}
       />
     </>
   );

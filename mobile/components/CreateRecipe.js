@@ -1,17 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Subheading, FAB, TextInput, Portal, Dialog, Button, ActivityIndicator,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import deepEqual from 'deep-equal';
 
-import { AppStateCtx } from '../service/context';
-import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
 import { Routes } from '../constants';
-import { useAppState, useSessionState, useNavigationFocusListener } from './helpers/navigation';
+import { useSessionState, useNavigationFocusListener, useNavigationBeforeRemove, useAppState } from './helpers/navigation';
 import { IngredientsTable } from './widgets/Table';
+import { ThemedTextInput, useUnsavedChangesDectector } from './widgets/RecipeEditor';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -49,54 +47,22 @@ export default function CreateRecipe() {
   const [tags, setTags] = useState([]);
   const [ingredients, setIngredients] = useState([]);
 
-  const [saveEnabled, setSaveEnabled] = useState(false);
-  const [showSavingSpinner, setShowSavingSpinner] = useState(false);
-  const [saveChangesDialogVisible, setSaveChangesDialogVisible] = useState(false);
+  const changeDetector = (modState) => Boolean(modState.name);
 
-  const hasChanges = () => !!sessionState.getRecipeModificationState()?.title;
+  const [saveChanges, saveEnabled] = useUnsavedChangesDectector({
+    changeDetector,
+    presistChanges: (fields) => appState.createRecipe(fields),
+    onSaveComplete: () => navigation.navigate(Routes.Browse, { createdRecipeTitle: title }),
+  });
 
-  const onBeforeRemove = (event) => {
-    if (hasChanges()) {
-      event.preventDefault();
-      setSaveChangesDialogVisible(true);
-    }
-  };
-
-  useNavigationFocusListener(React.useCallback(() => {
+  useNavigationFocusListener(() => {
     const modState = sessionState.getRecipeModificationState();
-    if (modState?.tags) {
-      setTags(modState.tags);
-    }
-    if (modState?.ingredients) {
-      setIngredients(modState.ingredients);
-    }
-  }, [sessionState.getRecipeModificationState()]));
-
-  useEffect(() => {
-    navigation.addListener('beforeRemove', (e) => onBeforeRemove(e));
-  }, [navigation]);
-
-  useEffect(() => {
-    setSaveEnabled(hasChanges());
-  }, [sessionState.getRecipeModificationState()]);
-
-  const onSave = async () => {
-    if (!hasChanges()) {
-      console.log('Cannot create recipe as no changed detected');
-      navigation.navigate(Routes.Browse);
-    }
-    setShowSavingSpinner(true);
-    await appState.createRecipe({
-      name: title,
-      source,
-      tags,
-      ingredients,
-    });
-    navigation.navigate(Routes.Browse, { createdRecipeTitle: title });
-  };
+    setTags(modState.tags);
+    setIngredients(modState.ingredients);
+  });
 
   const onTitleChanged = (text) => {
-    sessionState.updateRecipeModificationState({ title: text });
+    sessionState.updateRecipeModificationState({ name: text });
     setTitle(text);
   };
 
@@ -156,61 +122,24 @@ export default function CreateRecipe() {
   };
 
   const titleCard = (
-    <>
-      <TextInput
-        style={{ marginBottom: 10 }}
-        label="Recipe Name"
-        mode="flat"
-        value={title}
-        onChangeText={(text) => onTitleChanged(text)}
-        multiline
-        blurOnSubmit
-      />
-    </>
+    <ThemedTextInput
+      style={{ marginBottom: 10 }}
+      value={title}
+      label="Recipe Name"
+      onChangeText={(text) => onTitleChanged(text)}
+    />
   );
 
   const sourceCard = (
-    <>
-      <TextInput
-        label="Recipe Source"
-        mode="flat"
-        value={source}
-        onChangeText={(text) => onSourceChanged(text)}
-        multiline
-        blurOnSubmit
-      />
-    </>
+    <ThemedTextInput
+      label="Recipe Source"
+      value={source}
+      onChangeText={(text) => onSourceChanged(text)}
+    />
   );
-
-  const hideSaveChangesDialog = () => setSaveChangesDialogVisible(false);
-
-  const saveChanges = () => {
-    hideSaveChangesDialog();
-    onSave();
-  };
-
-  const cancelChanges = () => {
-    sessionState.clearRecipeModificationState();
-    navigation.navigate(Routes.Browse);
-  };
 
   return (
     <>
-      <Portal>
-        <Dialog visible={showSavingSpinner}>
-          <Dialog.Title>Saving changes...</Dialog.Title>
-          <ActivityIndicator size="large" style={{ paddingBottom: 30 }} />
-        </Dialog>
-      </Portal>
-      <Portal>
-        <Dialog visible={saveChangesDialogVisible} onDismiss={hideSaveChangesDialog}>
-          <Dialog.Title>Save Changes?</Dialog.Title>
-          <Dialog.Actions>
-            <Button onPress={() => cancelChanges()}>Discard</Button>
-            <Button onPress={() => saveChanges()}>Save</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
       <ScrollView style={styles.viewContainer} contentContainerStyle={{ paddingBottom: 120 }} overScrollMode="never">
         <View style={{ flex: 1 }}>
           {titleCard}
@@ -223,7 +152,7 @@ export default function CreateRecipe() {
         disabled={!saveEnabled}
         style={styles.fab}
         icon="content-save"
-        onPress={() => onSave()}
+        onPress={() => saveChanges()}
       />
     </>
   );

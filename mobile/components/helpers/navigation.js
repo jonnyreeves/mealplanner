@@ -14,7 +14,10 @@ export const useNavigationBeforeRemove = (handler) => {
   const navigation = useNavigation();
   useEffect(() => {
     const unsub = navigation.addListener('beforeRemove', (e) => handler(e));
-    return () => unsub();
+    return () => {
+      console.log('removing navigation listener...');
+      unsub();
+    };
   }, [navigation]);
 };
 

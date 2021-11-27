@@ -1,4 +1,8 @@
 export default class SessionState {
+  constructor() {
+    this.clearRecipeModificationState();
+  }
+
   updateRecipeModificationState(fields) {
     this._recipeModificationState = {
       ...this._recipeModificationState,
@@ -11,7 +15,12 @@ export default class SessionState {
   }
 
   clearRecipeModificationState() {
-    this._recipeModificationState = {};
+    this._recipeModificationState = {
+      name: '',
+      source: '',
+      tags: [],
+      ingredients: [],
+    };
   }
 
   autoFocusRecipeSearchbar() {
