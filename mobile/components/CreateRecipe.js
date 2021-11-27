@@ -9,7 +9,7 @@ import { ChipList } from './helpers/chips';
 import { Routes } from '../constants';
 import { useSessionState, useNavigationFocusListener, useNavigationBeforeRemove, useAppState } from './helpers/navigation';
 import { IngredientsTable } from './widgets/Table';
-import { ThemedTextInput, useUnsavedChangesDectector } from './widgets/RecipeEditor';
+import { IngredientEditor, SourceEditor, TagEditor, ThemedTextInput, TitleEditor, useUnsavedChangesDectector } from './widgets/RecipeEditor';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -53,6 +53,9 @@ export default function CreateRecipe() {
     changeDetector,
     presistChanges: (fields) => appState.createRecipe(fields),
     onSaveComplete: () => navigation.navigate(Routes.Browse, { createdRecipeTitle: title }),
+    navigationOptions: {
+      title: 'Create Recipe',
+    },
   });
 
   useNavigationFocusListener(() => {
@@ -61,91 +64,14 @@ export default function CreateRecipe() {
     setIngredients(modState.ingredients);
   });
 
-  const onTitleChanged = (text) => {
-    sessionState.updateRecipeModificationState({ name: text });
-    setTitle(text);
-  };
-
-  const onSourceChanged = (text) => {
-    sessionState.updateRecipeModificationState({ source: text });
-    setSource(text);
-  };
-
-  const IngredientsCard = () => {
-    const onDeleteIngredient = (ingredientValue) => {
-      const newIngredients = ingredients.filter((ing) => ing.value !== ingredientValue);
-      sessionState.updateRecipeModificationState({ ingredients: newIngredients });
-      setIngredients(newIngredients);
-    };
-
-    const onAddIngredient = () => {
-      navigation.push(Routes.EditRecipeIngredients);
-    };
-
-    return (
-      <>
-        <View style={styles.subheadingContainer}>
-          <Subheading>Ingredients</Subheading>
-          <Button compact icon="plus" onPress={() => onAddIngredient()}>Add Ingredient</Button>
-        </View>
-        <IngredientsTable
-          ingredients={ingredients}
-          onDelete={(ingredient) => onDeleteIngredient(ingredient.value)}
-        />
-      </>
-    );
-  };
-
-  const TagsCard = () => {
-    const onDeleteTag = (tagName) => {
-      const newTags = tags.filter((v) => v !== tagName);
-      sessionState.updateRecipeModificationState({ tags: newTags });
-      setTags(newTags);
-    };
-
-    const onEditTags = () => {
-      navigation.push(Routes.EditRecipeTags);
-    };
-
-    return (
-      <>
-        <View style={styles.subheadingContainer}>
-          <Subheading>Tags</Subheading>
-        </View>
-        <ChipList
-          items={tags}
-          onAdd={onEditTags}
-          onClose={onDeleteTag}
-        />
-      </>
-    );
-  };
-
-  const titleCard = (
-    <ThemedTextInput
-      style={{ marginBottom: 10 }}
-      value={title}
-      label="Recipe Name"
-      onChangeText={(text) => onTitleChanged(text)}
-    />
-  );
-
-  const sourceCard = (
-    <ThemedTextInput
-      label="Recipe Source"
-      value={source}
-      onChangeText={(text) => onSourceChanged(text)}
-    />
-  );
-
   return (
     <>
       <ScrollView style={styles.viewContainer} contentContainerStyle={{ paddingBottom: 120 }} overScrollMode="never">
         <View style={{ flex: 1 }}>
-          {titleCard}
-          {sourceCard}
-          <TagsCard />
-          <IngredientsCard />
+          <TitleEditor title={title} setTitle={setTitle} />
+          <SourceEditor source={source} setSource={setSource} />
+          <TagEditor tags={tags} setTags={setTags} />
+          <IngredientEditor ingredients={ingredients} setIngredients={setIngredients} />
         </View>
       </ScrollView>
       <FAB
