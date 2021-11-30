@@ -17,7 +17,10 @@ export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onS
 
   const [saveEnabled, setSaveEnabled] = useState(false);
   useEffect(
-    () => setSaveEnabled(hasChanges()),
+    () => {
+      console.log('useEffect for saveEnabled...')
+      setSaveEnabled(hasChanges())
+    },
     [sessionState.getRecipeModificationState()],
   );
 
@@ -25,7 +28,14 @@ export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onS
   // discards changes or once the changes have been persisted.
   let skipCheckRef = useRef(false);
 
-  const hasChanges = () => changeDetector(sessionState.getRecipeModificationState());
+  const hasChanges = useCallback(
+    () => {
+      const result = changeDetector(sessionState.getRecipeModificationState());
+      console.log('checking for change, hasChanges=' + result);
+      return result;
+    },
+    [sessionState.getRecipeModificationState()]
+  );
 
   const discardChanges = () => {
     sessionState.clearRecipeModificationState();
@@ -90,16 +100,16 @@ export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onS
   return [saveChanges, saveEnabled]
 }
 
-export const ThemedTextInput = ({ style, value, label, onChangeText }) => (
+export const ThemedTextInput = ({ style, value, label, onChangeText, multiline, placeholder }) => (
   <TextInput
     style={style}
     label={label}
     mode="outlined"
+    placeholder={placeholder}
     theme={{ ...theme, roundness: 8 }}
     value={value}
     onChangeText={onChangeText}
-    multiline
-    numberOfLines={1}
+    multiline={multiline}
     blurOnSubmit
   />
 );
@@ -115,6 +125,7 @@ export const TitleEditor = ({ title, setTitle }) => {
       style={{ marginBottom: 10 }}
       value={title}
       label="Recipe Name"
+      multiline={true}
       onChangeText={onTitleChanged}
     />
   );
@@ -130,6 +141,7 @@ export const SourceEditor = ({ source, setSource }) => {
     <ThemedTextInput
       label="Recipe Source"
       value={source}
+      multiline={true}
       onChangeText={onSourceChanged}
     />
   );

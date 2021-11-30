@@ -5,10 +5,9 @@ import {
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
-import { AppStateCtx } from '../service/context';
-import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { ChipList } from './helpers/chips';
-import { useAppState, useNavigationFocusListener, useSessionState } from './helpers/navigation';
+import { useAppState, useSessionState } from './helpers/navigation';
+import { ThemedTextInput } from './widgets/RecipeEditor';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -26,7 +25,7 @@ export default function EditRecipeTags() {
   const [newTagTextEntry, setNewTagTextEntry] = useState('');
   const [tags, setTags] = useState([]);
 
-  const onNewTag = (newTag) => {
+  const onCreateNewTag = (newTag) => {
     if (!tags.includes(newTag)) {
       setTags([...tags, newTag]);
     }
@@ -46,32 +45,28 @@ export default function EditRecipeTags() {
   };
 
   return (
-    <Provider>
-      <View style={styles.viewContainer}>
-        <Title>{sessionState.getRecipeModificationState()?.title}</Title>
-        <ChipList
-          containerStyle={{ paddingTop: 10, paddingBottom: 10, justifyContent: 'center' }}
-          items={[...new Set([...appState.getAllTags(), ...tags])]}
-          selectedItems={tags}
-          onPress={(tag) => {
-            if (tags.includes(tag)) {
-              setTags([...tags.filter((t) => t !== tag)]);
-            } else {
-              onNewTag(tag);
-            }
-          }}
-        />
-        <TextInput
-          mode="flat"
-          dense
-          placeholder="Create new tag"
-          value={newTagTextEntry}
-          onChangeText={((text) => setNewTagTextEntry(text))}
-          onSubmitEditing={() => onNewTag(newTagTextEntry)}
-        />
+    <View style={styles.viewContainer}>
+      <Title>{sessionState.getRecipeModificationState()?.title}</Title>
+      <ChipList
+        containerStyle={{ paddingTop: 10, paddingBottom: 10, justifyContent: 'center' }}
+        items={[...new Set([...appState.getAllTags(), ...tags])]}
+        selectedItems={tags}
+        onPress={(tag) => {
+          if (tags.includes(tag)) {
+            setTags([...tags.filter((t) => t !== tag)]);
+          } else {
+            onCreateNewTag(tag);
+          }
+        }}
+      />
+      <ThemedTextInput
+        placeholder="Create new tag"
+        value={newTagTextEntry}
+        onChangeText={setNewTagTextEntry}
+        onSubmitEditing={() => onCreateNewTag(newTagTextEntry)}
+      />
 
-        <Button compact style={{ paddingTop: 30 }} onPress={() => onSave()}>Save</Button>
-      </View>
-    </Provider>
+      <Button compact style={{ paddingTop: 30 }} onPress={() => onSave()}>Save</Button>
+    </View>
   );
 }

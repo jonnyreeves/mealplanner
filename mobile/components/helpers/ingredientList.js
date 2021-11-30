@@ -22,7 +22,7 @@ export function toIngredientList(planEntries, recipes) {
 
     const recipe = recipeByName[entry.name];
     if (!recipe) {
-      unknownMeals.push({ name: entry.name, date: entry.date, slot: entry.slot });
+      unknownMeals.push({ name: entry.name, date: entry.date, slot: entry.slot, ingredientQty: '' });
       return;
     }
     recipe.ingredients.forEach((ing) => {
@@ -30,12 +30,16 @@ export function toIngredientList(planEntries, recipes) {
       if (!e) {
         byIngredient[ing.name] = {
           qty: ing.quantity,
-          meals: [{ name: entry.name, date: entry.date, slot: entry.slot }],
+          meals: [{
+            name: entry.name, date: entry.date, slot: entry.slot, ingredientQty: ing.quantity,
+          }],
         };
       } else {
         const [num, unit] = /[0-9]+(.*)/.exec(ing.quantity) || [];
         e.qty = `${parseInt(e.qty, 10) + parseInt(num, 10)}${unit}`;
-        e.meals.push({ name: entry.name, date: entry.date, slot: entry.slot });
+        e.meals.push({
+          name: entry.name, date: entry.date, slot: entry.slot, ingredientQty: ing.quantity,
+        });
       }
     });
   });

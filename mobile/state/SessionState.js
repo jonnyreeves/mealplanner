@@ -4,6 +4,7 @@ export default class SessionState {
   }
 
   updateRecipeModificationState(fields) {
+    console.log('mutating modification state...' + JSON.stringify(fields));
     this._recipeModificationState = {
       ...this._recipeModificationState,
       ...fields,

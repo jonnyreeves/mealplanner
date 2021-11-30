@@ -71,6 +71,9 @@ export default function EditRecipe({ route }) {
     if ('ingredients' in modState && !deepEqual(modState.ingredients, r.ingredients)) {
       result.ingredients = modState.ingredients;
     }
+    console.log(`modState=${JSON.stringify(modState)}`);
+    console.log(`source recipe=${JSON.stringify(r)}`);
+    console.log(`modState=${JSON.stringify(result)}`);
     return result;
   };
 
@@ -87,15 +90,13 @@ export default function EditRecipe({ route }) {
 
   useNavigationFocusListener(() => {
     const modState = sessionState.getRecipeModificationState();
-    if (modState) {
-      setTitle(modState.name);
-      setSource(modState.source);
-      setTags(modState.tags);
-      setIngredients(modState.ingredients);
-    }
+    setTitle(modState.name);
+    setSource(modState.source);
+    setTags(modState.tags);
+    setIngredients(modState.ingredients);
   });
 
-  useEffect(React.useCallback(() => {
+  useEffect(() => {
     const r = appState.getRecipeById(recipeId);
     if (r) {
       setRecipe(r);
@@ -106,7 +107,7 @@ export default function EditRecipe({ route }) {
         ingredients: r.ingredients,
       });
     }
-  }), []);
+  }, []);
 
   if (!recipe) return (<LoadingSpinner message="Fetching recipe details" />);
 

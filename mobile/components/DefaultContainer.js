@@ -22,7 +22,8 @@ import List from './List';
 
 const AppStack = createNativeStackNavigator();
 
-const tabOpts = ({ icon }) => ({
+const tabOpts = ({ tabBarLabel, icon }) => ({
+  tabBarLabel,
   tabBarIcon: ({ focused }) => {
     const iconColor = focused ? 'white' : '#283618';
     return (<MaterialCommunityIcons name={icon} size={24} color={iconColor} />);
@@ -43,8 +44,8 @@ export const DefaultContainer = withTheme(({ theme }) => {
   const HomeTabs = () => (
     <Tab.Navigator initialRoute="Plan" inactiveColor="#ccd5ae" barStyle={{ backgroundColor: colors.primary }}>
       <Tab.Screen name="Plan" component={Plan} options={tabOpts({ icon: 'calendar' })} />
-      <Tab.Screen name={Routes.Browse} component={Browse} options={tabOpts({ icon: 'silverware-fork-knife' })} />
-      <Tab.Screen name="List" component={List} options={tabOpts({ icon: 'format-list-checkbox' })} />
+      <Tab.Screen name={Routes.Browse} component={Browse} options={tabOpts({ tabBarLabel: 'Meals', icon: 'silverware-fork-knife' })} />
+      <Tab.Screen name="List" component={List} options={tabOpts({ tabBarLabel: 'Shopping List', icon: 'format-list-checkbox' })} />
     </Tab.Navigator>
   );
 
