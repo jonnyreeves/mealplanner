@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { SectionList, StyleSheet, View, Pressable } from 'react-native';
-import { Divider, IconButton, Subheading, Text, Title } from 'react-native-paper';
+import { SectionList, StyleSheet, View } from 'react-native';
+import { Button, Divider, IconButton, Subheading, Text, Title } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { toIngredientList } from './helpers/ingredientList';
 import { useAppState, usePlanUpdatedListener, useRecipesUpdatedListener } from './helpers/navigation';
@@ -107,7 +107,14 @@ export default function List() {
   const ListTitle = () => {
     const week = (selectedWeek === 'thisWeek') ? 'This Week' : 'Next Week';
     const msg = `${week}'s Shopping List`;
-    return <Title>{msg}</Title>;
+    const tescoOrdersUrl = 'https://www.tesco.com/groceries/en-GB/orders';
+
+    return (
+      <>
+        <Title>{msg}</Title>
+        {selectedWeek === 'nextWeek' && <Button onPress={() => WebBrowser.openBrowserAsync(tescoOrdersUrl)}>Select Tesco Order</Button>}
+      </>
+    );
   };
 
   return (

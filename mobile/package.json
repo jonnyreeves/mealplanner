@@ -36,7 +36,8 @@
     "react-native-safe-area-context": "3.2.0",
     "react-native-screens": "~3.4.0",
     "react-native-web": "~0.13.12",
-    "title-case": "^3.0.3"
+    "title-case": "^3.0.3",
+    "expo-linking": "~2.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
