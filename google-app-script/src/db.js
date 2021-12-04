@@ -296,7 +296,9 @@ class MealPlannerDb {
   getNextRolloverDate(startDate) {
     const res = new Date(startDate.getTime());
     let daysUntilNextRollover = ROLLOVER_DAY_OF_WEEK - startDate.getDay();
-    if (daysUntilNextRollover === 0) {
+    if (daysUntilNextRollover < 0) {
+      daysUntilNextRollover = ROLLOVER_DAY_OF_WEEK + Math.abs(daysUntilNextRollover);
+    } else if (daysUntilNextRollover === 0) {
       daysUntilNextRollover = 7;
     }
     res.setDate(startDate.getDate() + daysUntilNextRollover);
