@@ -1,0 +1,22 @@
+{
+  "name": "alex-skill-meal-plan",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ./lambda",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/2fa41630-97f2-44ad-bde6-bb91ab53262d"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ask-cli": "^2.20.0",
+    "eslint": "^7.15.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "meal plan",
+      "intents": [
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "MealQueryIntent",
+          "slots": [
+            {
+              "name": "MealTime",
+              "type": "MealTime"
+            },
+            {
+              "name": "MealDay",
+              "type": "MealDay"
+            }
+          ],
+          "samples": [
+            "what is {MealDay} {MealTime}",
+            "what is {MealTime} {MealDay}",
+            "what\u0027s on {MealDay} {MealTime}",
+            "what\u0027s on {MealDay} plan for {MealTime}",
+            "what\u0027s on {MealDay} plan",
+            "what\u0027s on {MealDay}",
+            "what\u0027s for {MealDay} {MealTime}",
+            "what\u0027s for {MealDay}",
+            "what\u0027s for {MealTime} {MealDay}"
+          ]
+        },
+        {
+          "name": "MaxIntent",
+          "slots": [],
+          "samples": [
+            "who is awesome"
+          ]
+        },
+        {
+          "name": "RecipeQueryIntent",
+          "slots": [
+            {
+              "name": "MealTime",
+              "type": "MealTime"
+            },
+            {
+              "name": "MealDay",
+              "type": "MealDay"
+            }
+          ],
+          "samples": [
+            "how do I cook {MealDay} {MealTime}",
+            "how do I cook {MealTime} {MealDay}",
+            "how do I cook {MealTime}",
+            "what\u0027s the recipe for {MealDay} {MealTime}",
+            "what\u0027s the recipe for {MealTime} {MealDay}",
+            "what\u0027s the recipe for {MealTime}"
+          ]
+        },
+        {
+          "name": "SuggestMealIntent",
+          "slots": [
+            {
+              "name": "MealTag",
+              "type": "MealTag"
+            }
+          ],
+          "samples": [
+            "to suggest something for {MealTag}",
+            "to suggest something {MealTag}",
+            "to suggest {MealTag}"
+          ]
+        },
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "id": "DINNER",
+              "name": {
+                "value": "Dinner"
+              }
+            },
+            {
+              "id": "LUNCH",
+              "name": {
+                "value": "Lunch"
+              }
+            }
+          ],
+          "name": "MealTime"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "tomorrow",
+                "synonyms": [
+                  "tomorrow\u0027s"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "today",
+                "synonyms": [
+                  "tonight\u0027s",
+                  "today\u0027s",
+                  "Tonight"
+                ]
+              }
+            }
+          ],
+          "name": "MealDay"
+        },
+        {
+          "values": [
+            {
+              "name": {
+                "value": "kids eat it",
+                "synonyms": [
+                  "the kids eat",
+                  "the kids will eat"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "dinner"
+              }
+            },
+            {
+              "name": {
+                "value": "lunch"
+              }
+            }
+          ],
+          "name": "MealTag"
+        }
+      ],
+      "modelConfiguration": {
+        "fallbackIntentSensitivity": {
+          "level": "LOW"
+        }
+      }
+    }
+  },
+  "version": "16"
+}
