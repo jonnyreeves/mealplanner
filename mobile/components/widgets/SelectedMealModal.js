@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import {
   Button, Subheading, Title,
 } from 'react-native-paper';
-import { prettyDate } from '../helpers/date';
+import { prettyDate, prettyMealSlot } from '../helpers/date';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -46,8 +46,7 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
     return <Button compact mode="outlined" icon={cfg.icon} style={cfg.style} onPress={onPress}>{cfg.name}</Button>
   };
 
-  const mealSlot = meal.slot.substr(0, 1).toUpperCase() + meal.slot.substr(1);
-  const title = `${mealSlot} on ${prettyDate(meal.date)}`;
+  const title = prettyMealSlot(meal.slot, meal.date);
   const subtitle = meal.name || 'Empty';
 
   const ViewRecipeInfo = () => (

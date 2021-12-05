@@ -7,6 +7,7 @@ import { useAppState, usePlanUpdatedListener, useRecipesUpdatedListener } from '
 import { toPlannerGridData } from './helpers/planData';
 import { WeekSelector } from './widgets/WeekSelector';
 import * as WebBrowser from 'expo-web-browser';
+import { shortPrettyMealSlot } from './helpers/date';
 
 const styles = StyleSheet.create({
 });
@@ -49,14 +50,16 @@ export default function List() {
     <Subheading style={{ fontSize: 18, textDecorationLine: 'underline' }}>{section.title}</Subheading>
   );
 
+  const bulletPoint = <Text style={{ color: '#808080' }}>{'\u2022'}</Text>;
+
   const MealList = ({ meals }) => (
     meals
       .map(({ name, date, slot, ingredientQty }) => {
         const key = `${name}-${date}-${slot}`;
-        const qtyAndMealName = `${name} (${formatIngredientQty(ingredientQty)})`;
+        const qtyAndMealName = `${formatIngredientQty(ingredientQty)} for ${name} (${shortPrettyMealSlot(slot, date)})`;
         return (
           <View key={key} style={{ flexDirection: 'row', paddingLeft: 24 }}>
-            <Text style={{ color: '#808080' }}>{'\u2022'}</Text>
+            {bulletPoint}
             <Text style={{ flex: 1, paddingLeft: 5, color: '#808080' }}>{qtyAndMealName}</Text>
           </View>
         );
@@ -74,21 +77,38 @@ export default function List() {
     </View>
   );
 
-  const Item = ({ item }) => {
+  const IngredientListItem = ({ item }) => {
+    const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(item.ingredient)}`;
+    const openStore = () => WebBrowser.openBrowserAsync(tescoUrl);
+    const showBasketButton = selectedWeek === 'nextWeek';
+    return (
+      <View style={{ flexDirection: 'row' }}>
+        <RequiredIngredient item={item} style={{ flexGrow: 1, flexShrink: 0, flexBasis: 'auto' }} />
+        {showBasketButton && <IconButton icon="basket-outline" onPress={openStore} style={{ flexGrow: 0, flexShrink: 1, flexBasis: 'auto' }} />}
+      </View>
+    );
+  };
+
+  const MealWithoutIngredientsListItem = ({ item }) => (
+    <>
+      <Text style={{ fontSize: 16 }}>{item.name}</Text>
+      <View style={{ flexDirection: 'row', paddingLeft: 24 }}>
+        {bulletPoint}
+        <Text style={{ flex: 1, paddingLeft: 5, color: '#808080' }}>{shortPrettyMealSlot(item.slot, item.date)}</Text>
+      </View>
+    </>
+  );
+
+  const renderSectionListItem = ({ item }) => {
+    let contents;
     if (item.ingredient) {
-      const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(item.ingredient)}`;
-      const openStore = () => WebBrowser.openBrowserAsync(tescoUrl);
-      return (
-        <View style={{ marginVertical: 10, paddingLeft: 12, display: 'flex', flexDirection: 'row' }}>
-          <RequiredIngredient item={item} style={{ flexGrow: 1, flexShrink: 0, flexBasis: 'auto' }} />
-          <IconButton icon="basket-outline" onPress={openStore} style={{ flexGrow: 0, flexShrink: 1, flexBasis: 'auto' }} />
-        </View>
-      );
+      contents = <IngredientListItem item={item} />;
+    } else {
+      contents = <MealWithoutIngredientsListItem item={item} />;
     }
     return (
-      <View style={{ flexDirection: 'row', paddingLeft: 12 }}>
-        <Text>{'\u2022'}</Text>
-        <Text style={{ flex: 1, paddingLeft: 5, fontSize: 16 }}>{item.name}</Text>
+      <View style={{ marginVertical: 10, paddingLeft: 12, display: 'flex' }}>
+        {contents}
       </View>
     );
   };
@@ -127,7 +147,7 @@ export default function List() {
             contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
             sections={listData}
             keyExtractor={(entry, index) => `${entry.ingredient || entry.name}-${index}`}
-            renderItem={({ item }) => <Item item={item} />}
+            renderItem={renderSectionListItem}
             renderSectionHeader={({ section }) => <SectionHeader section={section} />}
           />
         )}

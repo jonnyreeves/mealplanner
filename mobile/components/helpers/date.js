@@ -16,6 +16,11 @@ export function getShortDayOfTheWeek(isoDate) {
   return getDayOfTheWeek(isoDate).substr(0, 3);
 }
 
+export function getShortMonth(isoDate) {
+  const m = monthsOfTheYear[new Date(isoDate).getMonth()];
+  return m.substr(0, 3);
+}
+
 function dateWithOrdinal(d) {
   const day = d.getDate();
   const lastDigit = day.toString().substr(-1);
@@ -39,6 +44,13 @@ export function prettyDate(isoDate) {
   return `${day}, ${dateWithOrdinal(d)} ${month}`;
 }
 
+export function shortPrettyDate(isoDate) {
+  const d = new Date(isoDate);
+  const day = getShortDayOfTheWeek(isoDate);
+  const month = getShortMonth(isoDate);
+  return `${day}, ${month} ${dateWithOrdinal(d)}`;
+}
+
 export function today() {
   let d = new Date();
   const offset = d.getTimezoneOffset();
@@ -49,4 +61,14 @@ export function today() {
 
 export function toShortISOString(d) {
   return d.toISOString().split('T')[0];
+}
+
+export function prettyMealSlot(slot, date) {
+  const mealSlot = slot.substr(0, 1).toUpperCase() + slot.substr(1);
+  return `${mealSlot} on ${prettyDate(date)}`;
+}
+
+export function shortPrettyMealSlot(slot, date) {
+  const mealSlot = slot.substr(0, 1).toUpperCase() + slot.substr(1);
+  return `${mealSlot} on ${getShortDayOfTheWeek(date)}`;
 }
