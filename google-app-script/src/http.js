@@ -94,6 +94,7 @@ class HttpHandler {
         plan: this.doModifyPlanRequest,
         recipe: this.doCreateRecipeRequest,
         'recipe/*': this.doModifyRecipeRequest,
+        'list/*': this.doModifyListRequest,
       },
       get: {
         plan: this.doPlanRequest,
@@ -207,7 +208,30 @@ class HttpHandler {
   }
 
   doListRequest(req, resp) {
-    const [, listName = 'default'] = req.getPathParts();
+    const [, listName] = req.getPathParts();
+    if (!listName) {
+      throw new Error('expected list name to be supplied');
+    }
     return resp.setContent(this._db.getList(listName));
+  }
+
+  /*
+  {
+    version: "1.0",
+    action: "tick",
+    item: "Bananas",
+  }
+  */
+  doModifyListRequest(req, resp) {
+    const [, listName] = req.getPathParts();
+    if (!listName) {
+      throw new Error('expected list name to be supplied');
+    }
+    const payload = req.getJsonPayload();
+    if (!['tick', 'add', 'delete'].some(payload.action)) {
+      throw new Error(`Invalid list action: '${payload.action}`);
+    }
+    this._db.modifyList(listName, { action: payload.action, item: payload.item });
+    resp.setContent({ message: 'ok' });
   }
 }

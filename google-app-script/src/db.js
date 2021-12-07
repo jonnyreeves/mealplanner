@@ -32,11 +32,12 @@ class MealPlannerDb {
         }
         return this._meals;
       },
-      regulars() {
-        if (!this._regulars) {
-          this._regulars = ss.getSheetByName('Regulars');
+      getList(listName) {
+        const listSheet = ss.getSheetByName(`list_${listName}`);
+        if (!listSheet) {
+          throw new Error(`expected sheet named: 'list_${listName}'`);
         }
-        return this._regulars;
+        return listSheet;
       },
     };
   }
@@ -313,8 +314,28 @@ class MealPlannerDb {
   }
 
   getList(listName) {
-    const values = this.sheets.regulars().getDataRange().getValues();
+    const values = this.sheets.getList(listName).getDataRange().getValues();
     return values.map((value) => ({ item: value[0], checked: Boolean(value[1]) }));
+  }
+
+  modifyList(listName, { action, item }) {
+    const listSheet = this.sheets.getList(listName);
+    const values = listSheet.getDataRange().getValues();
+    if (action === 'add') {
+      listSheet.appendRow([item]);
+    } else {
+      const rowIdx = values.findIndex((row) => row[0] === item);
+      if (rowIdx === -1) {
+        throw new Error(`expected to find item '${item}' in list: '${listName}'`);
+      }
+      if (action === 'tick') {
+        const currentValue = listSheet.getRange(rowIdx, 1).getValue();
+        const newValue = (currentValue === 1) ? 0 : 1;
+        listSheet.getRange(rowIdx, 1).setValue(newValue);
+      } else if (action === 'delete') {
+        listSheet.deleteRow(rowIdx);
+      }
+    }
   }
 }
 
