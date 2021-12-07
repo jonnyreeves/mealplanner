@@ -16,11 +16,11 @@ const styles = StyleSheet.create({
   },
 });
 
-export const ChipList = ({ containerStyle, items, onClose, onAdd, onPress, selectedItems = [] }) => {
-  console.log('chips = ' + JSON.stringify(items));
+export const ChipList = ({ containerStyle, chipStyle, chipTextStyle, items, onClose, onAdd, onPress, selectedItems = [] }) => {
   const chips = items.map((item) => (
     <Chip
-      style={styles.chipListItem}
+      style={[styles.chipListItem, chipStyle]}
+      textStyle={chipTextStyle}
       mode="outlined"
       selected={selectedItems.includes(item)}
       onClose={typeof onClose === 'function' ? (() => onClose(item)) : null}

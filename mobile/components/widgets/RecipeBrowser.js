@@ -5,7 +5,9 @@ import {
 import {
   Text, Chip, Searchbar, Button, Divider,
 } from 'react-native-paper';
+import { ChipList } from '../helpers/chips';
 
+import { theme } from '../../theme';
 import { kebab } from '../helpers/kebab';
 
 const styles = StyleSheet.create({
@@ -16,6 +18,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   recipeIngredients: {
+    color: '#808080',
+  },
+  miniTagContainer: {
+    flexDirection: 'row',
+    marginBottom: 2,
+  },
+  miniTag: {
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#808080',
+    borderRadius: 6,
+    paddingVertical: 1,
+    paddingHorizontal: 6,
+    marginRight: 6,
+  },
+  miniTagText: {
+    fontSize: 12,
     color: '#808080',
   },
   tagListContainer: {
@@ -36,7 +55,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearchSubmitted }, ref) => {
+export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearchSubmitted, showTags }, ref) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [query, setQuery] = useState('');
 
@@ -107,12 +126,21 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     }
   };
 
+  const MiniTag = ({ value }) => (
+    <View style={styles.miniTag}>
+      <Text style={styles.miniTagText}>{value}</Text>
+    </View>
+  );
+
   const renderRecipe = ({ item }) => {
-    const ingredientsList = item.ingredients.map((ing) => ing.name).join(', ');
+    const ingredientsList = `${item.ingredients.map((ing) => ing.name).join(', ')}`;
+    const tagList = item.tags.map((tag) => (<MiniTag value={tag} />));
+
     return (
       <View style={styles.recipeListItem}>
         <TouchableOpacity onPress={() => { onRecipePress(item); }}>
           <Text style={styles.recipeName}>{item.name}</Text>
+          {(showTags && tagList.length > 0) && <View style={styles.miniTagContainer}>{tagList}</View>}
           <Text style={styles.recipeIngredients}>{ingredientsList}</Text>
         </TouchableOpacity>
       </View>

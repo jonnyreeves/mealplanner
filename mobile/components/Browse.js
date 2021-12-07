@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  useContext, useEffect, useLayoutEffect, useRef, useState,
+} from 'react';
 import {
   StyleSheet,
 } from 'react-native';
@@ -7,7 +9,9 @@ import { FAB, Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RecipeBrowser } from './widgets/RecipeBrowser';
-import { useAppState, useNavigationFocusListener, useRecipesUpdatedListener, useSessionState } from './helpers/navigation';
+import {
+  useAppState, useNavigationFocusListener, useRecipesUpdatedListener, useSessionState,
+} from './helpers/navigation';
 import { LoadingSpinner } from './widgets/LoadingSpinner';
 import { Routes } from '../constants';
 
@@ -61,7 +65,14 @@ export default function Browse({ route }) {
     <>
       <SafeAreaView style={styles.viewContainer}>
         {!hasRecipes && <LoadingSpinner message="Fetching recipes" />}
-        {hasRecipes && <RecipeBrowser ref={recipeBrowserRef} recipes={recipes} onRecipePress={onRecipePress} />}
+        {hasRecipes && (
+          <RecipeBrowser
+            ref={recipeBrowserRef}
+            recipes={recipes}
+            onRecipePress={onRecipePress}
+            showTags
+          />
+        )}
         <FAB style={styles.addRecipeFAB} icon="plus" onPress={() => navigation.navigate(Routes.CreateRecipe)} />
       </SafeAreaView>
       <Snackbar
@@ -69,7 +80,9 @@ export default function Browse({ route }) {
         onDismiss={() => setAddedRecipeNotificationVisible(false)}
         duration={5000}
       >
-        Added Recipe: {createdRecipeTitle}
+        Added Recipe:
+        {' '}
+        {createdRecipeTitle}
       </Snackbar>
     </>
   );
