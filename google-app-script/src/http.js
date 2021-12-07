@@ -100,6 +100,7 @@ class HttpHandler {
         'plan/by-days/*': this.doPlanByDaysRequest,
         'plan/by-range/*': this.doPlanByRangeRequest,
         recipes: this.doRecipesRequest,
+        'list/*': this.doListRequest,
       },
     };
   }
@@ -203,5 +204,10 @@ class HttpHandler {
     const payload = req.getJsonPayload();
     this._db.updateRecipe(recipeId, payload.fields);
     resp.setContent({ message: 'ok' });
+  }
+
+  doListRequest(req, resp) {
+    const [, listName = 'default'] = req.getPathParts();
+    return resp.setContent(this._db.getList(listName));
   }
 }

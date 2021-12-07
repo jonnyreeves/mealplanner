@@ -32,6 +32,12 @@ class MealPlannerDb {
         }
         return this._meals;
       },
+      regulars() {
+        if (!this._regulars) {
+          this._regulars = ss.getSheetByName('Regulars');
+        }
+        return this._regulars;
+      },
     };
   }
 
@@ -304,6 +310,11 @@ class MealPlannerDb {
     res.setDate(startDate.getDate() + daysUntilNextRollover);
     dateUtils.zeroHMS(res);
     return res;
+  }
+
+  getList(listName) {
+    const values = this.sheets.regulars().getDataRange().getValues();
+    return values.map((value) => ({ item: value[0], checked: Boolean(value[1]) }));
   }
 }
 
