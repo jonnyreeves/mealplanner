@@ -21,8 +21,10 @@ export function toIngredientList(planEntries, recipes) {
     }
 
     const recipe = recipeByName[entry.name];
-    if (!recipe) {
-      unknownMeals.push({ name: entry.name, date: entry.date, slot: entry.slot, ingredientQty: '' });
+    if (!recipe || recipe.ingredients.length === 0) {
+      unknownMeals.push({
+        name: entry.name, date: entry.date, slot: entry.slot, ingredientQty: '',
+      });
       return;
     }
     recipe.ingredients.forEach((ing) => {

@@ -274,7 +274,7 @@ class MealPlannerDb {
       name: row[RecipeCols.name],
       source: row[RecipeCols.source],
       recipe: row[RecipeCols.source], // TODO: 'recipe' field is deprecated by 'source' field.
-      ingredients: ingredientMapper(row[RecipeCols.ingredients]),
+      ingredients: ingredientMapper(row[RecipeCols.ingredients]).filter((v) => !!v.name),
       tags: (row[RecipeCols.tags] || '').split(',').map((item) => item.trim()).filter((v) => v !== ''),
     };
   }

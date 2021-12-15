@@ -28,6 +28,7 @@ export default function List() {
     const { ingredients, meals } = toIngredientList(gridData[selectedWeek], recipes);
     if (ingredients.length > 0) {
       sectionData.push({ title: 'Ingredients', data: ingredients });
+      // sectionData.push({ title: 'Regulars', data: appState._listsByName.regulars });
     }
     if (meals.length > 0) {
       sectionData.push({ title: 'Meals', data: meals });
