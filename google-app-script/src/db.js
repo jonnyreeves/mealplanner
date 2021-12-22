@@ -321,13 +321,17 @@ class MealPlannerDb {
   modifyList(listName, { action, item }) {
     const listSheet = this.sheets.getList(listName);
     const values = listSheet.getDataRange().getValues();
+    const idx = values.findIndex((row) => row[0].toLowerCase() === item.toLowerCase());
     if (action === 'add') {
+      if (idx !== -1) {
+        throw new Error(`item: '${item}' is already present in list: '${listName}'`);
+      }
       listSheet.appendRow([item]);
     } else {
-      const rowIdx = values.findIndex((row) => row[0] === item);
-      if (rowIdx === -1) {
+      if (idx === -1) {
         throw new Error(`expected to find item '${item}' in list: '${listName}'`);
       }
+      const rowIdx = idx + 1; // GoogleSheet rows start at index 1.
       if (action === 'tick') {
         const currentValue = listSheet.getRange(rowIdx, 1).getValue();
         const newValue = (currentValue === 1) ? 0 : 1;

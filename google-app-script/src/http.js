@@ -1,4 +1,4 @@
-/* global dateUtils, assert, MealPlannerDb */
+/* global dateUtils, assert, MealPlannerDb, alexaUtils */
 
 // The following comment is required to fix OAuth issues w/ Google App Scripts
 // DriveApp.getFiles()
@@ -228,10 +228,16 @@ class HttpHandler {
       throw new Error('expected list name to be supplied');
     }
     const payload = req.getJsonPayload();
-    if (!['tick', 'add', 'delete'].some(payload.action)) {
+    if (!['tick', 'add', 'delete'].some((v) => payload.action === v)) {
       throw new Error(`Invalid list action: '${payload.action}`);
     }
-    this._db.modifyList(listName, { action: payload.action, item: payload.item });
+
+    if (listName === 'alexa-shopping' && payload.action === 'tick') {
+      alexaUtils.completeShoppingListItem({ itemName: payload.item });
+    } else {
+      this._db.modifyList(listName, { action: payload.action, item: payload.item });
+    }
+
     resp.setContent({ message: 'ok' });
   }
 }
