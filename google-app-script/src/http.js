@@ -209,10 +209,15 @@ class HttpHandler {
 
   doListRequest(req, resp) {
     const [, listName] = req.getPathParts();
-    if (!listName) {
-      throw new Error('expected list name to be supplied');
+    if (listName) {
+      return resp.setContent(this._db.getList(listName));
     }
-    return resp.setContent(this._db.getList(listName));
+    const allLists = ['regulars', 'alexa-shopping']
+      .reduce((acc, value) => {
+        acc[value] = this._db.getList(value);
+        return acc;
+      }, {});
+    return resp.setContent(allLists);
   }
 
   /*

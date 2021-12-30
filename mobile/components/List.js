@@ -1,13 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SectionList, StyleSheet, View } from 'react-native';
-import { Button, Divider, IconButton, Subheading, Text, Title } from 'react-native-paper';
+import {
+  Button, Checkbox, Divider, IconButton, Subheading, Text, Title,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { toIngredientList } from './helpers/ingredientList';
-import { useAppState, usePlanUpdatedListener, useRecipesUpdatedListener } from './helpers/navigation';
-import { toPlannerGridData } from './helpers/planData';
-import { WeekSelector } from './widgets/WeekSelector';
 import * as WebBrowser from 'expo-web-browser';
+import { toIngredientList } from './helpers/ingredientList';
+import {
+  useAppState, useListsUpdatedListener, usePlanUpdatedListener, useRecipesUpdatedListener,
+} from './helpers/navigation';
+import { toPlannerGridData } from './helpers/planData';
+import { ToggleButtonGroup } from './widgets/WeekSelector';
 import { shortPrettyMealSlot } from './helpers/date';
+import { MealPlanShoppingList, ShoppingList } from './widgets/ShoppingList';
 
 const styles = StyleSheet.create({
 });
@@ -15,103 +20,60 @@ const styles = StyleSheet.create({
 export default function List() {
   const appState = useAppState();
 
-  const [listData, setListData] = useState([]);
-  const [selectedWeek, setSelectedWeek] = useState('nextWeek');
+  const [shoppingLists, setShoppingLists] = useState([]);
+  const [planLists, setPlanLists] = useState({});
 
-  const refresh = () => {
-    console.log('rebuilding shopping list');
+  const [selectedWeek, setSelectedWeek] = useState('thisWeek');
+
+  const buildPlanList = (gridData, targetWeek) => {
     const recipes = appState.getRecipes();
-    const planData = appState.getPlanData();
-    const gridData = toPlannerGridData(Object.values(planData));
-
     const sectionData = [];
-    const { ingredients, meals } = toIngredientList(gridData[selectedWeek], recipes);
+    const { ingredients, meals } = toIngredientList(gridData[targetWeek], recipes);
     if (ingredients.length > 0) {
-      sectionData.push({ title: 'Ingredients', data: ingredients });
-      // sectionData.push({ title: 'Regulars', data: appState._listsByName.regulars });
+      sectionData.push({
+        title: 'Ingredients',
+        type: 'ingredients',
+        data: ingredients,
+      });
     }
     if (meals.length > 0) {
-      sectionData.push({ title: 'Meals', data: meals });
+      sectionData.push({ title: 'Meals', type: 'meals', data: meals });
     }
-    setListData(sectionData);
+    return sectionData;
   };
 
-  useRecipesUpdatedListener(() => refresh());
-  usePlanUpdatedListener(() => refresh());
-  useEffect(() => refresh(), [selectedWeek]);
-
-  const formatIngredientQty = (value) => {
-    if (parseInt(value, 10).toString() === value) {
-      return `${value}x`;
-    }
-    return value;
+  const rebuildPlanLists = () => {
+    const planData = appState.getPlanData();
+    const gridData = toPlannerGridData(Object.values(planData));
+    setPlanLists({
+      thisWeek: buildPlanList(gridData, 'thisWeek'),
+      nextWeek: buildPlanList(gridData, 'nextWeek'),
+    });
   };
 
-  const SectionHeader = ({ section }) => (
-    <Subheading style={{ fontSize: 18, textDecorationLine: 'underline' }}>{section.title}</Subheading>
-  );
-
-  const bulletPoint = <Text style={{ color: '#808080' }}>{'\u2022'}</Text>;
-
-  const MealList = ({ meals }) => (
-    meals
-      .map(({ name, date, slot, ingredientQty }) => {
-        const key = `${name}-${date}-${slot}`;
-        const qtyAndMealName = `${formatIngredientQty(ingredientQty)} for ${name} (${shortPrettyMealSlot(slot, date)})`;
-        return (
-          <View key={key} style={{ flexDirection: 'row', paddingLeft: 24 }}>
-            {bulletPoint}
-            <Text style={{ flex: 1, paddingLeft: 5, color: '#808080' }}>{qtyAndMealName}</Text>
-          </View>
-        );
-      })
-  );
-
-  const RequiredIngredient = ({ item, style }) => (
-    <View style={style}>
-      <Text style={{ fontSize: 16 }}>
-        {formatIngredientQty(item.qty)}
-        {' '}
-        {item.ingredient}
-      </Text>
-      <MealList meals={item.meals} />
-    </View>
-  );
-
-  const IngredientListItem = ({ item }) => {
-    const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(item.ingredient)}`;
-    const openStore = () => WebBrowser.openBrowserAsync(tescoUrl);
-    const showBasketButton = selectedWeek === 'nextWeek';
-    return (
-      <View style={{ flexDirection: 'row' }}>
-        <RequiredIngredient item={item} style={{ flexGrow: 1, flexShrink: 0, flexBasis: 'auto' }} />
-        {showBasketButton && <IconButton icon="basket-outline" onPress={openStore} style={{ flexGrow: 0, flexShrink: 1, flexBasis: 'auto' }} />}
-      </View>
-    );
+  const rebuildShoppingLists = () => {
+    const sectionData = [];
+    sectionData.push({
+      title: 'Alexa Shopping List', type: 'list', listName: 'alexa-shopping', data: appState.getListByName('alexa-shopping'),
+    });
+    sectionData.push({
+      title: 'Regular Items', type: 'list', listName: 'regulars', data: appState.getListByName('regulars'),
+    });
+    setShoppingLists(sectionData);
   };
 
-  const MealWithoutIngredientsListItem = ({ item }) => (
-    <>
-      <Text style={{ fontSize: 16 }}>{item.name}</Text>
-      <View style={{ flexDirection: 'row', paddingLeft: 24 }}>
-        {bulletPoint}
-        <Text style={{ flex: 1, paddingLeft: 5, color: '#808080' }}>{shortPrettyMealSlot(item.slot, item.date)}</Text>
-      </View>
-    </>
-  );
+  useRecipesUpdatedListener(() => rebuildPlanLists());
+  usePlanUpdatedListener(() => rebuildPlanLists());
+  useListsUpdatedListener(() => rebuildShoppingLists());
 
-  const renderSectionListItem = ({ item }) => {
-    let contents;
-    if (item.ingredient) {
-      contents = <IngredientListItem item={item} />;
-    } else {
-      contents = <MealWithoutIngredientsListItem item={item} />;
-    }
-    return (
-      <View style={{ marginVertical: 10, paddingLeft: 12, display: 'flex' }}>
-        {contents}
-      </View>
-    );
+  useEffect(() => {
+    rebuildPlanLists();
+    rebuildShoppingLists();
+  }, []);
+
+  const openTescoSearch = (searchTerm) => {
+    const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(searchTerm)}`;
+    WebBrowser.openBrowserAsync(tescoUrl);
   };
 
   const EmptyShoppingList = () => {
@@ -125,37 +87,31 @@ export default function List() {
     );
   };
 
-  const ListTitle = () => {
-    const week = (selectedWeek === 'thisWeek') ? 'This Week' : 'Next Week';
-    const msg = `${week}'s Shopping List`;
-    const tescoOrdersUrl = 'https://www.tesco.com/groceries/en-GB/orders';
-
-    return (
-      <>
-        <Title>{msg}</Title>
-        {selectedWeek === 'nextWeek' && <Button onPress={() => WebBrowser.openBrowserAsync(tescoOrdersUrl)}>Select Tesco Order</Button>}
-      </>
-    );
-  };
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, justifyContent: 'space-between' }}>
-        {listData.length > 0 && (
-          <SectionList
-            ListHeaderComponent={<ListTitle />}
-            ItemSeparatorComponent={Divider}
-            contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
-            sections={listData}
-            keyExtractor={(entry, index) => `${entry.ingredient || entry.name}-${index}`}
-            renderItem={renderSectionListItem}
-            renderSectionHeader={({ section }) => <SectionHeader section={section} />}
+
+        {selectedWeek === 'lists' && (
+          <ShoppingList
+            sections={shoppingLists}
+            onStoreLinkPress={openTescoSearch}
+            onCheckboxPress={(listName, item) => appState.toggleListItem(listName, item)}
           />
         )}
-        {listData.length === 0 && (
-          <EmptyShoppingList />
+        {selectedWeek !== 'lists' && (
+          <MealPlanShoppingList
+            sections={planLists[selectedWeek]}
+            selectedWeek={selectedWeek}
+            onStoreLinkPress={openTescoSearch}
+          />
         )}
-        <WeekSelector selectedWeek={selectedWeek} onSelect={(value) => setSelectedWeek(value)} />
+
+        <ToggleButtonGroup selectedValue={selectedWeek} onPress={(value) => setSelectedWeek(value)}>
+          <ToggleButtonGroup.Btn label="This Week" value="thisWeek" />
+          <ToggleButtonGroup.Btn label="Next Week" value="nextWeek" />
+          <ToggleButtonGroup.Btn label="Lists" value="lists" />
+        </ToggleButtonGroup>
+
       </View>
     </SafeAreaView>
   );

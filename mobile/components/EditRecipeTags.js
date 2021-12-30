@@ -26,10 +26,16 @@ export default function EditRecipeTags() {
   const [tags, setTags] = useState([]);
 
   const onCreateNewTag = (newTag) => {
+    console.log(' create new tag ');
     if (!tags.includes(newTag)) {
-      setTags([...tags, newTag]);
+      modifyTags([...tags, newTag]);
     }
     setNewTagTextEntry('');
+  };
+
+  const modifyTags = (newTags) => {
+    sessionState.updateRecipeModificationState({ tags: newTags });
+    setTags(newTags);
   };
 
   useLayoutEffect(() => {
@@ -46,14 +52,15 @@ export default function EditRecipeTags() {
 
   return (
     <View style={styles.viewContainer}>
-      <Title>{sessionState.getRecipeModificationState()?.title}</Title>
+      <Title>{sessionState.getRecipeModificationState()?.name}</Title>
+
       <ChipList
-        containerStyle={{ paddingTop: 10, paddingBottom: 10, justifyContent: 'center' }}
+        containerStyle={{ marginTop: 10, marginBottom: 10, justifyContent: 'center' }}
         items={[...new Set([...appState.getAllTags(), ...tags])]}
         selectedItems={tags}
         onPress={(tag) => {
           if (tags.includes(tag)) {
-            setTags([...tags.filter((t) => t !== tag)]);
+            modifyTags([...tags.filter((t) => t !== tag)]);
           } else {
             onCreateNewTag(tag);
           }

@@ -97,10 +97,10 @@ export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onS
     }
   });
 
-  return [saveChanges, saveEnabled]
-}
+  return [saveChanges, saveEnabled];
+};
 
-export const ThemedTextInput = ({ style, value, label, onChangeText, multiline, placeholder }) => (
+export const ThemedTextInput = ({ style, value, label, onChangeText, onSubmitEditing, multiline, placeholder }) => (
   <TextInput
     style={style}
     label={label}
@@ -109,6 +109,7 @@ export const ThemedTextInput = ({ style, value, label, onChangeText, multiline, 
     theme={{ ...theme, roundness: 8 }}
     value={value}
     onChangeText={onChangeText}
+    onSubmitEditing={onSubmitEditing}
     multiline={multiline}
     blurOnSubmit
   />
@@ -171,10 +172,10 @@ export const TagEditor = ({ tags, setTags }) => {
     <>
       <View style={subheadingContainerStyle}>
         <Subheading>Tags</Subheading>
+        <Button compact icon="plus" onPress={() => onEditTags()}>Add Tags</Button>
       </View>
       <ChipList
         items={tags}
-        onAdd={onEditTags}
         onClose={onDeleteTag}
       />
     </>

@@ -38,6 +38,7 @@ export const DefaultContainer = withTheme(({ theme }) => {
   useEffect(() => {
     mealPlanApi.fetchPlan();
     mealPlanApi.fetchRecipes();
+    mealPlanApi.fetchLists();
   }, []);
 
   const Tab = createMaterialBottomTabNavigator();

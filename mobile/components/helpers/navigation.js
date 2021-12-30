@@ -39,3 +39,11 @@ export const usePlanUpdatedListener = (onUpdated) => {
     return () => unsub();
   }, []);
 };
+
+export const useListsUpdatedListener = (onUpdated) => {
+  const appState = useAppState();
+  useEffect(() => {
+    const unsub = appState.addListener('lists_updated', () => onUpdated());
+    return () => unsub();
+  }, []);
+};

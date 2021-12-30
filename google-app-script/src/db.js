@@ -333,9 +333,9 @@ class MealPlannerDb {
       }
       const rowIdx = idx + 1; // GoogleSheet rows start at index 1.
       if (action === 'tick') {
-        const currentValue = listSheet.getRange(rowIdx, 1).getValue();
+        const currentValue = listSheet.getRange(rowIdx, 2).getValue();
         const newValue = (currentValue === 1) ? 0 : 1;
-        listSheet.getRange(rowIdx, 1).setValue(newValue);
+        listSheet.getRange(rowIdx, 2).setValue(newValue);
       } else if (action === 'delete') {
         listSheet.deleteRow(rowIdx);
       }

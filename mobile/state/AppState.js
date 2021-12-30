@@ -9,13 +9,16 @@ export default class AppState {
     this._handlerMap = {
       recipes_updated: [],
       plan_updated: [],
+      lists_updated: [],
     };
 
     this._recipesById = {};
     this._planByDate = {};
+    this._listsByName = {};
 
     this._api.addListener('plan_fetched', (planData) => this._onPlanFetched(planData));
     this._api.addListener('recipes_fetched', (recipes) => this._onRecipesFetched(recipes));
+    this._api.addListener('lists_fetched', (listData) => this._onListsFetched(listData));
   }
 
   async init() {
@@ -170,6 +173,29 @@ export default class AppState {
     return this._api.updateRecipe(recipeId, updateFields);
   }
 
+  toggleListItem(listName, item) {
+    const targetList = this._listsByName[listName];
+    const targetItemIdx = targetList.findIndex((v) => v.item === item);
+
+    console.log(`Change ${listName} - ${item}, idx=${targetItemIdx}`);
+    if (targetItemIdx !== -1) {
+      const newState = !targetList[targetItemIdx].checked;
+      this._setListData({
+        ...this._listsByName,
+        [listName]: [
+          ...targetList.slice(0, targetItemIdx),
+          { item, checked: newState },
+          ...targetList.slice(targetItemIdx + 1),
+        ],
+      });
+      this._api.modifyListItem(listName, { item, action: 'tick' });
+    }
+  }
+
+  getListByName(listKey) {
+    return this._listsByName[listKey] || [];
+  }
+
   _setRecipesById(value) {
     if (!deepEqual(this._recipesById, value)) {
       this._recipesById = value;
@@ -182,6 +208,11 @@ export default class AppState {
       this._planByDate = value;
       this._dispatch('plan_updated');
     }
+  }
+
+  _setListData(value) {
+    this._listsByName = value;
+    this._dispatch('lists_updated');
   }
 
   _onRecipesFetched(recipes) {
@@ -198,6 +229,10 @@ export default class AppState {
       byDate[entry.date] = entry;
     });
     this._setPlanByDate(byDate);
+  }
+
+  _onListsFetched(listData) {
+    this._setListData(listData);
   }
 
   _dispatch(eventName) {

@@ -13,10 +13,11 @@ const styles = StyleSheet.create({
   },
   chipListItem: {
     margin: 3,
+    minHeight: 34,
   },
 });
 
-export const ChipList = ({ containerStyle, chipStyle, chipTextStyle, items, onClose, onAdd, onPress, selectedItems = [] }) => {
+export const ChipList = ({ containerStyle, chipStyle, chipTextStyle, items, onClose, onPress, selectedItems = [] }) => {
   const chips = items.map((item) => (
     <Chip
       style={[styles.chipListItem, chipStyle]}
@@ -30,9 +31,6 @@ export const ChipList = ({ containerStyle, chipStyle, chipTextStyle, items, onCl
       {item}
     </Chip>
   ));
-  if (typeof onAdd === 'function') {
-    chips.push(<Chip style={styles.chipListItem} onPress={onAdd} icon="pencil" mode="outlined" key="add">Edit</Chip>);
-  }
   return (
     <View style={[styles.chipListContainer, containerStyle]}>
       {chips}

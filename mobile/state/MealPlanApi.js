@@ -12,6 +12,7 @@ export default class MealPlanApi {
     this._listenerMap = {
       recipes_fetched: [],
       plan_fetched: [],
+      lists_fetched: [],
       api_error: [],
     };
   }
@@ -25,8 +26,7 @@ export default class MealPlanApi {
       const response = await this._makeRequest({ resource: '/plan' });
       this._listenerMap.plan_fetched.forEach((handlerFn) => handlerFn(response));
     } catch (err) {
-      console.error(err);
-      this._listenerMap.api_error.forEach((handlerFn) => handlerFn(err));
+      this._onApiError(err);
     }
   }
 
@@ -35,8 +35,16 @@ export default class MealPlanApi {
       const response = await this._makeRequest({ resource: '/recipes' });
       this._listenerMap.recipes_fetched.forEach((handlerFn) => handlerFn(response));
     } catch (err) {
-      console.error(err);
-      this._listenerMap.api_error.forEach((handlerFn) => handlerFn(err));
+      this._onApiError(err);
+    }
+  }
+
+  async fetchLists() {
+    try {
+      const response = await this._makeRequest({ resource: '/list' });
+      this._listenerMap.lists_fetched.forEach((handlerFn) => handlerFn(response));
+    } catch (err) {
+      this._onApiError(err);
     }
   }
 
@@ -55,6 +63,16 @@ export default class MealPlanApi {
   async updatePlan(entryMap) {
     const postData = { version: '1.0', entryMap };
     return this._makeRequest({ resource: '/plan', postData });
+  }
+
+  async modifyListItem(listName, fields) {
+    const postData = { version: '1.0', ...fields };
+    return this._makeRequest({ resource: `/list/${listName}`, postData });
+  }
+
+  _onApiError(err) {
+    console.error(err);
+    this._listenerMap.api_error.forEach((handlerFn) => handlerFn(err));
   }
 
   setAccessToken(at) {
