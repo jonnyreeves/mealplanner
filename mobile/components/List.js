@@ -1,8 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { SectionList, StyleSheet, View } from 'react-native';
-import {
-  Button, Checkbox, Divider, IconButton, Subheading, Text, Title,
-} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { toIngredientList } from './helpers/ingredientList';
@@ -11,14 +8,15 @@ import {
 } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
 import { ToggleButtonGroup } from './widgets/WeekSelector';
-import { shortPrettyMealSlot } from './helpers/date';
 import { MealPlanShoppingList, ShoppingList } from './widgets/ShoppingList';
+import { MealPlanApiCtx } from '../service/context';
 
 const styles = StyleSheet.create({
 });
 
 export default function List() {
   const appState = useAppState();
+  const mealPlanApi = useContext(MealPlanApiCtx);
 
   const [shoppingLists, setShoppingLists] = useState([]);
   const [planLists, setPlanLists] = useState({});
@@ -66,6 +64,14 @@ export default function List() {
   usePlanUpdatedListener(() => rebuildPlanLists());
   useListsUpdatedListener(() => rebuildShoppingLists());
 
+  const [refreshingShoppingList, setRefreshingShoppingList] = useState(false);
+
+  const refreshShoppingList = async () => {
+    setRefreshingShoppingList(true);
+    await mealPlanApi.fetchLists();
+    setRefreshingShoppingList(false);
+  };
+
   useEffect(() => {
     rebuildPlanLists();
     rebuildShoppingLists();
@@ -74,17 +80,6 @@ export default function List() {
   const openTescoSearch = (searchTerm) => {
     const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(searchTerm)}`;
     WebBrowser.openBrowserAsync(tescoUrl);
-  };
-
-  const EmptyShoppingList = () => {
-    const week = (selectedWeek === 'thisWeek') ? 'this week' : 'next week';
-    const msg = `There's nothing on ${week}'s plan`;
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <IconButton icon="calendar-alert" color="#d8e2dc" size={128} />
-        <Text>{msg}</Text>
-      </View>
-    );
   };
 
   return (
@@ -96,6 +91,8 @@ export default function List() {
             sections={shoppingLists}
             onStoreLinkPress={openTescoSearch}
             onCheckboxPress={(listName, item) => appState.toggleListItem(listName, item)}
+            refreshing={refreshingShoppingList}
+            onRefresh={refreshShoppingList}
           />
         )}
         {selectedWeek !== 'lists' && (

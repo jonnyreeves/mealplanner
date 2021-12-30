@@ -1,5 +1,5 @@
-import React from 'react';
-import { SectionList, View } from 'react-native';
+import React, { useState } from 'react';
+import { RefreshControl, SectionList, View } from 'react-native';
 import {
   Divider, Checkbox, Text, IconButton, Subheading, Title,
 } from 'react-native-paper';
@@ -101,6 +101,17 @@ export const MealPlanShoppingList = ({ sections, selectedWeek, onStoreLinkPress 
     );
   };
 
+  const EmptyShoppingList = () => {
+    const week = (selectedWeek === 'thisWeek') ? 'this week' : 'next week';
+    const msg = `There's nothing on ${week}'s plan`;
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <IconButton icon="calendar-alert" color="#d8e2dc" size={128} />
+        <Text>{msg}</Text>
+      </View>
+    );
+  };
+
   return (
     <SectionList
       ListHeaderComponent={ListHeader}
@@ -115,7 +126,7 @@ export const MealPlanShoppingList = ({ sections, selectedWeek, onStoreLinkPress 
 };
 
 export const ShoppingList = ({
-  sections, onStoreLinkPress, onCheckboxPress,
+  sections, onStoreLinkPress, onCheckboxPress, refreshing, onRefresh,
 }) => {
   const shoppingListKeyExtractor = (item) => (`key-${kebab(item.item)}`);
   const ShoppingListHeader = () => (
@@ -147,6 +158,7 @@ export const ShoppingList = ({
         keyExtractor={shoppingListKeyExtractor}
         renderItem={ShoppingListEntry}
         renderSectionHeader={SectionHeader}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       />
     </>
   );
