@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
   BackHandler,
   Linking,
@@ -8,6 +8,7 @@ import {
 import { Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Routes } from '../constants';
+import { MealPlanApiCtx } from '../service/context';
 
 import { toShortISOString, today } from './helpers/date';
 import { useAppState, useListsUpdatedListener, useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener, useSessionState } from './helpers/navigation';
@@ -50,6 +51,7 @@ export default function Plan({ route }) {
   const { params } = route;
 
   const navigation = useNavigation();
+  const mealPlanApi = useContext(MealPlanApiCtx);
 
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [todaysMeal, setTodaysMeal] = useState(null);
@@ -63,6 +65,8 @@ export default function Plan({ route }) {
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
 
+  const [refreshing, setRefreshing] = useState(false);
+
   const appState = useAppState();
   const sessionState = useSessionState();
 
@@ -70,6 +74,13 @@ export default function Plan({ route }) {
     setRecipes(appState.getRecipes());
     setPlanData(appState.getPlanData());
     setTodaysMeal(appState.getPlanData()[toShortISOString(today())]);
+  };
+
+  const doRefresh = async () => {
+    setRefreshing(true);
+    await mealPlanApi.fetchPlan();
+    refresh();
+    setRefreshing(false);
   };
 
   useRecipesUpdatedListener(() => refresh());
@@ -203,6 +214,8 @@ export default function Plan({ route }) {
                 swapSource={swapSource}
                 onMealSelected={onMealSelected}
                 planData={planData}
+                refreshing={refreshing}
+                onRefresh={doRefresh}
               />
             </View>
             {todaysMeal && <NextMealCard />}

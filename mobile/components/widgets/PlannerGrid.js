@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import React, { Fragment, useState } from 'react';
 import {
-  StyleSheet, View, TouchableOpacity, FlatList,
+  StyleSheet, View, TouchableOpacity, FlatList, RefreshControl,
 } from 'react-native';
 import { Text, Button, withTheme } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
@@ -36,7 +36,7 @@ const PlannerGridLabel = ({ dayOfTheWeek }) => (
   </View>
 );
 
-export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelected }) => {
+export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelected, refreshing, onRefresh }) => {
   const { colors } = theme;
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
 
@@ -73,6 +73,7 @@ export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelec
           keyExtractor={(item) => kebab(`${item.id}-${item.name}`)}
           numColumns={3}
           extraData={swapSource}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
       </View>
       <WeekSelector selectedWeek={selectedWeek} onSelect={(value) => setSelectedWeek(value)} />
