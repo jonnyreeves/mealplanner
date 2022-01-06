@@ -1,23 +1,16 @@
 import React, { useState } from 'react';
 import { RefreshControl, SectionList, View } from 'react-native';
 import {
-  Divider, Checkbox, Text, IconButton, Subheading, Title,
+  Divider, Checkbox, Text, IconButton, Title,
 } from 'react-native-paper';
 import { shortPrettyMealSlot } from '../helpers/date';
 import { kebab } from '../helpers/kebab';
 
 const SectionHeader = ({ section }) => (
-  <Subheading style={{ fontSize: 18, textDecorationLine: 'underline' }}>{section.title}</Subheading>
+  <Title>{section.title}</Title>
 );
 
 export const MealPlanShoppingList = ({ sections, selectedWeek, onStoreLinkPress }) => {
-  const ListHeader = () => {
-    const msg = `${selectedWeek === 'thisWeek' ? 'This Week\'s' : 'Next Week\'s'} Shopping List`;
-    return (
-      <Title>{msg}</Title>
-    );
-  };
-
   const formatIngredientQty = (value) => {
     if (parseInt(value, 10).toString() === value) {
       return `${value}x`;
@@ -114,7 +107,6 @@ export const MealPlanShoppingList = ({ sections, selectedWeek, onStoreLinkPress 
 
   return (
     <SectionList
-      ListHeaderComponent={ListHeader}
       ItemSeparatorComponent={Divider}
       contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
       sections={sections}
@@ -129,9 +121,6 @@ export const ShoppingList = ({
   sections, onStoreLinkPress, onCheckboxPress, refreshing, onRefresh,
 }) => {
   const shoppingListKeyExtractor = (item) => (`key-${kebab(item.item)}`);
-  const ShoppingListHeader = () => (
-    <Title>Shopping Lists</Title>
-  );
 
   const ShoppingListEntry = ({ item: { item, checked }, section: { listName } }) => (
     <View style={{ marginVertical: 10, paddingLeft: 12, display: 'flex' }}>
@@ -151,7 +140,6 @@ export const ShoppingList = ({
   return (
     <>
       <SectionList
-        ListHeaderComponent={ShoppingListHeader}
         ItemSeparatorComponent={Divider}
         contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
         sections={sections}
