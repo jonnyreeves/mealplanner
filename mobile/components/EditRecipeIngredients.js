@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { kebab } from './helpers/kebab';
 import { AppStateCtx } from '../service/context';
 import { useAppState, useSessionState } from './helpers/navigation';
+import { ThemedTextInput } from './widgets/RecipeEditor';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -30,6 +31,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     margin: 20,
+    borderRadius: 15,
   },
 });
 
@@ -131,26 +133,24 @@ export default function EditRecipeIngredients() {
 
   const showCreateNewIngredient = query.trim().length >= MinSearchLength && !visibleIngredients.includes(query.trim());
   const showQueryTooShort = query.trim().length < MinSearchLength;
+  const qtyModalTitle = `Required quantity of ${newIngredientName}`;
 
   return (
-
     <>
-      {qtyModalVisible && (
-        <Portal>
-          <Modal visible={qtyModalVisible} onDismiss={() => setQtyModalVisible(false)} style={{ bottom: 300 }} contentContainerStyle={styles.qtyModalStyle}>
-            <Title>Quantity of {newIngredientName}</Title>
-            <Text style={{ marginBottom: 10 }}>eg: `2`, `250g`, etc</Text>
-            <TextInput
-              autoFocus
-              autoCorrect={false}
-              value={newIngredientQty}
-              dense
-              onChangeText={setNewIngredientQty}
-              onSubmitEditing={() => onNewIngredientAdded()}
-            />
-          </Modal>
-        </Portal>
-      )}
+      <Portal>
+        <Modal visible={qtyModalVisible} onDismiss={() => setQtyModalVisible(false)} style={{ bottom: 340 }} contentContainerStyle={styles.qtyModalStyle}>
+          <Title>{qtyModalTitle}</Title>
+          <Text style={{ marginBottom: 10 }}>eg: `2`, `250g`, etc</Text>
+          <ThemedTextInput
+            autoFocus
+            autoCorrect={false}
+            value={newIngredientQty}
+            dense
+            onChangeText={setNewIngredientQty}
+            onSubmitEditing={() => onNewIngredientAdded()}
+          />
+        </Modal>
+      </Portal>
 
       <View style={styles.viewContainer}>
         <FlatList
@@ -160,7 +160,7 @@ export default function EditRecipeIngredients() {
                 style={styles.searchbar}
                 onSubmitEditing={onSubmitEditing}
                 autoCorrect={false}
-                placeholder="Search or add a new ingredient"
+                placeholder="Ingredient name"
                 value={query}
                 onChangeText={setQuery}
                 returnKeyType="done"

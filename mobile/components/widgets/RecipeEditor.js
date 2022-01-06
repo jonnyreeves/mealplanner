@@ -100,7 +100,7 @@ export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onS
   return [saveChanges, saveEnabled];
 };
 
-export const ThemedTextInput = ({ style, value, label, onChangeText, onSubmitEditing, multiline, placeholder }) => (
+export const ThemedTextInput = ({ style, value, label, onChangeText, onSubmitEditing, multiline, placeholder, ...props }) => (
   <TextInput
     style={style}
     label={label}
@@ -112,6 +112,7 @@ export const ThemedTextInput = ({ style, value, label, onChangeText, onSubmitEdi
     onSubmitEditing={onSubmitEditing}
     multiline={multiline}
     blurOnSubmit
+    {...props}
   />
 );
 

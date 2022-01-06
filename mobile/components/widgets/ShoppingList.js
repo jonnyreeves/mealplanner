@@ -108,8 +108,10 @@ export const MealPlanShoppingList = ({ sections, selectedWeek, onStoreLinkPress 
   return (
     <SectionList
       ItemSeparatorComponent={Divider}
+      ListEmptyComponent={EmptyShoppingList}
       contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
       sections={sections}
+      initialNumToRender={15}
       keyExtractor={mealPlanKeyExtrator}
       renderItem={renderSectionListItem}
       renderSectionHeader={SectionHeader}
@@ -143,6 +145,7 @@ export const ShoppingList = ({
         ItemSeparatorComponent={Divider}
         contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
         sections={sections}
+        initialNumToRender={15}
         keyExtractor={shoppingListKeyExtractor}
         renderItem={ShoppingListEntry}
         renderSectionHeader={SectionHeader}
