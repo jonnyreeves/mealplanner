@@ -70,7 +70,6 @@ export default function Browse({ route }) {
             ref={recipeBrowserRef}
             recipes={recipes}
             onRecipePress={onRecipePress}
-            showTags
           />
         )}
         <FAB style={styles.addRecipeFAB} icon="plus" onPress={() => navigation.navigate(Routes.CreateRecipe)} />

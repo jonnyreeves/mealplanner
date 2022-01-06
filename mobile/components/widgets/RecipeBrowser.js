@@ -134,13 +134,16 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
 
   const renderRecipe = ({ item }) => {
     const ingredientsList = `${item.ingredients.map((ing) => ing.name).join(', ')}`;
-    const tagList = item.tags.map((tag) => (<MiniTag value={tag} />));
+    const tagList = item.tags.map((tag) => {
+      const key = `${item.name}-${tag}`;
+      return <MiniTag value={tag} key={key} />;
+    });
 
     return (
       <View style={styles.recipeListItem}>
         <TouchableOpacity onPress={() => { onRecipePress(item); }}>
           <Text style={styles.recipeName}>{item.name}</Text>
-          {(showTags && tagList.length > 0) && <View style={styles.miniTagContainer}>{tagList}</View>}
+          {tagList.length > 0 && <View style={styles.miniTagContainer}>{tagList}</View>}
           <Text style={styles.recipeIngredients}>{ingredientsList}</Text>
         </TouchableOpacity>
       </View>
