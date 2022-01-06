@@ -318,26 +318,39 @@ class MealPlannerDb {
     return values.map((value) => ({ item: value[0], checked: Boolean(value[1]) }));
   }
 
-  modifyList(listName, { action, item }) {
+  modifyList(listName, { action, item, listItems }) {
     const listSheet = this.sheets.getList(listName);
-    const values = listSheet.getDataRange().getValues();
-    const idx = values.findIndex((row) => row[0].toLowerCase() === item.toLowerCase());
-    if (action === 'add') {
-      if (idx !== -1) {
-        throw new Error(`item: '${item}' is already present in list: '${listName}'`);
+    if (action === 'replace') {
+      if (!Array.isArray(listItems)) {
+        throw new Error("Refusing to replace list contents with undefined value");
       }
-      listSheet.appendRow([item]);
-    } else {
-      if (idx === -1) {
-        throw new Error(`expected to find item '${item}' in list: '${listName}'`);
+      const transformed = [];
+      for (let i = 0; i < listItems.length; i++) {
+        transformed[i] = [ listItems[i] ];
       }
-      const rowIdx = idx + 1; // GoogleSheet rows start at index 1.
-      if (action === 'tick') {
-        const currentValue = listSheet.getRange(rowIdx, 2).getValue();
-        const newValue = (currentValue === 1) ? 0 : 1;
-        listSheet.getRange(rowIdx, 2).setValue(newValue);
-      } else if (action === 'delete') {
-        listSheet.deleteRow(rowIdx);
+      listSheet.clear();
+      listSheet.getRange(1, 1, listItems.length, 1).setValues(transformed);
+    }
+    else {
+      const values = listSheet.getDataRange().getValues();
+      const idx = values.findIndex((row) => row[0].toLowerCase() === item.toLowerCase());
+      if (action === 'add') {
+        if (idx !== -1) {
+          throw new Error(`item: '${item}' is already present in list: '${listName}'`);
+        }
+        listSheet.appendRow([item]);
+      } else {
+        if (idx === -1) {
+          throw new Error(`expected to find item '${item}' in list: '${listName}'`);
+        }
+        const rowIdx = idx + 1; // GoogleSheet rows start at index 1.
+        if (action === 'tick') {
+          const currentValue = listSheet.getRange(rowIdx, 2).getValue();
+          const newValue = (currentValue === 1) ? 0 : 1;
+          listSheet.getRange(rowIdx, 2).setValue(newValue);
+        } else if (action === 'delete') {
+          listSheet.deleteRow(rowIdx);
+        }
       }
     }
   }

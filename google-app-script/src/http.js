@@ -233,14 +233,14 @@ class HttpHandler {
       throw new Error('expected list name to be supplied');
     }
     const payload = req.getJsonPayload();
-    if (!['tick', 'add', 'delete'].some((v) => payload.action === v)) {
+    if (!['tick', 'add', 'delete', 'replace'].some((v) => payload.action === v)) {
       throw new Error(`Invalid list action: '${payload.action}`);
     }
 
     if (listName === 'alexa-shopping' && payload.action === 'tick') {
       alexaUtils.completeShoppingListItem({ itemName: payload.item });
     } else {
-      this._db.modifyList(listName, { action: payload.action, item: payload.item });
+      this._db.modifyList(listName, payload);
     }
 
     resp.setContent({ message: 'ok' });
