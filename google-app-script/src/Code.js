@@ -1,5 +1,5 @@
 function trigger_syncAlexaShoppingList() {
-  alexaUtils.syncShoppingList();
+  alexaSkill.syncShoppingList();
 }
 
 function trigger_rotateWeeks() {

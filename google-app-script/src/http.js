@@ -1,4 +1,4 @@
-/* global dateUtils, assert, MealPlannerDb, alexaUtils */
+/* global dateUtils, assert, MealPlannerDb, alexaSkill */
 
 // The following comment is required to fix OAuth issues w/ Google App Scripts
 // DriveApp.getFiles()
@@ -238,7 +238,7 @@ class HttpHandler {
     }
 
     if (listName === 'alexa-shopping' && payload.action === 'tick') {
-      alexaUtils.completeShoppingListItem({ itemName: payload.item });
+      alexaSkill.completeShoppingListItem({ itemName: payload.item });
     } else {
       this._db.modifyList(listName, payload);
     }
