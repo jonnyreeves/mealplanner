@@ -1,36 +1,8 @@
-function debugUpdateStats() {
-  const app = SpreadsheetApp.getActive();
-  const thisWeek = app.getSheetByName('This Week');
-  const statsSheet = app.getSheetByName('Stats');
-  const thisWeeksPlan = thisWeek.getRange('B2:D8');
-  _updateStats(statsSheet, thisWeeksPlan, _getMealMap(app));
-}
-
-function debugSyncAlexaShoppingList() {
+function trigger_syncAlexaShoppingList() {
   alexaUtils.syncShoppingList();
 }
 
-function debugReplaceList() {
-  const listItems = [ "foo", "bar", "baz" ];
-  const app = SpreadsheetApp.getActive();
-  const list = app.getSheetByName('list_alexa-shopping');
-  list.clear();
-  const transformed = [];
-      for (let i = 0; i < listItems.length; i++) {
-        transformed[i] = [ listItems[i] ];
-      }
-  list.getRange(1, 1, listItems.length, 1).setValues(transformed);
-}
-
-function debugSyncRecipes() {
-  const app = SpreadsheetApp.getActive();
-  const thisWeek = app.getSheetByName('This Week');
-  const mealMap = _getMealMap(app);
-
-  _syncRecipes(thisWeek, mealMap);
-}
-
-function rotateWeeks() {
+function trigger_rotateWeeks() {
   const app = SpreadsheetApp.getActive();
 
   const thisWeek = app.getSheetByName('This Week');
@@ -116,24 +88,4 @@ function _createMealFreqMap(plan, mealMap) {
 
 function _resetRegularsLists(regularsSheet) {
   regularsSheet.getRange("B1:B").clearContent();
-}
-
-function _syncRecipes(plan, mealMap) {
-  const thisWeeksMeals = plan.getRange('B2:D8');
-  thisWeeksMeals.getValues().forEach((row, rowIdx) => {
-    const lunch = String(row[0]).toLowerCase().trim();
-    const dinner = String(row[1]).toLowerCase().trim();
-
-    const lunchRecipe = _getRecipe(lunch, mealMap);
-    const dinnerRecipe = _getRecipe(dinner, mealMap);
-
-    console.log(lunchRecipe, dinnerRecipe, rowIdx);
-  });
-}
-
-function _getRecipe(mealName, mealMap) {
-  if (!mealName in mealMap) {
-    return '';
-  }
-  return mealMap[mealName].recipe || '';
 }

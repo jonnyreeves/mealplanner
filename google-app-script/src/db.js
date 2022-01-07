@@ -84,10 +84,10 @@ class MealPlannerDb {
     if (queryThisWeek) {
       startRowIdx = this.dayToRowIdx(startDate.getDay());
       numRows = Math.min(dateUtils.daysBetween(startDate, endDate), dateUtils.daysBetween(startDate, nextRolloverDate) - 1);
-      const endRowIdx = Math.min(((startRowIdx + numRows) - 1), 8);
+      const endRowIdx = Math.min(((startRowIdx + numRows) - 1), 9);
       queryPlan.push({ sheet: 'this-week', startRow: startRowIdx, numRows: (endRowIdx - startRowIdx) + 1 });
-      if ((startRowIdx + numRows) > 8) {
-        const remainingRows = (numRows - (endRowIdx - startRowIdx) - 1);
+      if ((startRowIdx + numRows) > 9) {
+        const remainingRows = (numRows - (endRowIdx - startRowIdx));
         queryPlan.push({ sheet: 'this-week', startRow: 2, numRows: remainingRows });
       }
     }
