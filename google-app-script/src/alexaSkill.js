@@ -1,6 +1,6 @@
 const alexaSkill = {
-  ALEXA_USER_ID: "<not set>",
-  CLIENT_SECRET: "<not set>",
+  ALEXA_USER_ID: '<not set>',
+  CLIENT_SECRET: '<not set>',
 
   _fetchAlexaMessagingToken() {
     const url = 'https://api.amazon.com/auth/o2/token';
@@ -27,7 +27,7 @@ const alexaSkill = {
   _sendAlexaSkillMessage({ messageData }) {
     const { accessToken } = this._fetchAlexaMessagingToken();
     const url = `https://api.eu.amazonalexa.com/v1/skillmessages/users/${this.ALEXA_USER_ID}`;
-    console.log("Sending skill message to: " + url);
+    console.log(`Sending skill message to: ${url}`);
     const response = UrlFetchApp.fetch(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -38,7 +38,7 @@ const alexaSkill = {
         expiresAfterSeconds: 60,
       }),
     });
-    console.log("Skill Message Response...");
+    console.log('Skill Message Response...');
     console.log(response.getContentText());
   },
 
@@ -51,14 +51,14 @@ const alexaSkill = {
   },
 
   syncShoppingList() {
-    console.log("syncShoppingList");
+    console.log('syncShoppingList');
     const messageData = {
-      action: 'sync_shopping_list_items'
+      action: 'sync_shopping_list_items',
     };
     this._sendAlexaSkillMessage({ messageData });
-  }
-}
+  },
+};
 
 // Inject secrets from Google AppScript Env.
-alexaSkill.ALEXA_USER_ID = PropertiesService.getScriptProperties().getProperty("JONNY_ALEXA_USER_ID");
-alexaSkill.CLIENT_SECRET = PropertiesService.getScriptProperties().getProperty("ALEXA_SKILL_CLIENT_SECRET");
+alexaSkill.ALEXA_USER_ID = PropertiesService.getScriptProperties().getProperty('JONNY_ALEXA_USER_ID');
+alexaSkill.CLIENT_SECRET = PropertiesService.getScriptProperties().getProperty('ALEXA_SKILL_CLIENT_SECRET');

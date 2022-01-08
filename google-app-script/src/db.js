@@ -322,16 +322,15 @@ class MealPlannerDb {
     const listSheet = this.sheets.getList(listName);
     if (action === 'replace') {
       if (!Array.isArray(listItems)) {
-        throw new Error("Refusing to replace list contents with undefined value");
+        throw new Error('Refusing to replace list contents with undefined value');
       }
       const transformed = [];
       for (let i = 0; i < listItems.length; i++) {
-        transformed[i] = [ listItems[i] ];
+        transformed[i] = [listItems[i]];
       }
       listSheet.clear();
       listSheet.getRange(1, 1, listItems.length, 1).setValues(transformed);
-    }
-    else {
+    } else {
       const values = listSheet.getDataRange().getValues();
       const idx = values.findIndex((row) => row[0].toLowerCase() === item.toLowerCase());
       if (action === 'add') {
