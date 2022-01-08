@@ -1,6 +1,18 @@
 import React, { Fragment, useContext, useRef, useState } from 'react';
 import { Text, ActivityIndicator, Portal, Modal } from 'react-native-paper';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+  glass: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'white',
+    opacity: 0.8,
+  },
+});
 
 const SpinnerServiceContext = React.createContext();
 
@@ -26,6 +38,13 @@ export const SpinnerServiceProvider = ({ children }) => {
     </>
   );
 };
+
+export const Glass = ({ visible }) => (
+  <>
+    {visible && <View style={styles.glass} />}
+    {!visible && <></>}
+  </>
+);
 
 export const SpinnerDialog = ({ visible, message }) => (
   <Portal>

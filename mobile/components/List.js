@@ -7,7 +7,7 @@ import {
   useAppState, useListsUpdatedListener, usePlanUpdatedListener, useRecipesUpdatedListener,
 } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
-import { ToggleButtonGroup } from './widgets/WeekSelector';
+import { ToggleButtonGroup } from './widgets/buttons';
 import { MealPlanShoppingList, ShoppingList } from './widgets/ShoppingList';
 import { MealPlanApiCtx } from '../service/context';
 

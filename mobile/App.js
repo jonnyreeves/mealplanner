@@ -5,7 +5,7 @@ import { DefaultContainer } from './components/DefaultContainer';
 import GoogleLogin from './components/GoogleLogin';
 import { AppStateCtx, MealPlanApiCtx } from './service/context';
 import { theme } from './theme';
-import { SpinnerServiceProvider } from './components/widgets/LoadingSpinner';
+import { SpinnerServiceProvider } from './components/widgets/modals';
 
 export default function App() {
   const [appInitialised, setAppInitalised] = useState(false);

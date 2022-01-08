@@ -6,7 +6,7 @@ import {
 import { Text, Button, withTheme } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
 import { toPlannerGridData } from '../helpers/planData';
-import { WeekSelector } from './WeekSelector';
+import { WeekSelector } from './buttons';
 
 const styles = StyleSheet.create({
   plannerGridContainer: {

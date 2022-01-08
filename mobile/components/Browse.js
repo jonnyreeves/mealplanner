@@ -12,7 +12,7 @@ import { RecipeBrowser } from './widgets/RecipeBrowser';
 import {
   useAppState, useNavigationFocusListener, useRecipesUpdatedListener, useSessionState,
 } from './helpers/navigation';
-import { LoadingSpinner } from './widgets/LoadingSpinner';
+import { LoadingSpinner } from './widgets/modals';
 import { Routes } from '../constants';
 
 const styles = StyleSheet.create({

@@ -7,8 +7,8 @@ import { useNavigation } from '@react-navigation/native';
 import deepEqual from 'deep-equal';
 
 import { AppStateCtx } from '../service/context';
-import { LoadingSpinner } from './widgets/LoadingSpinner';
-import { ChipList } from './helpers/chips';
+import { LoadingSpinner } from './widgets/modals';
+import { ChipList } from './widgets/chips';
 import { Routes } from '../constants';
 import { useAppState, useNavigationFocusListener, useSessionState } from './helpers/navigation';
 import { IngredientsTable } from './widgets/Table';

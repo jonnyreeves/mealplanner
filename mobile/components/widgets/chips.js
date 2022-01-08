@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Chip } from 'react-native-paper';
 
-import { kebab } from './kebab';
+import { kebab } from '../helpers/kebab';
 
 const styles = StyleSheet.create({
   chipListContainer: {

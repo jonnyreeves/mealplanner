@@ -5,7 +5,7 @@ import {
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
-import { ChipList } from './helpers/chips';
+import { ChipList } from './widgets/chips';
 import { useAppState, useSessionState } from './helpers/navigation';
 import { ThemedTextInput } from './widgets/RecipeEditor';
 

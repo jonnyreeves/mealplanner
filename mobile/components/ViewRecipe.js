@@ -7,8 +7,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/core';
 
 import { AppStateCtx } from '../service/context';
-import { LoadingSpinner } from './widgets/LoadingSpinner';
-import { ChipList } from './helpers/chips';
+import { LoadingSpinner } from './widgets/modals';
+import { ChipList } from './widgets/chips';
 import { Routes } from '../constants';
 import { IngredientsTable, Table } from './widgets/Table';
 import { kebab } from './helpers/kebab';

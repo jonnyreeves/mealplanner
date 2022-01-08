@@ -5,7 +5,7 @@ import {
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
-import { ChipList } from './helpers/chips';
+import { ChipList } from './widgets/chips';
 import { Routes } from '../constants';
 import { useSessionState, useNavigationFocusListener, useNavigationBeforeRemove, useAppState } from './helpers/navigation';
 import { IngredientsTable } from './widgets/Table';

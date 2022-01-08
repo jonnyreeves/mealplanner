@@ -4,7 +4,7 @@ import { Button } from 'react-native-paper';
 import * as SecureStore from 'expo-secure-store';
 import * as GoogleAuthHelper from '../service/expoGooleAuthHelper';
 import { MealPlanApiCtx } from '../service/context';
-import { LoadingSpinner } from './widgets/LoadingSpinner';
+import { LoadingSpinner } from './widgets/modals';
 import { authConfig, hasRefreshToken } from '../state/auth';
 
 const SECURE_STORE_KEY = 'rt_v1';

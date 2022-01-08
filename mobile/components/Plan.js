@@ -12,7 +12,7 @@ import { MealPlanApiCtx } from '../service/context';
 
 import { toShortISOString, today } from './helpers/date';
 import { useAppState, useListsUpdatedListener, useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener, useSessionState } from './helpers/navigation';
-import { LoadingSpinner } from './widgets/LoadingSpinner';
+import { LoadingSpinner } from './widgets/modals';
 import { PlannerGrid } from './widgets/PlannerGrid';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
 

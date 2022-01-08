@@ -4,10 +4,10 @@ import { Alert, View } from 'react-native';
 import { HeaderBackButton } from '@react-navigation/elements';
 import { theme } from '../../theme';
 import { useAppState, useNavigationBeforeRemove, useSessionState } from '../helpers/navigation';
-import { useSpinner } from './LoadingSpinner';
+import { useSpinner } from './modals';
 import { useNavigation } from '@react-navigation/core';
 import { Routes } from '../../constants';
-import { ChipList } from '../helpers/chips';
+import { ChipList } from './chips';
 import { IngredientsTable } from './Table';
 
 export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onSaveComplete, navigationOptions }) => {
