@@ -1,18 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import {
-  Subheading, FAB, TextInput, Portal, Dialog, Button,
+  FAB,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import deepEqual from 'deep-equal';
 
-import { AppStateCtx } from '../service/context';
 import { LoadingSpinner } from './widgets/modals';
-import { ChipList } from './widgets/chips';
 import { Routes } from '../constants';
-import { useAppState, useNavigationFocusListener, useSessionState } from './helpers/navigation';
-import { IngredientsTable } from './widgets/Table';
-import { IngredientEditor, SaveChangesDialog, SourceEditor, TagEditor, ThemedTextInput, TitleEditor, useUnsavedChangesDectector } from './widgets/RecipeEditor';
+import { useNavigationFocusListener } from './helpers/navigation';
+import {
+  IngredientEditor, SourceEditor, TagEditor, TitleEditor, useUnsavedChangesDectector,
+} from './widgets/RecipeEditor';
+import { useAppState, useSessionState } from '../service/context';
 
 const styles = StyleSheet.create({
   viewContainer: {

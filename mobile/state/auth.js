@@ -43,4 +43,3 @@ export async function doRefresh() {
   };
   return AppAuth.refreshAsync(config, refreshToken);
 }
-

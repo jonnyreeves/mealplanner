@@ -17,7 +17,9 @@ const styles = StyleSheet.create({
   },
 });
 
-export const ChipList = ({ containerStyle, chipStyle, chipTextStyle, items, onClose, onPress, selectedItems = [] }) => {
+export const ChipList = ({
+  containerStyle, chipStyle, chipTextStyle, items, onClose, onPress, selectedItems = [],
+}) => {
   const chips = items.map((item) => (
     <Chip
       style={[styles.chipListItem, chipStyle]}

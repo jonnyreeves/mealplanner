@@ -1,47 +1,53 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Button, Subheading, TextInput } from 'react-native-paper';
+import React, {
+  useCallback, useEffect, useLayoutEffect, useRef, useState,
+} from 'react';
+import { Button, Subheading } from 'react-native-paper';
 import { Alert, View } from 'react-native';
 import { HeaderBackButton } from '@react-navigation/elements';
-import { theme } from '../../theme';
-import { useAppState, useNavigationBeforeRemove, useSessionState } from '../helpers/navigation';
-import { useSpinner } from './modals';
 import { useNavigation } from '@react-navigation/core';
+import { useNavigationBeforeRemove } from '../helpers/navigation';
+import { useSpinner } from './modals';
 import { Routes } from '../../constants';
 import { ChipList } from './chips';
-import { IngredientsTable } from './Table';
+import { IngredientsTable } from './tables';
+import { useSessionState } from '../../service/context';
+import { ThemedTextInput } from './input';
 
-export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onSaveComplete, navigationOptions }) => {
+export const useUnsavedChangesDectector = ({
+  changeDetector, presistChanges, onSaveComplete, navigationOptions,
+}) => {
   const sessionState = useSessionState();
   const navigation = useNavigation();
   const showSpinner = useSpinner();
 
   const [saveEnabled, setSaveEnabled] = useState(false);
+
+  const hasChanges = useCallback(
+    () => {
+      const result = changeDetector(sessionState.getRecipeModificationState());
+      console.log(`checking for change, hasChanges=${result}`);
+      return result;
+    },
+    [sessionState.getRecipeModificationState()],
+  );
+
   useEffect(
     () => {
-      console.log('useEffect for saveEnabled...')
-      setSaveEnabled(hasChanges())
+      console.log('useEffect for saveEnabled...');
+      setSaveEnabled(hasChanges());
     },
     [sessionState.getRecipeModificationState()],
   );
 
   // Used to by-pass the logic which shows the 'changed detected' modal when the user
   // discards changes or once the changes have been persisted.
-  let skipCheckRef = useRef(false);
-
-  const hasChanges = useCallback(
-    () => {
-      const result = changeDetector(sessionState.getRecipeModificationState());
-      console.log('checking for change, hasChanges=' + result);
-      return result;
-    },
-    [sessionState.getRecipeModificationState()]
-  );
+  const skipCheckRef = useRef(false);
 
   const discardChanges = () => {
     sessionState.clearRecipeModificationState();
     skipCheckRef.current = true;
     navigation.goBack();
-  }
+  };
 
   const saveChanges = () => {
     if (!hasChanges()) {
@@ -62,10 +68,10 @@ export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onS
         hideSpinner();
         Alert.alert(
           'Failed to save recipe',
-          `Something went wrong trying to save your recipe: ${err.message}`
+          `Something went wrong trying to save your recipe: ${err.message}`,
         );
       });
-  }
+  };
 
   const showUnsavedChangesAlert = () => Alert.alert(
     'Unsaved Changes',
@@ -100,34 +106,18 @@ export const useUnsavedChangesDectector = ({ changeDetector, presistChanges, onS
   return [saveChanges, saveEnabled];
 };
 
-export const ThemedTextInput = ({ style, value, label, onChangeText, onSubmitEditing, multiline, placeholder, ...props }) => (
-  <TextInput
-    style={style}
-    label={label}
-    mode="outlined"
-    placeholder={placeholder}
-    theme={{ ...theme, roundness: 8 }}
-    value={value}
-    onChangeText={onChangeText}
-    onSubmitEditing={onSubmitEditing}
-    multiline={multiline}
-    blurOnSubmit
-    {...props}
-  />
-);
-
 export const TitleEditor = ({ title, setTitle }) => {
   const sessionState = useSessionState();
   const onTitleChanged = (text) => {
     sessionState.updateRecipeModificationState({ name: text });
     setTitle(text);
-  }
+  };
   return (
     <ThemedTextInput
       style={{ marginBottom: 10 }}
       value={title}
       label="Recipe Name"
-      multiline={true}
+      multiline
       onChangeText={onTitleChanged}
     />
   );
@@ -138,12 +128,12 @@ export const SourceEditor = ({ source, setSource }) => {
   const onSourceChanged = (text) => {
     sessionState.updateRecipeModificationState({ source: text });
     setSource(text);
-  }
+  };
   return (
     <ThemedTextInput
       label="Recipe Source"
       value={source}
-      multiline={true}
+      multiline
       onChangeText={onSourceChanged}
     />
   );

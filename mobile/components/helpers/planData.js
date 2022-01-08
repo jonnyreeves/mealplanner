@@ -3,7 +3,6 @@ import { getShortDayOfTheWeek, today, toShortISOString } from './date';
 // The Meal Plan API starts returning entries from the rollover date (Friday);
 // This logic will swap the order around so the array starts from Monday.
 function toNaturalWeekOrder(entries) {
-  const headers = [{ id: 'blank', isHeader: true, name: '' }, { id: 'lunch', isHeader: true, name: 'Lunch' }, { id: 'dinner', isHeader: true, name: 'Dinner' }];
   const first3Days = entries.slice(0, 0 + 9);
   const remaining4Days = entries.slice(0 + 9, 0 + 9 + 12);
   return [].concat(remaining4Days).concat(first3Days);

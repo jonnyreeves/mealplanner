@@ -1,15 +1,22 @@
-import React, { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import React, {
+  useState,
+} from 'react';
 import {
-  Subheading, FAB, TextInput, Portal, Dialog, Button, ActivityIndicator,
+  ScrollView, StyleSheet, View,
+} from 'react-native';
+import {
+  FAB,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
-import { ChipList } from './widgets/chips';
 import { Routes } from '../constants';
-import { useSessionState, useNavigationFocusListener, useNavigationBeforeRemove, useAppState } from './helpers/navigation';
-import { IngredientsTable } from './widgets/Table';
-import { IngredientEditor, SourceEditor, TagEditor, ThemedTextInput, TitleEditor, useUnsavedChangesDectector } from './widgets/RecipeEditor';
+import {
+  useNavigationFocusListener,
+} from './helpers/navigation';
+import {
+  IngredientEditor, SourceEditor, TagEditor, TitleEditor, useUnsavedChangesDectector,
+} from './widgets/RecipeEditor';
+import { useAppState, useSessionState } from '../service/context';
 
 const styles = StyleSheet.create({
   viewContainer: {

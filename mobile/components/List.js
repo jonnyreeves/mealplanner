@@ -1,26 +1,22 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { SectionList, StyleSheet, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as WebBrowser from 'expo-web-browser';
 import { toIngredientList } from './helpers/ingredientList';
 import {
-  useAppState, useListsUpdatedListener, usePlanUpdatedListener, useRecipesUpdatedListener,
+  useListsUpdatedListener, usePlanUpdatedListener, useRecipesUpdatedListener,
 } from './helpers/navigation';
 import { toPlannerGridData } from './helpers/planData';
 import { ToggleButtonGroup } from './widgets/buttons';
 import { MealPlanShoppingList, ShoppingList } from './widgets/ShoppingList';
-import { MealPlanApiCtx } from '../service/context';
-
-const styles = StyleSheet.create({
-});
+import { useAppState, useMealPlanApi } from '../service/context';
 
 export default function List() {
   const appState = useAppState();
-  const mealPlanApi = useContext(MealPlanApiCtx);
+  const mealPlanApi = useMealPlanApi();
 
   const [shoppingLists, setShoppingLists] = useState([]);
   const [planLists, setPlanLists] = useState({});
-
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
 
   const buildPlanList = (gridData, targetWeek) => {

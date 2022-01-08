@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { RefreshControl, SectionList, View } from 'react-native';
 import {
   Divider, Checkbox, Text, IconButton, Title,

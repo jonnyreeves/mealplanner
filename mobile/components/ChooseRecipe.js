@@ -1,4 +1,6 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+  useEffect, useRef, useState,
+} from 'react';
 import {
   StyleSheet, View,
 } from 'react-native';
@@ -6,7 +8,8 @@ import { useNavigation } from '@react-navigation/native';
 
 import { getDayOfTheWeek } from './helpers/date';
 import { RecipeBrowser } from './widgets/RecipeBrowser';
-import { useAppState, useNavigationFocusListener } from './helpers/navigation';
+import { useNavigationFocusListener } from './helpers/navigation';
+import { useAppState } from '../service/context';
 
 const styles = StyleSheet.create({
   viewContainer: {

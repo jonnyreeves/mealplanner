@@ -1,17 +1,23 @@
 import { useNavigation } from '@react-navigation/core';
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, {
+  useState, useEffect,
+} from 'react';
 import {
   BackHandler,
   Linking,
   Platform, Pressable, StyleSheet, View,
 } from 'react-native';
-import { Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface } from 'react-native-paper';
+import {
+  Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface,
+} from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Routes } from '../constants';
-import { MealPlanApiCtx } from '../service/context';
+import { useAppState, useMealPlanApi, useSessionState } from '../service/context';
 
 import { toShortISOString, today } from './helpers/date';
-import { useAppState, useListsUpdatedListener, useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener, useSessionState } from './helpers/navigation';
+import {
+  useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener,
+} from './helpers/navigation';
 import { LoadingSpinner } from './widgets/modals';
 import { PlannerGrid } from './widgets/PlannerGrid';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
@@ -47,11 +53,11 @@ const styles = StyleSheet.create({
   },
 });
 
-export default function Plan({ route }) {
-  const { params } = route;
-
+export default function Plan() {
   const navigation = useNavigation();
-  const mealPlanApi = useContext(MealPlanApiCtx);
+  const appState = useAppState();
+  const sessionState = useSessionState();
+  const mealPlanApi = useMealPlanApi();
 
   const [selectedMeal, setSelectedMeal] = useState(null);
   const [todaysMeal, setTodaysMeal] = useState(null);
@@ -61,14 +67,10 @@ export default function Plan({ route }) {
 
   const [recipes, setRecipes] = useState([]);
   const [planData, setPlanData] = useState(null);
-
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
 
   const [refreshing, setRefreshing] = useState(false);
-
-  const appState = useAppState();
-  const sessionState = useSessionState();
 
   const refresh = () => {
     setRecipes(appState.getRecipes());

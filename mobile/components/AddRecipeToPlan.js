@@ -2,7 +2,8 @@ import { useNavigation } from '@react-navigation/core';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useAppState, usePlanUpdatedListener } from './helpers/navigation';
+import { useAppState } from '../service/context';
+import { usePlanUpdatedListener } from './helpers/navigation';
 import { PlannerGrid } from './widgets/PlannerGrid';
 
 const styles = StyleSheet.create({

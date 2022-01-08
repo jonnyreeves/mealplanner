@@ -1,5 +1,7 @@
 import React, { useContext, useState } from 'react';
-import { DefaultTheme, Provider as PaperProvider, Snackbar, Text } from 'react-native-paper';
+import {
+  Provider as PaperProvider, Snackbar,
+} from 'react-native-paper';
 
 import { DefaultContainer } from './components/DefaultContainer';
 import GoogleLogin from './components/GoogleLogin';

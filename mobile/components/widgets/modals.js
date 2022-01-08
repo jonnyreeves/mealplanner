@@ -1,5 +1,9 @@
-import React, { Fragment, useContext, useRef, useState } from 'react';
-import { Text, ActivityIndicator, Portal, Modal } from 'react-native-paper';
+import React, {
+  Fragment, useContext, useRef, useState,
+} from 'react';
+import {
+  Text, ActivityIndicator, Portal, Modal,
+} from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -48,13 +52,21 @@ export const Glass = ({ visible }) => (
 
 export const SpinnerDialog = ({ visible, message }) => (
   <Portal>
-    <Modal dismissable={false} visible={visible} contentContainerStyle={{ borderRadius: 15, backgroundColor: 'white', margin: 40, height: 180, padding: 20 }}>
+    <Modal
+      dismissable={false}
+      visible={visible}
+      contentContainerStyle={{
+        borderRadius: 15, backgroundColor: 'white', margin: 40, height: 180, padding: 20,
+      }}
+    >
       <LoadingSpinner message={message} size="large" />
     </Modal>
   </Portal>
 );
 
-export const LoadingSpinner = ({ style, message = 'Fetching data', delay = 0, size }) => {
+export const LoadingSpinner = ({
+  style, message = 'Fetching data', delay = 0, size,
+}) => {
   const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {

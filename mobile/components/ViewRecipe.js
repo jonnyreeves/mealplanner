@@ -1,17 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Linking, StyleSheet, View, ScrollView } from 'react-native';
+import React, { useState } from 'react';
 import {
-  Provider, Title, Button, Text, Subheading, FAB, Chip, TextInput,
+  Linking, StyleSheet, View, ScrollView,
+} from 'react-native';
+import {
+  Title, Button, Text, Subheading, FAB,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/core';
 
-import { AppStateCtx } from '../service/context';
+import { useAppState } from '../service/context';
 import { LoadingSpinner } from './widgets/modals';
 import { ChipList } from './widgets/chips';
 import { Routes } from '../constants';
-import { IngredientsTable, Table } from './widgets/Table';
-import { kebab } from './helpers/kebab';
+import { IngredientsTable } from './widgets/tables';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -34,13 +35,13 @@ export default function ViewRecipe({ route }) {
   const { recipeId, showAddButton } = route.params;
 
   const navigation = useNavigation();
-  const appState = useContext(AppStateCtx);
+  const appState = useAppState();
 
   const [recipe, setRecipe] = useState(null);
 
-  useFocusEffect(React.useCallback(() => {
+  useFocusEffect(() => {
     setRecipe(appState.getRecipeById(recipeId));
-  }));
+  });
 
   if (!recipe) return (<LoadingSpinner message="Fetching recipe details" />);
 

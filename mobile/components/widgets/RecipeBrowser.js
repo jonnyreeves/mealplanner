@@ -1,13 +1,13 @@
-import React, { useState, useRef, useImperativeHandle, useEffect } from 'react';
+import React, {
+  useState, useRef, useImperativeHandle,
+} from 'react';
 import {
   FlatList, StyleSheet, TouchableOpacity, View,
 } from 'react-native';
 import {
   Text, Chip, Searchbar, Button, Divider,
 } from 'react-native-paper';
-import { ChipList } from './chips';
 
-import { theme } from '../../theme';
 import { kebab } from '../helpers/kebab';
 
 const styles = StyleSheet.create({
@@ -55,7 +55,9 @@ const styles = StyleSheet.create({
   },
 });
 
-export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearchSubmitted, showTags }, ref) => {
+export const RecipeBrowser = React.forwardRef(({
+  recipes, onRecipePress, onSearchSubmitted,
+}, ref) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [query, setQuery] = useState('');
 
@@ -178,8 +180,6 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
     </View>
   );
 
-  const divvy = () => (<Divider />);
-
   return (
     <FlatList
       ListHeaderComponent={(
@@ -199,7 +199,7 @@ export const RecipeBrowser = React.forwardRef(({ recipes, onRecipePress, onSearc
       )}
       ref={flatlistRef}
       contentContainerStyle={{ padding: 12 }}
-      ItemSeparatorComponent={divvy}
+      ItemSeparatorComponent={Divider}
       data={visibleRecipes}
       keyExtractor={(recipe) => recipe.id}
       renderItem={renderRecipe}

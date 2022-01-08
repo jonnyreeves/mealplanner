@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet, View, TouchableOpacity, FlatList, RefreshControl,
 } from 'react-native';
-import { Text, Button, withTheme } from 'react-native-paper';
+import { Text, withTheme } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
 import { toPlannerGridData } from '../helpers/planData';
 import { WeekSelector } from './buttons';
@@ -36,11 +36,15 @@ const PlannerGridLabel = ({ dayOfTheWeek }) => (
   </View>
 );
 
-export const PlannerGrid = withTheme(({ theme, swapSource, planData, onMealSelected, refreshing, onRefresh }) => {
+export const PlannerGrid = withTheme(({
+  theme, swapSource, planData, onMealSelected, refreshing, onRefresh,
+}) => {
   const { colors } = theme;
   const [selectedWeek, setSelectedWeek] = useState('thisWeek');
 
-  const PlannerGridMeaButton = ({ onPress, onLongPress, mealName, additionalStyles = [] }) => (
+  const PlannerGridMeaButton = ({
+    onPress, onLongPress, mealName, additionalStyles = [],
+  }) => (
     <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.planListEntry, { backgroundColor: colors.accent }, ...additionalStyles]}>
       <Text style={{ textAlign: 'center' }}>{mealName}</Text>
     </TouchableOpacity>

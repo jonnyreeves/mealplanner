@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/core';
-import { useEffect, useContext } from 'react';
-import { AppStateCtx, SessionStateCtx } from '../../service/context';
+import { useEffect } from 'react';
+import { useAppState } from '../../service/context';
 
 export const useNavigationFocusListener = (onFocus) => {
   const navigation = useNavigation();
@@ -20,9 +20,6 @@ export const useNavigationBeforeRemove = (handler) => {
     };
   }, [navigation]);
 };
-
-export const useAppState = () => useContext(AppStateCtx);
-export const useSessionState = () => useContext(SessionStateCtx);
 
 export const useRecipesUpdatedListener = (onUpdated) => {
   const appState = useAppState();

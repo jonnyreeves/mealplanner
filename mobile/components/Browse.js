@@ -1,5 +1,5 @@
 import React, {
-  useContext, useEffect, useLayoutEffect, useRef, useState,
+  useLayoutEffect, useRef, useState,
 } from 'react';
 import {
   StyleSheet,
@@ -10,10 +10,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RecipeBrowser } from './widgets/RecipeBrowser';
 import {
-  useAppState, useNavigationFocusListener, useRecipesUpdatedListener, useSessionState,
+  useNavigationFocusListener, useRecipesUpdatedListener,
 } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/modals';
 import { Routes } from '../constants';
+import { useAppState, useSessionState } from '../service/context';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -59,6 +60,19 @@ export default function Browse({ route }) {
     navigation.navigate(Routes.ViewRecipe, { recipeId: recipe.id, showAddButton: true });
   };
 
+  const RecipeAddedSnackbar = () => {
+    const message = `Added recipe: ${createdRecipeTitle}`;
+    return (
+      <Snackbar
+        visible={addedRecipeNotificationVisible}
+        onDismiss={() => setAddedRecipeNotificationVisible(false)}
+        duration={5000}
+      >
+        {message}
+      </Snackbar>
+    );
+  };
+
   const hasRecipes = recipes.length > 0;
 
   return (
@@ -74,15 +88,7 @@ export default function Browse({ route }) {
         )}
         <FAB style={styles.addRecipeFAB} icon="plus" onPress={() => navigation.navigate(Routes.CreateRecipe)} />
       </SafeAreaView>
-      <Snackbar
-        visible={addedRecipeNotificationVisible}
-        onDismiss={() => setAddedRecipeNotificationVisible(false)}
-        duration={5000}
-      >
-        Added Recipe:
-        {' '}
-        {createdRecipeTitle}
-      </Snackbar>
+      <RecipeAddedSnackbar />
     </>
   );
 }

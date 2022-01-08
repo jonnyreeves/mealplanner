@@ -1,14 +1,15 @@
-import React, { useContext, useLayoutEffect, useState } from 'react';
-import { AppState, FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useLayoutEffect, useState } from 'react';
 import {
-  Text, Title, Searchbar, TextInput, Portal, Modal,
+  FlatList, StyleSheet, TouchableOpacity, View,
+} from 'react-native';
+import {
+  Text, Title, Searchbar, Portal, Modal,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
 import { kebab } from './helpers/kebab';
-import { AppStateCtx } from '../service/context';
-import { useAppState, useSessionState } from './helpers/navigation';
-import { ThemedTextInput } from './widgets/RecipeEditor';
+import { useAppState, useSessionState } from '../service/context';
+import { ThemedTextInput } from './widgets/input';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -108,7 +109,11 @@ export default function EditRecipeIngredients() {
 
   const createNewIngredient = (
     <TouchableOpacity onPress={() => { onSubmitEditing(); }}>
-      <Text style={styles.itemText}>{query} (create new)</Text>
+      <Text style={styles.itemText}>
+        {query}
+        {' '}
+        (create new)
+      </Text>
     </TouchableOpacity>
   );
 

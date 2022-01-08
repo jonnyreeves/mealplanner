@@ -1,6 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
-import { DefaultTheme, Text, withTheme } from 'react-native-paper';
+import React, { useEffect } from 'react';
+import { withTheme } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';

@@ -1,13 +1,15 @@
-import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  useLayoutEffect, useState,
+} from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
-  Provider, Title, Button, Text, Subheading, FAB, Chip, TextInput, Portal, Modal,
+  Title, Button,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
 import { ChipList } from './widgets/chips';
-import { useAppState, useSessionState } from './helpers/navigation';
-import { ThemedTextInput } from './widgets/RecipeEditor';
+import { useAppState, useSessionState } from '../service/context';
+import { ThemedTextInput } from './widgets/input';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -25,17 +27,17 @@ export default function EditRecipeTags() {
   const [newTagTextEntry, setNewTagTextEntry] = useState('');
   const [tags, setTags] = useState([]);
 
+  const modifyTags = (newTags) => {
+    sessionState.updateRecipeModificationState({ tags: newTags });
+    setTags(newTags);
+  };
+
   const onCreateNewTag = (newTag) => {
     console.log(' create new tag ');
     if (!tags.includes(newTag)) {
       modifyTags([...tags, newTag]);
     }
     setNewTagTextEntry('');
-  };
-
-  const modifyTags = (newTags) => {
-    sessionState.updateRecipeModificationState({ tags: newTags });
-    setTags(newTags);
   };
 
   useLayoutEffect(() => {
