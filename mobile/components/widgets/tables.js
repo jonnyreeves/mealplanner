@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
 
@@ -51,7 +51,20 @@ const ingredientsTableStyles = StyleSheet.create({
   },
 });
 
-export const IngredientsTable = ({ ingredients, onDelete }) => (
+const IngredientValue = ({ ing, onPress }) => {
+  let _onPress;
+  if (onPress) {
+    _onPress = () => onPress(ing);
+  }
+  return (
+    <>
+      <Text onPress={_onPress} style={ingredientsTableStyles.qtyCell}>{ing.quantity}</Text>
+      <Text onPress={_onPress} style={ingredientsTableStyles.ingredientCell}>{ing.name}</Text>
+    </>
+  );
+};
+
+export const IngredientsTable = ({ ingredients, onDelete, onPress }) => (
   <Table
     rows={ingredients}
     tableStyles={{ marginHorizontal: 20, marginTop: 8 }}
@@ -59,8 +72,7 @@ export const IngredientsTable = ({ ingredients, onDelete }) => (
     keyExtractor={(ing) => kebab(ing.value)}
     renderRow={(ing) => (
       <>
-        <Text style={ingredientsTableStyles.qtyCell}>{ing.quantity}</Text>
-        <Text style={ingredientsTableStyles.ingredientCell}>{ing.name}</Text>
+        <IngredientValue ing={ing} onPress={onPress} />
         {typeof onDelete === 'function' && <IconButton style={ingredientsTableStyles.deleteButton} icon="close" onPress={() => onDelete(ing)} />}
       </>
     )}

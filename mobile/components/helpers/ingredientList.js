@@ -1,4 +1,4 @@
-const alphabetically = (a, b) => {
+export const alphabetically = (a, b) => {
   const aa = a.toLowerCase();
   const bb = b.toLowerCase();
   if (aa === bb) return 0;

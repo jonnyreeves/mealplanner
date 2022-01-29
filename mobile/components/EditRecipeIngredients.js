@@ -38,20 +38,26 @@ const styles = StyleSheet.create({
 
 const MinSearchLength = 2;
 
-export default function EditRecipeIngredients() {
+export default function EditRecipeIngredients({ route }) {
   const navigation = useNavigation();
   const appState = useAppState();
   const sessionState = useSessionState();
+
+  const ingNameParam = route.params?.ingredientName;
+  console.log(ingNameParam);
 
   const [query, setQuery] = useState('');
   const [qtyModalVisible, setQtyModalVisible] = useState(false);
 
   const [allIngredients, setAllIngredients] = useState([]);
-  const [newIngredientName, setNewIngredientName] = useState('');
+  const [newIngredientName, setNewIngredientName] = useState(ingNameParam || '');
   const [newIngredientQty, setNewIngredientQty] = useState('1');
   const [ingredientAdded, setIngredientAdded] = useState(false);
 
-  const [ingredients, setIngredients] = useState([]);
+  const findRecipeIngredient = (ingredientName) => {
+    const { ingredients } = sessionState.getRecipeModificationState();
+    return ingredients.find((ing) => ing.name === ingredientName);
+  };
 
   const onNewIngredientAdded = () => {
     let newValue = '';
@@ -62,14 +68,25 @@ export default function EditRecipeIngredients() {
       newValue = `${newIngredientQty} ${newIngredientName}`;
     }
 
+    let { ingredients } = sessionState.getRecipeModificationState();
+    let perfomUpdate = true;
+
     const newIngredient = {
       name: newIngredientName,
       quantity: newIngredientQty,
       value: newValue,
     };
 
-    const targetIdx = ingredients.findIndex((ing) => ing.value === newValue);
-    if (targetIdx === -1) {
+    const existingIngredient = findRecipeIngredient(newIngredientName);
+    if (existingIngredient) {
+      if (existingIngredient.value === newValue) {
+        perfomUpdate = false;
+      } else {
+        // Remove the previous ingredient entry so we can replace it with the new (updated) one.
+        ingredients = ingredients.filter((ing) => ing.name !== newIngredientName);
+      }
+    }
+    if (perfomUpdate) {
       sessionState.updateRecipeModificationState({ ingredients: [...ingredients, newIngredient] });
     }
 
@@ -90,29 +107,38 @@ export default function EditRecipeIngredients() {
     }
   }, [ingredientAdded]);
 
-  useLayoutEffect(() => {
-    setAllIngredients(appState.getAllIngredients());
-    const modState = sessionState.getRecipeModificationState();
-    if (modState) {
-      setIngredients(modState.ingredients || []);
-    }
-  }, [sessionState.getRecipeModificationState()]);
-
   const searchIngredients = (source) => {
     const sanatized = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
     const re = new RegExp(`${sanatized}`, 'i');
     return source.filter((ingredient) => ingredient.search(re) >= 0);
   };
 
-  const onSubmitEditing = () => {
-    setNewIngredientName(query);
+  const onIngredientPressed = (ingredientName) => {
+    setNewIngredientName(ingredientName);
+    const knownIng = findRecipeIngredient(ingredientName);
+    if (knownIng) {
+      // If we are modifying an existing recipe ingredient then pickup the currently specificed quantity so the user can edit it.
+      setNewIngredientQty(knownIng.quantity);
+    }
     setQtyModalVisible(true);
   };
 
-  const onIngredientPressed = (ingredient) => {
-    setNewIngredientName(ingredient);
-    setQtyModalVisible(true);
+  const onSubmitEditing = () => {
+    onIngredientPressed(query);
   };
+
+  useLayoutEffect(() => {
+    setAllIngredients(appState.getAllIngredients());
+
+    // FIXME: Ingredient editing should be part of the RecipeEditor screen and not part of the
+    // EditRecipeIngredients screen; I just put it here because I'm being lazy.
+    if (ingNameParam) {
+      const knownIng = findRecipeIngredient(ingNameParam);
+      if (knownIng) {
+        onIngredientPressed(knownIng.name);
+      }
+    }
+  }, [sessionState.getRecipeModificationState()]);
 
   const renderIngredient = ({ item }) => (
     <TouchableOpacity onPress={() => { onIngredientPressed(item); }}>

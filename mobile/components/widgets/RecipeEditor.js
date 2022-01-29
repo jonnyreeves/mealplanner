@@ -12,6 +12,7 @@ import { ChipList } from './chips';
 import { IngredientsTable } from './tables';
 import { useSessionState } from '../../service/context';
 import { ThemedTextInput } from './input';
+import { alphabetically } from '../helpers/ingredientList';
 
 export const useUnsavedChangesDectector = ({
   changeDetector, presistChanges, onSaveComplete, navigationOptions,
@@ -183,6 +184,11 @@ export const IngredientEditor = ({ ingredients, setIngredients }) => {
     setIngredients(newIngredients);
   };
 
+  const onPressIngredient = (ingredient) => {
+    console.log(ingredient);
+    navigation.push(Routes.EditRecipeIngredients, { ingredientName: ingredient.name });
+  };
+
   const onAddIngredient = () => navigation.push(Routes.EditRecipeIngredients);
 
   return (
@@ -193,6 +199,7 @@ export const IngredientEditor = ({ ingredients, setIngredients }) => {
       </View>
       <IngredientsTable
         ingredients={ingredients}
+        onPress={(ingredient) => onPressIngredient(ingredient)}
         onDelete={(ingredient) => onDeleteIngredient(ingredient.value)}
       />
     </>
