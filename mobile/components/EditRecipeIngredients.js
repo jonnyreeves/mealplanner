@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   FlatList, StyleSheet, TouchableOpacity, View,
 } from 'react-native';
@@ -49,6 +49,7 @@ export default function EditRecipeIngredients() {
   const [allIngredients, setAllIngredients] = useState([]);
   const [newIngredientName, setNewIngredientName] = useState('');
   const [newIngredientQty, setNewIngredientQty] = useState('1');
+  const [ingredientAdded, setIngredientAdded] = useState(false);
 
   const [ingredients, setIngredients] = useState([]);
 
@@ -74,8 +75,20 @@ export default function EditRecipeIngredients() {
 
     setNewIngredientName('');
     setNewIngredientQty('');
-    navigation.goBack();
+    setQtyModalVisible(false);
+
+    // HACK: Setting this state will cause the app to navigate back from this screen on
+    // the next render.
+    setIngredientAdded(true);
   };
+
+  // HACK: We need to dismiss the QtyModal before we navigate away otherwise we break
+  // the backNavigation gesture.
+  useEffect(() => {
+    if (ingredientAdded) {
+      navigation.goBack();
+    }
+  }, [ingredientAdded]);
 
   useLayoutEffect(() => {
     setAllIngredients(appState.getAllIngredients());
@@ -174,6 +187,7 @@ export default function EditRecipeIngredients() {
               {showQueryTooShort && <QueryTooShort />}
             </>
           )}
+          extraData={ingredientAdded}
           data={visibleIngredients}
           keyExtractor={(ingredient) => kebab(ingredient || '-')}
           renderItem={(renderIngredient)}
