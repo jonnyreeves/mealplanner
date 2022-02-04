@@ -3,13 +3,14 @@ import {
   FlatList, StyleSheet, TouchableOpacity, View,
 } from 'react-native';
 import {
-  Text, Title, Searchbar, Portal, Modal,
+  Text, Title, Searchbar, Portal, Modal, Divider,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
 import { kebab } from './helpers/kebab';
 import { useAppState, useSessionState } from '../service/context';
 import { ThemedTextInput } from './widgets/input';
+import { alphabetically } from './helpers/ingredientList';
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -22,6 +23,7 @@ const styles = StyleSheet.create({
   },
   itemText: {
     fontSize: 18,
+    marginVertical: 8,
   },
   queryTooShortText: {
     textAlign: 'center',
@@ -124,7 +126,7 @@ export default function EditRecipeIngredients({ route }) {
   };
 
   const onSubmitEditing = () => {
-    onIngredientPressed(query);
+    onIngredientPressed(query.trim().toLowerCase());
   };
 
   useLayoutEffect(() => {
@@ -146,26 +148,21 @@ export default function EditRecipeIngredients({ route }) {
     </TouchableOpacity>
   );
 
-  const createNewIngredient = (
-    <TouchableOpacity onPress={() => { onSubmitEditing(); }}>
-      <Text style={styles.itemText}>
-        {query}
-        {' '}
-        (create new)
-      </Text>
-    </TouchableOpacity>
-  );
+  const CreateNewIngredient = () => {
+    const label = `🆕 ${query}`;
+    return (
+      <TouchableOpacity onPress={() => { onSubmitEditing(); }}>
+        <Text style={styles.itemText}>
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   let visibleIngredients = [];
   if (query.trim().length >= MinSearchLength) {
     visibleIngredients = searchIngredients(allIngredients)
-      .sort((a, b) => {
-        const aa = a.toLowerCase().charCodeAt(0);
-        const bb = b.toLowerCase().charCodeAt(0);
-        if (aa === bb) return 0;
-        if (aa > bb) return 1;
-        return -1;
-      });
+      .sort(alphabetically);
   }
 
   const QueryTooShort = () => {
@@ -175,7 +172,7 @@ export default function EditRecipeIngredients({ route }) {
     );
   };
 
-  const showCreateNewIngredient = query.trim().length >= MinSearchLength && !visibleIngredients.includes(query.trim());
+  const showCreateNewIngredient = query.trim().length >= MinSearchLength && !visibleIngredients.includes(query.trim().toLowerCase());
   const showQueryTooShort = query.trim().length < MinSearchLength;
   const qtyModalTitle = `Required quantity of ${newIngredientName}`;
 
@@ -204,17 +201,19 @@ export default function EditRecipeIngredients({ route }) {
                 style={styles.searchbar}
                 onSubmitEditing={onSubmitEditing}
                 autoCorrect={false}
+                autoCapitalize="none"
                 placeholder="Ingredient name"
                 value={query}
                 onChangeText={setQuery}
                 returnKeyType="done"
               />
-              {showCreateNewIngredient && createNewIngredient}
+              {showCreateNewIngredient && <CreateNewIngredient />}
               {showQueryTooShort && <QueryTooShort />}
             </>
           )}
           extraData={ingredientAdded}
           data={visibleIngredients}
+          ItemSeparatorComponent={Divider}
           keyExtractor={(ingredient) => kebab(ingredient || '-')}
           renderItem={(renderIngredient)}
         />

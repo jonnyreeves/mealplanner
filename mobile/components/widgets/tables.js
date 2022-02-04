@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { IconButton, Text } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
+import { sortedIngredients } from '../helpers/ingredientList';
 
 const _tableStyles = StyleSheet.create({
   table: {
@@ -66,7 +67,7 @@ const IngredientValue = ({ ing, onPress }) => {
 
 export const IngredientsTable = ({ ingredients, onDelete, onPress }) => (
   <Table
-    rows={ingredients}
+    rows={sortedIngredients(ingredients)}
     tableStyles={{ marginHorizontal: 20, marginTop: 8 }}
     rowStyles={ingredientsTableStyles.tableRow}
     keyExtractor={(ing) => kebab(ing.value)}

@@ -7,6 +7,7 @@ import {
 import {
   Text, Chip, Searchbar, Button, Divider,
 } from 'react-native-paper';
+import { alphabetically } from '../helpers/ingredientList';
 
 import { kebab } from '../helpers/kebab';
 
@@ -135,7 +136,7 @@ export const RecipeBrowser = React.forwardRef(({
   );
 
   const renderRecipe = ({ item }) => {
-    const ingredientsList = `${item.ingredients.map((ing) => ing.name).join(', ')}`;
+    const ingredientsList = `${item.ingredients.map((ing) => ing.name).sort(alphabetically).join(', ')}`;
     const tagList = item.tags.map((tag) => {
       const key = `${item.name}-${tag}`;
       return <MiniTag value={tag} key={key} />;

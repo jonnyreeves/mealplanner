@@ -6,6 +6,16 @@ export const alphabetically = (a, b) => {
   return -1;
 };
 
+export const sortedIngredients = (ingredients) => ingredients
+  .concat()
+  .sort((a, b) => {
+    const aa = a.name.toLowerCase();
+    const bb = b.name.toLowerCase();
+    if (aa === bb) return 0;
+    if (aa > bb) return 1;
+    return -1;
+  });
+
 export function toIngredientList(planEntries, recipes) {
   const recipeByName = {};
   const byIngredient = {};
