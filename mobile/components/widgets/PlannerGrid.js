@@ -28,6 +28,9 @@ const styles = StyleSheet.create({
     borderStyle: 'dotted',
     borderWidth: 4,
   },
+  planListEntryText: {
+    textAlign: 'center',
+  },
 });
 
 const PlannerGridLabel = ({ dayOfTheWeek }) => (
@@ -46,7 +49,7 @@ export const PlannerGrid = withTheme(({
     onPress, onLongPress, mealName, additionalStyles = [],
   }) => (
     <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.planListEntry, { backgroundColor: colors.accent }, ...additionalStyles]}>
-      <Text style={{ textAlign: 'center' }}>{mealName}</Text>
+      <Text numberOfLines={2} style={styles.planListEntryText}>{mealName}</Text>
     </TouchableOpacity>
   );
 
