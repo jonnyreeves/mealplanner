@@ -25,16 +25,16 @@ export function toPlannerGridData(planEntries) {
       // The label item is used to denote the day of the week in the planner grid.
       allGridData.push({ id: item.date, name: getShortDayOfTheWeek(item.date), isLabel: true });
       allGridData.push({
-        id: `${item.date}-lunch`, name: item.lunch.name, slot: 'lunch', date: item.date, recipe: item.lunch.recipe,
+        id: `${item.date}-lunch`, name: item.lunch.name, slot: 'lunch', date: item.date, recipe: item.lunch.recipe, recipeId: item.lunch.id,
       });
       allGridData.push({
-        id: `${item.date}-dinner`, name: item.dinner.name, slot: 'dinner', date: item.date, recipe: item.dinner.recipe,
+        id: `${item.date}-dinner`, name: item.dinner.name, slot: 'dinner', date: item.date, recipe: item.dinner.recipe, recipeId: item.dinner.id,
       });
     });
 
   return {
-    thisWeek: toNaturalWeekOrder(allGridData.slice(0, allGridData.length / 2)),
-    nextWeek: toNaturalWeekOrder(allGridData.slice(allGridData.length / 2, allGridData.length)),
+    thisWeek: allGridData.slice(0, allGridData.length / 2),
+    nextWeek: allGridData.slice(allGridData.length / 2, allGridData.length),
   };
 }
 
