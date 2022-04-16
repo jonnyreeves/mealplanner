@@ -16,6 +16,9 @@ export default class AppState {
     this._planByDate = {};
     this._listsByName = {};
 
+    // This is being used to shim plan api v1 => v2
+    this._hack_planIdByDate = {};
+
     this._api.addListener('plan_fetched', (planData) => this._onPlanFetched(planData));
     this._api.addListener('recipes_fetched', (recipes) => this._onRecipesFetched(recipes));
     this._api.addListener('lists_fetched', (listData) => this._onListsFetched(listData));
@@ -54,22 +57,32 @@ export default class AppState {
   }
 
   getPlanEntries() {
+    throw new Error("unused getPlanEntries!");
     return Object.values(this._planByDate);
   }
 
   async setPlanEntry({ date, slot, recipeName }) {
     const srcEntry = this._planByDate[date];
+    const recipe = this.findRecipeByName(recipeName);
     this._setPlanByDate({
       ...this._planByDate,
       [date]: {
         ...srcEntry,
         [slot]: {
-          ...this.findRecipeByName(recipeName),
+          ...recipe,
           name: recipeName,
         },
       },
     });
-    return this._api.updatePlan({ [date]: { [slot]: recipeName } });
+    return this._api.updatePlan({
+      [this._hack_planIdByDate[date]]: {
+        [date]: {
+          [slot]: {
+            name: recipeName,
+          },
+        },
+      },
+    });
   }
 
   swapPlanEntries({ src, dest }) {
@@ -84,7 +97,18 @@ export default class AppState {
           [dest.slot]: { ...prevEntry[src.slot] },
         },
       });
-      entryMap = { [src.date]: { [src.slot]: dest.recipeName, [dest.slot]: src.recipeName } };
+      entryMap = {
+        [this._hack_planIdByDate[src.date]]: {
+          [src.date]: {
+            [src.slot]: {
+              name: dest.recipeName,
+            },
+            [dest.slot]: {
+              name: src.recipeName,
+            },
+          },
+        },
+      };
     } else {
       const prevSrc = cloneDeep(this._planByDate[src.date]);
       const prevDest = cloneDeep(this._planByDate[dest.date]);
@@ -105,10 +129,16 @@ export default class AppState {
           },
         },
       });
-      entryMap = {
-        [src.date]: { [src.slot]: dest.recipeName },
-        [dest.date]: { [dest.slot]: src.recipeName },
-      };
+
+      const srcPlanId = this._hack_planIdByDate[src.date];
+      const destPlanId = this._hack_planIdByDate[dest.date];
+
+      entryMap = {};
+      entryMap[srcPlanId] = {};
+      entryMap[destPlanId] = {};
+
+      entryMap[srcPlanId][src.date] = { [src.slot]: { name: dest.recipeName } };
+      entryMap[destPlanId][dest.date] = { [dest.slot]: { name: src.recipeName } };
     }
     return this._api.updatePlan(entryMap);
   }
@@ -225,9 +255,16 @@ export default class AppState {
 
   _onPlanFetched(planData) {
     const byDate = {};
-    planData.forEach((entry) => {
-      byDate[entry.date] = entry;
-    });
+    const activePlans = planData.response.plans;
+
+    for (let i = 0; i < activePlans.length; i += 1) {
+      const thisPlan = activePlans[i];
+      thisPlan.entries.forEach((entry) => {
+        byDate[entry.date] = entry;
+        this._hack_planIdByDate[entry.date] = thisPlan.planId;
+      });
+    }
+
     this._setPlanByDate(byDate);
   }
 

@@ -23,7 +23,7 @@ export default class MealPlanApi {
 
   async fetchPlan() {
     try {
-      const response = await this._makeRequest({ resource: '/plan' });
+      const response = await this._makeRequest({ resource: '/plan/v2/active' });
       this._listenerMap.plan_fetched.forEach((handlerFn) => handlerFn(response));
     } catch (err) {
       this._onApiError(err);
@@ -62,7 +62,7 @@ export default class MealPlanApi {
 
   async updatePlan(entryMap) {
     const postData = { version: '1.0', entryMap };
-    return this._makeRequest({ resource: '/plan', postData });
+    return this._makeRequest({ resource: '/plan/v2/modify', postData });
   }
 
   async modifyListItem(listName, fields) {

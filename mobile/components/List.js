@@ -93,7 +93,7 @@ export default function List() {
         )}
         {selectedWeek !== 'lists' && (
           <MealPlanShoppingList
-            sections={planLists[selectedWeek]}
+            sections={planLists[selectedWeek] || []}
             selectedWeek={selectedWeek}
             onStoreLinkPress={openTescoSearch}
           />
