@@ -44,14 +44,16 @@ export default function ChooseRecipe({ route }) {
   }, []);
 
   const onRecipePress = (recipe) => {
-    appState.setPlanEntry({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
+    appState.setPlanEntry({
+      date: meal.date, planId: meal.planId, slot: meal.slot, recipeName: recipe.name,
+    });
     navigation.popToTop();
   };
 
   // Process when the user inputs a freeform recipe name which is not associated with
   // a known recipe.
   const onSearchSubmitted = (recipeName) => {
-    appState.setPlanEntry({ date: meal.date, slot: meal.slot, recipeName });
+    appState.setPlanEntry({ date: meal.date, planId: meal.planId, slot: meal.slot, recipeName });
     navigation.popToTop();
   };
 

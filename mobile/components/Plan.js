@@ -110,21 +110,41 @@ export default function Plan() {
   const doMealSwap = ({ source, target }) => {
     setSwapSource(null);
     appState.swapPlanEntries({
-      src: { date: source.date, slot: source.slot, recipeName: source.name },
-      dest: { date: target.date, slot: target.slot, recipeName: target.name },
+      src: {
+        date: source.date,
+        slot: source.slot,
+        planId: source.planId,
+        recipeName: source.name,
+      },
+      dest: {
+        date: target.date,
+        slot: target.slot,
+        planId: target.planId,
+        recipeName: target.name,
+      },
     });
     refresh();
   };
 
   const doDeleteMeal = (meal) => {
-    appState.setPlanEntry({ date: meal.date, slot: meal.slot, recipeName: '' });
+    appState.setPlanEntry({
+      date: meal.date,
+      slot: meal.slot,
+      planId: meal.planId,
+      recipeName: '',
+    });
     setDeletedMeal(meal);
     setSnackBarVisible(true);
     refresh();
   };
 
   const doUndeleteMeal = () => {
-    appState.setPlanEntry({ date: deletedMeal.date, slot: deletedMeal.slot, recipeName: deletedMeal.name });
+    appState.setPlanEntry({
+      date: deletedMeal.date,
+      slot: deletedMeal.slot,
+      planId: deletedMeal.planId,
+      recipeName: deletedMeal.name,
+    });
     setDeletedMeal(null);
     refresh();
   };

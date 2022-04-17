@@ -17,18 +17,42 @@ function sortEntriesByDate(a, b) {
 
 // Marhsalls the Meal Plan's '/plan' API response into a view ready data structure
 // with the entries grouped by 'this week' and 'next week'.
-export function toPlannerGridData(planEntries) {
+export function toPlannerGridData(plans) {
+  // TODO: Having the planId be part of the gridData feels hacky; although it is an easy
+  // way to propigate it through the application.
+  const allPlanEntries = (plans)
+    .map((plan) => ({
+      ...plan,
+      entries: plan.entries.map((entry) => ({
+        ...entry,
+        planId: plan.planId,
+      })),
+    }))
+    .map((plan) => plan.entries)
+    .flat(Infinity);
+
   const allGridData = [];
-  (planEntries)
+  (allPlanEntries)
     .sort(sortEntriesByDate)
     .forEach((item) => {
       // The label item is used to denote the day of the week in the planner grid.
       allGridData.push({ id: item.date, name: getShortDayOfTheWeek(item.date), isLabel: true });
+
       allGridData.push({
-        id: `${item.date}-lunch`, name: item.lunch.name, slot: 'lunch', date: item.date, recipe: item.lunch.recipe, recipeId: item.lunch.id,
+        id: `${item.date}-lunch`,
+        name: item.lunch.name,
+        slot: 'lunch',
+        date: item.date,
+        planId: item.planId,
+        recipeId: item.lunch.recipeId,
       });
       allGridData.push({
-        id: `${item.date}-dinner`, name: item.dinner.name, slot: 'dinner', date: item.date, recipe: item.dinner.recipe, recipeId: item.dinner.id,
+        id: `${item.date}-dinner`,
+        name: item.dinner.name,
+        slot: 'dinner',
+        date: item.date,
+        planId: item.planId,
+        recipeId: item.dinner.recipeId,
       });
     });
 

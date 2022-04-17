@@ -30,7 +30,7 @@ export default function doAddRecipeToPlan({ route }) {
   useEffect(() => refresh(), []);
 
   const onMealSelected = (meal) => {
-    appState.setPlanEntry({ date: meal.date, slot: meal.slot, recipeName: recipe.name });
+    appState.setPlanEntry({ date: meal.date, planId: meal.planId, slot: meal.slot, recipeName: recipe.name });
     setTimeout(() => navigation.popToTop(), 750);
   };
 
