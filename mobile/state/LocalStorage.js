@@ -3,7 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const StorageKeys = {
   RECIPES: '@recipes',
-  PLAN_DATA: '@plan_data',
+  PLAN_DATA_V2: '@plan_data_v2',
+
+  PLAN_DATA_V1: '@plan_data',
 };
 
 export default class LocalStorage {
@@ -16,6 +18,8 @@ export default class LocalStorage {
     appState.addListener('plan_updated', () => {
       this._onPlanUpdated();
     });
+
+    AsyncStorage.removeItem(StorageKeys.PLAN_DATA_V1);
   }
 
   async _read(key) {
@@ -34,7 +38,7 @@ export default class LocalStorage {
   }
 
   async getPlanData() {
-    return this._read(StorageKeys.PLAN_DATA);
+    return this._read(StorageKeys.PLAN_DATA_V2);
   }
 
   async _onRecipesUpdated() {
@@ -49,7 +53,7 @@ export default class LocalStorage {
   async _onPlanUpdated() {
     try {
       const jsonValue = JSON.stringify(this._appState.getPlanData());
-      await AsyncStorage.setItem(StorageKeys.PLAN_DATA, jsonValue);
+      await AsyncStorage.setItem(StorageKeys.PLAN_DATA_V2, jsonValue);
     } catch (e) {
       console.error(`Failed to persist recipes: ${e.message}`, e);
     }

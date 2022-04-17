@@ -13,7 +13,6 @@ export default class AppState {
     };
 
     this._plansById = {};
-
     this._recipesById = {};
     this._listsByName = {};
 
@@ -24,12 +23,12 @@ export default class AppState {
 
   async init() {
     this._storage.bind({ appState: this });
-    /*
     return Promise.all([
       (async () => {
         const planData = await this._storage.getPlanData();
         if (planData) {
-          this._setPlanByDate(planData);
+          // TODO: Prune inactive (past) plans.
+          this._setPlansById(planData);
         }
       })(),
       (async () => {
@@ -39,7 +38,6 @@ export default class AppState {
         }
       })(),
     ]);
-    */
   }
 
   addListener(eventName, handlerFn) {
