@@ -1,15 +1,19 @@
 /* eslint-disable import/prefer-default-export */
 import React, { useState } from 'react';
 import {
-  StyleSheet, View, TouchableOpacity, FlatList, RefreshControl,
+  StyleSheet, View, TouchableOpacity, FlatList, RefreshControl, Dimensions
 } from 'react-native';
 import { Text, withTheme } from 'react-native-paper';
 import { kebab } from '../helpers/kebab';
 import { toPlannerGridData } from '../helpers/planData';
 import { WeekSelector } from './buttons';
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   plannerGridContainer: {
+    width: width - 50,
+    marginRight: 50,
   },
   planListLabel: {
     width: 40,

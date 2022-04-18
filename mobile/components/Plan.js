@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 import {
   BackHandler,
+  Dimensions,
   Linking,
   Platform, Pressable, StyleSheet, View,
 } from 'react-native';
@@ -11,6 +12,8 @@ import {
   Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import SideSwipe from 'react-native-sideswipe';
+
 import { Routes } from '../constants';
 import { useAppState, useMealPlanApi, useSessionState } from '../service/context';
 
@@ -27,7 +30,6 @@ import { SelectedMealModal } from './widgets/SelectedMealModal';
 const styles = StyleSheet.create({
   viewContainer: {
     flex: 1,
-    padding: 12,
   },
   plannerGridContainer: {
     paddingHorizontal: 12,
@@ -67,6 +69,7 @@ export default function Plan() {
   const [modalVisible, setModalVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = usePlanSelector();
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   const [recipes, setRecipes] = useState([]);
   const [planData, setPlanData] = useState(null);
@@ -109,6 +112,7 @@ export default function Plan() {
   }, [selectedMeal]);
 
   const hasPlanData = planData && Object.keys(planData).length > 0;
+  const plans = hasPlanData ? Object.values(planData) : null;
   const selectedPlan = selectedPlanId && planData[selectedPlanId];
 
   const doMealSwap = ({ source, target }) => {
@@ -209,6 +213,21 @@ export default function Plan() {
     );
   };
 
+  const { width } = Dimensions.get('window');
+
+  useEffect(() => {
+    if (plans) {
+      setCarouselIndex(plans.findIndex((plan) => plan.planId === selectedPlanId));
+    }
+  }, [selectedPlanId]);
+
+  useEffect(() => {
+    if (plans) {
+      console.log("Carousel Index: " + carouselIndex);
+      setSelectedPlanId(plans[carouselIndex].planId);
+    }
+  }, [carouselIndex]);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Portal>
@@ -219,18 +238,28 @@ export default function Plan() {
       <View style={styles.viewContainer}>
         {!hasPlanData && <LoadingSpinner message="Fetching meal plan" />}
 
-        {Boolean(selectedPlan) && (
+        {Boolean(plans) && (
           <>
             <PlanSelector planData={planData} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
-            <View style={styles.plannerGridContainer}>
-              <PlannerGrid
-                swapSource={swapSource}
-                onMealSelected={onMealSelected}
-                plan={selectedPlan}
-                refreshing={refreshing}
-                onRefresh={doRefresh}
-              />
-            </View>
+            <SideSwipe
+              data={plans}
+              itemWidth={width}
+              contentOffset={25}
+              threshold={300}
+              index={carouselIndex}
+              onIndexChange={setCarouselIndex}
+              renderItem={({ itemIndex, currentIndex, item }) => (
+                <PlannerGrid
+                  swapSource={swapSource}
+                  onMealSelected={onMealSelected}
+                  plan={item}
+                  refreshing={refreshing}
+                  onRefresh={doRefresh}
+                />
+              )}
+            />
+
+
             {todaysMeal && <NextMealCard />}
           </>
         )}
