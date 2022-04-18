@@ -59,6 +59,18 @@ export function today() {
   return d;
 }
 
+export function fromISOString(isoStr) {
+  const res = new Date(isoStr);
+  zeroHMS(res);
+  return res;
+}
+
+export function addDays(d, days) {
+  const result = new Date(d);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
+}
+
 export function toShortISOString(d) {
   return d.toISOString().split('T')[0];
 }
@@ -72,3 +84,5 @@ export function shortPrettyMealSlot(slot, date) {
   const mealSlot = slot.substr(0, 1).toUpperCase() + slot.substr(1);
   return `${mealSlot} on ${getShortDayOfTheWeek(date)}`;
 }
+
+

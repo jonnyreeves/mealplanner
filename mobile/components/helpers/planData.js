@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { useAppState } from '../../service/context';
 import { getShortDayOfTheWeek, today, toShortISOString } from './date';
 
 // The Meal Plan API starts returning entries from the rollover date (Friday);
@@ -15,21 +17,15 @@ function sortEntriesByDate(a, b) {
   return aa < bb ? -1 : (aa > bb ? 1 : 0);
 }
 
-// Marhsalls the Meal Plan's '/plan' API response into a view ready data structure
-// with the entries grouped by 'this week' and 'next week'.
-export function toPlannerGridData(plans) {
+
+export function toPlannerGridData(plan) {
   // TODO: Having the planId be part of the gridData feels hacky; although it is an easy
   // way to propigate it through the application.
-  const allPlanEntries = (plans)
-    .map((plan) => ({
-      ...plan,
-      entries: plan.entries.map((entry) => ({
-        ...entry,
-        planId: plan.planId,
-      })),
-    }))
-    .map((plan) => plan.entries)
-    .flat(Infinity);
+  const allPlanEntries = plan.entries
+    .map((entry) => ({
+      ...entry,
+      planId: plan.planId,
+    }));
 
   const allGridData = [];
   (allPlanEntries)
@@ -55,11 +51,7 @@ export function toPlannerGridData(plans) {
         recipeId: item.dinner.recipeId,
       });
     });
-
-  return {
-    thisWeek: allGridData.slice(0, allGridData.length / 2),
-    nextWeek: allGridData.slice(allGridData.length / 2, allGridData.length),
-  };
+  return allGridData;
 }
 
 export function toTodayAndTomorrowData(planEntries) {
@@ -71,3 +63,15 @@ export function toTodayAndTomorrowData(planEntries) {
   }
   return [];
 }
+
+export const usePlanSelector = () => {
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const planData = useAppState().getPlanData();
+  useEffect(() => {
+    if (planData && Object.keys(planData).length > 0 && !selectedPlanId) {
+      // TODO: Need to select the first active plan.
+      setSelectedPlanId(Object.values(planData)[0].planId);
+    }
+  }, [planData]);
+  return [selectedPlanId, setSelectedPlanId];
+};

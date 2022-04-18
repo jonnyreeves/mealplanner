@@ -18,8 +18,10 @@ import { toShortISOString, today } from './helpers/date';
 import {
   useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener,
 } from './helpers/navigation';
+import { usePlanSelector } from './helpers/planData';
 import { LoadingSpinner } from './widgets/modals';
 import { PlannerGrid } from './widgets/PlannerGrid';
+import { PlanSelector } from './widgets/PlanSelector';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
 
 const styles = StyleSheet.create({
@@ -64,6 +66,7 @@ export default function Plan() {
   const [selectedMealRecipe, setSelectedMealRecipe] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = usePlanSelector();
 
   const [recipes, setRecipes] = useState([]);
   const [planData, setPlanData] = useState(null);
@@ -106,6 +109,7 @@ export default function Plan() {
   }, [selectedMeal]);
 
   const hasPlanData = planData && Object.keys(planData).length > 0;
+  const selectedPlan = selectedPlanId && planData[selectedPlanId];
 
   const doMealSwap = ({ source, target }) => {
     setSwapSource(null);
@@ -178,19 +182,6 @@ export default function Plan() {
     }
   };
 
-  const navigateToBrowseScreen = () => {
-    sessionState.autoFocusRecipeSearchbar();
-    navigation.navigate('Home', { screen: 'Browse' });
-  };
-
-  const FakeSearchbar = () => (
-    <Pressable onPress={navigateToBrowseScreen}>
-      <View style={{ pointerEvents: 'none' }}>
-        <Searchbar editable={false} placeholder="Recipe name" />
-      </View>
-    </Pressable>
-  );
-
   const NextMealCard = () => {
     const now = new Date();
     const slot = (now.getHours() > 14) ? 'Dinner' : 'Lunch';
@@ -228,14 +219,14 @@ export default function Plan() {
       <View style={styles.viewContainer}>
         {!hasPlanData && <LoadingSpinner message="Fetching meal plan" />}
 
-        {hasPlanData && (
+        {Boolean(selectedPlan) && (
           <>
-            <FakeSearchbar />
+            <PlanSelector planData={planData} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
             <View style={styles.plannerGridContainer}>
               <PlannerGrid
                 swapSource={swapSource}
                 onMealSelected={onMealSelected}
-                planData={planData}
+                plan={selectedPlan}
                 refreshing={refreshing}
                 onRefresh={doRefresh}
               />

@@ -23,14 +23,4 @@ export default class SessionState {
       ingredients: [],
     };
   }
-
-  autoFocusRecipeSearchbar() {
-    this._aFRS = true;
-  }
-
-  shouldAutoFocusRecipeSearchbar() {
-    const af = this._aFRS;
-    this._aFRS = false;
-    return af;
-  }
 }

@@ -50,9 +50,6 @@ export default function Browse({ route }) {
 
   useNavigationFocusListener(() => {
     refresh();
-    if (sessionState.shouldAutoFocusRecipeSearchbar()) {
-      recipeBrowserRef.current?.searchbar.focus();
-    }
     sessionState.clearRecipeModificationState();
   });
 

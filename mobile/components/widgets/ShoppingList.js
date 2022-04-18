@@ -5,12 +5,13 @@ import {
 } from 'react-native-paper';
 import { shortPrettyMealSlot } from '../helpers/date';
 import { kebab } from '../helpers/kebab';
+import { PlanSelector } from './PlanSelector';
 
 const SectionHeader = ({ section }) => (
   <Title>{section.title}</Title>
 );
 
-export const MealPlanShoppingList = ({ sections, selectedWeek, onStoreLinkPress }) => {
+export const MealPlanShoppingList = ({ sections, selectedPlanId, onStoreLinkPress }) => {
   const formatIngredientQty = (value) => {
     if (parseInt(value, 10).toString() === value) {
       return `${value}x`;
@@ -49,7 +50,7 @@ export const MealPlanShoppingList = ({ sections, selectedWeek, onStoreLinkPress 
 
   const IngredientListItem = ({ item }) => {
     const openStore = () => onStoreLinkPress(item.ingredient);
-    const showBasketButton = selectedWeek === 'nextWeek';
+    const showBasketButton = true; // TODO: Disable basket for current/active plan?
     return (
       <View style={{ flexDirection: 'row' }}>
         <RequiredIngredient item={item} style={{ flexGrow: 1, flexShrink: 0, flexBasis: 'auto' }} />
@@ -95,7 +96,8 @@ export const MealPlanShoppingList = ({ sections, selectedWeek, onStoreLinkPress 
   };
 
   const EmptyShoppingList = () => {
-    const week = (selectedWeek === 'thisWeek') ? 'this week' : 'next week';
+    // const week = (selectedWeek === 'thisWeek') ? 'this week' : 'next week';
+    const week = selectedPlanId;
     const msg = `There's nothing on ${week}'s plan`;
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>

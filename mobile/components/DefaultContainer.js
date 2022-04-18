@@ -45,7 +45,7 @@ export const DefaultContainer = withTheme(({ theme }) => {
     <Tab.Navigator initialRoute="Plan" inactiveColor="#ccd5ae" barStyle={{ backgroundColor: colors.primary }}>
       <Tab.Screen name="Plan" component={Plan} options={tabOpts({ icon: 'calendar' })} />
       <Tab.Screen name={Routes.Browse} component={Browse} options={tabOpts({ tabBarLabel: 'Meals', icon: 'silverware-fork-knife' })} />
-      <Tab.Screen name="List" component={List} options={tabOpts({ tabBarLabel: 'Shopping List', icon: 'format-list-checkbox' })} />
+      <Tab.Screen name="List" component={List} options={tabOpts({ tabBarLabel: 'Shop', icon: 'cart' })} />
     </Tab.Navigator>
   );
 

@@ -40,10 +40,9 @@ const PlannerGridLabel = ({ dayOfTheWeek }) => (
 );
 
 export const PlannerGrid = withTheme(({
-  theme, swapSource, planData, onMealSelected, refreshing, onRefresh,
+  theme, swapSource, plan, onMealSelected, refreshing, onRefresh,
 }) => {
   const { colors } = theme;
-  const [selectedWeek, setSelectedWeek] = useState('thisWeek');
 
   const PlannerGridMeaButton = ({
     onPress, onLongPress, mealName, additionalStyles = [],
@@ -69,7 +68,7 @@ export const PlannerGrid = withTheme(({
     return <PlannerGridMeaButton onPress={onPress} onLongPress={onLongPress} mealName={item.name} />;
   };
 
-  const gridData = toPlannerGridData(Object.values(planData))[selectedWeek];
+  const gridData = toPlannerGridData(plan);
 
   return (
     <>
@@ -83,7 +82,6 @@ export const PlannerGrid = withTheme(({
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         />
       </View>
-      <WeekSelector selectedWeek={selectedWeek} onSelect={(value) => setSelectedWeek(value)} />
     </>
   );
 });

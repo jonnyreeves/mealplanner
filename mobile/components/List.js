@@ -1,28 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as WebBrowser from 'expo-web-browser';
 import { toIngredientList } from './helpers/ingredientList';
 import {
   useListsUpdatedListener, usePlanUpdatedListener, useRecipesUpdatedListener,
 } from './helpers/navigation';
-import { toPlannerGridData } from './helpers/planData';
+import { toPlannerGridData, usePlanSelector } from './helpers/planData';
 import { ToggleButtonGroup } from './widgets/buttons';
 import { MealPlanShoppingList, ShoppingList } from './widgets/ShoppingList';
 import { useAppState, useMealPlanApi } from '../service/context';
+import { PlanSelector } from './widgets/PlanSelector';
+import { LoadingSpinner } from './widgets/modals';
 
 export default function List() {
   const appState = useAppState();
   const mealPlanApi = useMealPlanApi();
 
   const [shoppingLists, setShoppingLists] = useState([]);
-  const [planLists, setPlanLists] = useState({});
-  const [selectedWeek, setSelectedWeek] = useState('thisWeek');
+  const [selectedPlanListSections, setSelectedPlanListSections] = useState([]);
+  const [selectedPlanId, setSelectedPlanId] = usePlanSelector();
+  const [listMode, setListMode] = useState('plan');
+  const [buildingListSections, setBuildingListSections] = useState(false);
 
-  const buildPlanList = (gridData, targetWeek) => {
+  const buildSelectedPlanListSections = (gridData) => {
     const recipes = appState.getRecipes();
     const sectionData = [];
-    const { ingredients, meals } = toIngredientList(gridData[targetWeek], recipes);
+    const { ingredients, meals } = toIngredientList(gridData, recipes);
     if (ingredients.length > 0) {
       sectionData.push({
         title: 'Ingredients',
@@ -37,12 +40,12 @@ export default function List() {
   };
 
   const rebuildPlanLists = () => {
+    if (!selectedPlanId) {
+      return;
+    }
     const planData = appState.getPlanData();
-    const gridData = toPlannerGridData(Object.values(planData));
-    setPlanLists({
-      thisWeek: buildPlanList(gridData, 'thisWeek'),
-      nextWeek: buildPlanList(gridData, 'nextWeek'),
-    });
+    const result = buildSelectedPlanListSections(toPlannerGridData(planData[selectedPlanId]));
+    setSelectedPlanListSections(result);
   };
 
   const rebuildShoppingLists = () => {
@@ -69,20 +72,28 @@ export default function List() {
   };
 
   useEffect(() => {
-    rebuildPlanLists();
     rebuildShoppingLists();
   }, []);
 
+  useEffect(() => {
+    if (selectedPlanId) {
+      rebuildPlanLists();
+    }
+  }, [selectedPlanId]);
+
+  useEffect(() => {
+    setBuildingListSections(false);
+  }, [selectedPlanListSections]);
+
   const openTescoSearch = (searchTerm) => {
     const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(searchTerm)}`;
-    WebBrowser.openBrowserAsync(tescoUrl);
+    Linking.openURL(tescoUrl);
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, justifyContent: 'space-between' }}>
-
-        {selectedWeek === 'lists' && (
+        {listMode === 'lists' && (
           <ShoppingList
             sections={shoppingLists}
             onStoreLinkPress={openTescoSearch}
@@ -91,18 +102,26 @@ export default function List() {
             onRefresh={refreshShoppingList}
           />
         )}
-        {selectedWeek !== 'lists' && (
-          <MealPlanShoppingList
-            sections={planLists[selectedWeek] || []}
-            selectedWeek={selectedWeek}
-            onStoreLinkPress={openTescoSearch}
-          />
+        {listMode !== 'lists' && Boolean(selectedPlanId) && (
+          <>
+            <PlanSelector planData={appState.getPlanData()} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
+            <MealPlanShoppingList
+              sections={selectedPlanListSections}
+              buildingListSections={buildingListSections}
+              selectedPlanId={selectedPlanId}
+              onStoreLinkPress={openTescoSearch}
+            />
+          </>
+        )}
+        {listMode !== 'lists' && Boolean(selectedPlanId) === false && (
+          <View style={{ height: 400 }}>
+            <LoadingSpinner />
+          </View>
         )}
 
-        <ToggleButtonGroup selectedValue={selectedWeek} onPress={(value) => setSelectedWeek(value)}>
-          <ToggleButtonGroup.Btn label="This Week" value="thisWeek" />
-          <ToggleButtonGroup.Btn label="Next Week" value="nextWeek" />
-          <ToggleButtonGroup.Btn label="Lists" value="lists" />
+        <ToggleButtonGroup selectedValue={listMode} onPress={(value) => setListMode(value)}>
+          <ToggleButtonGroup.Btn label="Groceries" value="plan" />
+          <ToggleButtonGroup.Btn label="Shopping Lists" value="lists" />
         </ToggleButtonGroup>
 
       </View>
