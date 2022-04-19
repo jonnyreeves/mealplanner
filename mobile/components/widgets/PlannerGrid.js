@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
 export const PlannerGrid = ({
   swapSource, plan, onMealSelected, refreshing, onRefresh,
 }) => {
-  const gridData = useMemo(() => toPlannerGridData(plan), [plan.planId]);
+  const gridData = toPlannerGridData(plan);
 
   const PlannerGridLabel = ({ title, subtitle, highlighted }) => {
     const highlightStyle = highlighted ? { backgroundColor: colors.primary } : {};
