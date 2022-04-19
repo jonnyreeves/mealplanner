@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
   },
   planListLabelTitle: {
     textAlign: 'center',
+    lineHeight: 14,
   },
   planListLabelSubtitle: {
     fontSize: 9,
@@ -55,11 +56,13 @@ export const PlannerGrid = ({
   const gridData = toPlannerGridData(plan);
 
   const PlannerGridLabel = ({ title, subtitle, highlighted }) => {
-    const highlightStyle = highlighted ? { backgroundColor: colors.primary } : {};
+    //fbf8cc
+    //d674cc
+    const highlightStyle = highlighted ? { backgroundColor: '#e5d9f2' } : {};
     return (
       <View style={[styles.planListLabel, highlightStyle]}>
-        <Text style={[styles.planListLabelTitle, highlighted && { color: 'white' }]}>{title}</Text>
-        <Text style={[styles.planListLabelSubtitle, highlighted && { color: 'white' }]}>{subtitle}</Text>
+        <Text style={[styles.planListLabelTitle]}>{title}</Text>
+        <Text style={[styles.planListLabelSubtitle]}>{subtitle}</Text>
       </View>
     );
   };

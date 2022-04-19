@@ -87,6 +87,7 @@ export default function List() {
 
   const openTescoSearch = (searchTerm) => {
     const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(searchTerm)}`;
+    // Linking.openURL(tescoUrl);
     Linking.openURL(tescoUrl);
   };
 

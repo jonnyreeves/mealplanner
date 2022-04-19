@@ -21,7 +21,7 @@ import { toShortISOString, today } from './helpers/date';
 import {
   useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener,
 } from './helpers/navigation';
-import { usePlanSelector } from './helpers/planData';
+import { sortedPlans, usePlanSelector } from './helpers/planData';
 import { LoadingSpinner } from './widgets/modals';
 import { PlannerGrid } from './widgets/PlannerGrid';
 import { PlanSelector } from './widgets/PlanSelector';
@@ -117,7 +117,7 @@ export default function Plan() {
   }, [selectedMeal]);
 
   const hasPlanData = planData && Object.keys(planData).length > 0;
-  const plans = hasPlanData ? Object.values(planData) : null;
+  const plans = hasPlanData ? sortedPlans(planData) : [];
 
   const doMealSwap = ({ source, target }) => {
     setSwapSource(null);
@@ -229,7 +229,7 @@ export default function Plan() {
       <View style={styles.viewContainer}>
         {!hasPlanData && <LoadingSpinner message="Fetching meal plan" />}
 
-        {Boolean(plans) && (
+        {hasPlanData && (
           <>
             <View style={{ margin: 20 }}>
               <PlanSelector planData={planData} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
@@ -253,8 +253,6 @@ export default function Plan() {
                 />
               )}
             />
-
-            {todaysMeal && <NextMealCard />}
           </>
         )}
       </View>
