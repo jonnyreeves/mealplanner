@@ -104,7 +104,9 @@ export default function List() {
         )}
         {listMode !== 'lists' && Boolean(selectedPlanId) && (
           <>
-            <PlanSelector planData={appState.getPlanData()} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
+            <View style={{ margin: 20 }}>
+              <PlanSelector planData={appState.getPlanData()} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
+            </View>
             <MealPlanShoppingList
               sections={selectedPlanListSections}
               buildingListSections={buildingListSections}

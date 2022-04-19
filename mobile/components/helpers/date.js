@@ -21,7 +21,7 @@ export function getShortMonth(isoDate) {
   return m.substr(0, 3);
 }
 
-function dateWithOrdinal(d) {
+export function dateWithOrdinal(d) {
   const day = d.getDate();
   const lastDigit = day.toString().substr(-1);
   let ordinal = 'th';
@@ -69,6 +69,11 @@ export function addDays(d, days) {
   const result = new Date(d);
   result.setUTCDate(result.getUTCDate() + days);
   return result;
+}
+
+export function daysBetween(firstDate, secondDate) {
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  return Math.round(Math.abs((firstDate - secondDate) / oneDay));
 }
 
 export function toShortISOString(d) {

@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppState } from '../../service/context';
-import { getShortDayOfTheWeek, today, toShortISOString } from './date';
-
-// The Meal Plan API starts returning entries from the rollover date (Friday);
-// This logic will swap the order around so the array starts from Monday.
-function toNaturalWeekOrder(entries) {
-  const first3Days = entries.slice(0, 0 + 9);
-  const remaining4Days = entries.slice(0 + 9, 0 + 9 + 12);
-  return [].concat(remaining4Days).concat(first3Days);
-}
+import { dateWithOrdinal, getShortDayOfTheWeek, getShortMonth, shortPrettyDate, today, toShortISOString } from './date';
 
 function sortEntriesByDate(a, b) {
   const aa = a.date.split('/').join();
@@ -16,7 +8,6 @@ function sortEntriesByDate(a, b) {
   // eslint-disable-next-line no-nested-ternary
   return aa < bb ? -1 : (aa > bb ? 1 : 0);
 }
-
 
 export function toPlannerGridData(plan) {
   // TODO: Having the planId be part of the gridData feels hacky; although it is an easy
@@ -27,12 +18,19 @@ export function toPlannerGridData(plan) {
       planId: plan.planId,
     }));
 
+  const todayIsoDate = toShortISOString(today());
   const allGridData = [];
   (allPlanEntries)
     .sort(sortEntriesByDate)
     .forEach((item) => {
       // The label item is used to denote the day of the week in the planner grid.
-      allGridData.push({ id: item.date, name: getShortDayOfTheWeek(item.date), isLabel: true });
+      allGridData.push({
+        id: item.date,
+        dayOfWeek: getShortDayOfTheWeek(item.date),
+        shortDate: `${getShortMonth(item.date)} ${new Date(item.date).getDate()}`,
+        isToday: item.date === todayIsoDate,
+        isLabel: true,
+      });
 
       allGridData.push({
         id: `${item.date}-lunch`,

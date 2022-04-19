@@ -1,26 +1,38 @@
 /* eslint-disable import/prefer-default-export */
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   StyleSheet, View, TouchableOpacity, FlatList, RefreshControl, Dimensions
 } from 'react-native';
-import { Text, withTheme } from 'react-native-paper';
-import { kebab } from '../helpers/kebab';
+import { Text } from 'react-native-paper';
 import { toPlannerGridData } from '../helpers/planData';
-import { WeekSelector } from './buttons';
+import { theme } from '../../theme';
 
 const { width } = Dimensions.get('window');
+const { colors } = theme;
 
 const styles = StyleSheet.create({
   plannerGridContainer: {
-    width: width - 50,
-    marginRight: 50,
+    width: width - 30,
+    marginRight: 30,
   },
   planListLabel: {
-    width: 40,
+    width: 44,
+    height: 44,
+    marginTop: 20,
     justifyContent: 'center',
+    borderRadius: 22,
+  },
+  planListLabelTitle: {
+    textAlign: 'center',
+  },
+  planListLabelSubtitle: {
+    fontSize: 9,
+    lineHeight: 9,
+    textAlign: 'center',
+    color: 'grey',
   },
   planListEntry: {
-    flex: 1,
+    width: ((width - 30) / 2) - 30,
     height: 60,
     borderRadius: 12,
     marginVertical: 4,
@@ -37,21 +49,25 @@ const styles = StyleSheet.create({
   },
 });
 
-const PlannerGridLabel = ({ dayOfTheWeek }) => (
-  <View style={[styles.planListLabel]}>
-    <Text>{dayOfTheWeek}</Text>
-  </View>
-);
-
-export const PlannerGrid = withTheme(({
-  theme, swapSource, plan, onMealSelected, refreshing, onRefresh,
+export const PlannerGrid = ({
+  swapSource, plan, onMealSelected, refreshing, onRefresh,
 }) => {
-  const { colors } = theme;
+  const gridData = useMemo(() => toPlannerGridData(plan), [plan.planId]);
+
+  const PlannerGridLabel = ({ title, subtitle, highlighted }) => {
+    const highlightStyle = highlighted ? { backgroundColor: colors.primary } : {};
+    return (
+      <View style={[styles.planListLabel, highlightStyle]}>
+        <Text style={[styles.planListLabelTitle, highlighted && { color: 'white' }]}>{title}</Text>
+        <Text style={[styles.planListLabelSubtitle, highlighted && { color: 'white' }]}>{subtitle}</Text>
+      </View>
+    );
+  };
 
   const PlannerGridMeaButton = ({
-    onPress, onLongPress, mealName, additionalStyles = [],
+    onPress, mealName, additionalStyles = [],
   }) => (
-    <TouchableOpacity onPress={onPress} onLongPress={onLongPress} style={[styles.planListEntry, { backgroundColor: colors.accent }, ...additionalStyles]}>
+    <TouchableOpacity onPress={onPress} style={[styles.planListEntry, { backgroundColor: colors.accent }, ...additionalStyles]}>
       <Text numberOfLines={2} style={styles.planListEntryText}>{mealName}</Text>
     </TouchableOpacity>
   );
@@ -61,31 +77,25 @@ export const PlannerGrid = withTheme(({
       return <Text>{item.name}</Text>;
     }
     if (item.isLabel) {
-      return <PlannerGridLabel dayOfTheWeek={item.name} />;
+      return <PlannerGridLabel title={item.dayOfWeek} subtitle={item.shortDate} highlighted={item.isToday} />;
     }
     if (swapSource && swapSource.id === item.id) {
       return <PlannerGridMeaButton mealName={item.name} additionalStyles={[styles.planListEntrySwapSource, { borderColor: colors.primary }]} />;
     }
 
     const onPress = () => onMealSelected(item);
-    const onLongPress = () => console.log(`You long pressed ${item.id}: ${item.name}`);
-    return <PlannerGridMeaButton onPress={onPress} onLongPress={onLongPress} mealName={item.name} />;
+    return <PlannerGridMeaButton onPress={onPress} mealName={item.name} />;
   };
 
-  const gridData = toPlannerGridData(plan);
-
   return (
-    <>
-      <View style={styles.plannerGridContainer}>
-        <FlatList
-          data={gridData}
-          renderItem={plannerGridItemRenderer}
-          keyExtractor={(item) => kebab(`${item.id}-${item.name}`)}
-          numColumns={3}
-          extraData={swapSource}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        />
-      </View>
-    </>
+    <FlatList
+      style={styles.plannerGridContainer}
+      data={gridData}
+      renderItem={plannerGridItemRenderer}
+      keyExtractor={(item) => `planner-grid-${item.id}-${item.name}`}
+      numColumns={3}
+      extraData={swapSource}
+    />
+
   );
-});
+};

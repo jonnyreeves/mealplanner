@@ -111,7 +111,7 @@ export const MealPlanShoppingList = ({ sections, selectedPlanId, onStoreLinkPres
     <SectionList
       ItemSeparatorComponent={Divider}
       ListEmptyComponent={EmptyShoppingList}
-      contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
+      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 50 }}
       sections={sections}
       initialNumToRender={15}
       keyExtractor={mealPlanKeyExtrator}

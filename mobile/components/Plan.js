@@ -240,15 +240,19 @@ export default function Plan() {
 
         {Boolean(plans) && (
           <>
-            <PlanSelector planData={planData} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
+            <View style={{ margin: 20 }}>
+              <PlanSelector planData={planData} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
+            </View>
+
             <SideSwipe
               data={plans}
               itemWidth={width}
-              contentOffset={25}
-              threshold={300}
+              contentOffset={15}
+              threshold={100}
+              useVelocityForIndex={false}
               index={carouselIndex}
               onIndexChange={setCarouselIndex}
-              renderItem={({ itemIndex, currentIndex, item }) => (
+              renderItem={({ item }) => (
                 <PlannerGrid
                   swapSource={swapSource}
                   onMealSelected={onMealSelected}
@@ -258,7 +262,6 @@ export default function Plan() {
                 />
               )}
             />
-
 
             {todaysMeal && <NextMealCard />}
           </>
