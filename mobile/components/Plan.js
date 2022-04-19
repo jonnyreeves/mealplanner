@@ -6,7 +6,7 @@ import {
   BackHandler,
   Dimensions,
   Linking,
-  Platform, Pressable, StyleSheet, View,
+  Platform, Pressable, StyleSheet, Vibration, View,
 } from 'react-native';
 import {
   Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface,
@@ -83,6 +83,7 @@ export default function Plan() {
   const [refreshing, setRefreshing] = useState(false);
 
   const refresh = () => {
+    console.log('refreshing plan');
     setRecipes(appState.getRecipes());
     setPlanData(appState.getPlanData());
     setTodaysMeal(appState.getPlanData()[toShortISOString(today())]);

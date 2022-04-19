@@ -2,12 +2,18 @@ import { useEffect, useState } from 'react';
 import { useAppState } from '../../service/context';
 import { dateWithOrdinal, getShortDayOfTheWeek, getShortMonth, shortPrettyDate, today, toShortISOString } from './date';
 
-function sortEntriesByDate(a, b) {
-  const aa = a.date.split('/').join();
-  const bb = b.date.split('/').join();
-  // eslint-disable-next-line no-nested-ternary
-  return aa < bb ? -1 : (aa > bb ? 1 : 0);
+
+function sortByDate(key) {
+  return (a, b) => {
+    const aa = a[key].split('/').join();
+    const bb = b[key].split('/').join();
+    // eslint-disable-next-line no-nested-ternary
+    return aa < bb ? -1 : (aa > bb ? 1 : 0);
+  };
 }
+
+const planEntrySorter = sortByDate('date');
+const planSorter = sortByDate('startDate');
 
 export function toPlannerGridData(plan) {
   // TODO: Having the planId be part of the gridData feels hacky; although it is an easy
@@ -21,11 +27,11 @@ export function toPlannerGridData(plan) {
   const todayIsoDate = toShortISOString(today());
   const allGridData = [];
   (allPlanEntries)
-    .sort(sortEntriesByDate)
+    .sort(planEntrySorter)
     .forEach((item) => {
       // The label item is used to denote the day of the week in the planner grid.
       allGridData.push({
-        id: item.date,
+        id: `${item.date}-label`,
         dayOfWeek: getShortDayOfTheWeek(item.date),
         shortDate: `${getShortMonth(item.date)} ${new Date(item.date).getDate()}`,
         isToday: item.date === todayIsoDate,
@@ -40,6 +46,7 @@ export function toPlannerGridData(plan) {
         planId: item.planId,
         recipeId: item.lunch.recipeId,
       });
+
       allGridData.push({
         id: `${item.date}-dinner`,
         name: item.dinner.name,
@@ -62,29 +69,37 @@ export function toTodayAndTomorrowData(planEntries) {
   return [];
 }
 
+export const sortedPlans = (planData) => Object.values(planData).sort(planSorter);
+
 export const usePlanSelector = () => {
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   const planData = useAppState().getPlanData();
-  const plans = Object.values(planData);
+  const plans = sortedPlans(planData);
 
   useEffect(() => {
-    if (planData && Object.keys(planData).length > 0 && !selectedPlanId) {
-      // TODO: Need to select the first active plan.
+    if (!selectedPlanId && plans.length > 0) {
       setSelectedPlanId(plans[0].planId);
     }
   }, [planData]);
 
+  // Syncronise the Planner Grid Carousel with the Plan Selector
   useEffect(() => {
-    if (plans) {
-      setCarouselIndex(plans.findIndex((plan) => plan.planId === selectedPlanId));
+    if (plans.length > 0) {
+      const idx = plans.findIndex((plan) => plan.planId === selectedPlanId);
+      if (idx !== -1 && carouselIndex !== idx) {
+        setCarouselIndex(idx);
+      }
     }
   }, [selectedPlanId]);
 
+  // Syncronise the Plan Selector with the Planner Grid Carousel.
   useEffect(() => {
-    if (plans && carouselIndex >= 0 && carouselIndex < plans.length) {
-      setSelectedPlanId(plans[carouselIndex].planId);
+    if (plans.length > 0 && carouselIndex >= 0 && carouselIndex < plans.length) {
+      if (selectedPlanId !== plans[carouselIndex].planId) {
+        setSelectedPlanId(plans[carouselIndex].planId);
+      }
     }
   }, [carouselIndex]);
   return {

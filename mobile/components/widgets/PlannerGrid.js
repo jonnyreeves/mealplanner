@@ -92,7 +92,7 @@ export const PlannerGrid = ({
       style={styles.plannerGridContainer}
       data={gridData}
       renderItem={plannerGridItemRenderer}
-      keyExtractor={(item) => `planner-grid-${item.id}-${item.name}`}
+      keyExtractor={(item) => `planner-grid-${item.id}`}
       numColumns={3}
       extraData={swapSource}
     />
