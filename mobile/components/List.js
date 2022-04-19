@@ -18,7 +18,7 @@ export default function List() {
 
   const [shoppingLists, setShoppingLists] = useState([]);
   const [selectedPlanListSections, setSelectedPlanListSections] = useState([]);
-  const [selectedPlanId, setSelectedPlanId] = usePlanSelector();
+  const { selectedPlanId, setSelectedPlanId } = usePlanSelector();
   const [listMode, setListMode] = useState('plan');
   const [buildingListSections, setBuildingListSections] = useState(false);
 

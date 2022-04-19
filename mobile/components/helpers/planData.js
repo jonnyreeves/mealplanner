@@ -64,12 +64,30 @@ export function toTodayAndTomorrowData(planEntries) {
 
 export const usePlanSelector = () => {
   const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
   const planData = useAppState().getPlanData();
+  const plans = Object.values(planData);
+
   useEffect(() => {
     if (planData && Object.keys(planData).length > 0 && !selectedPlanId) {
       // TODO: Need to select the first active plan.
-      setSelectedPlanId(Object.values(planData)[0].planId);
+      setSelectedPlanId(plans[0].planId);
     }
   }, [planData]);
-  return [selectedPlanId, setSelectedPlanId];
+
+  useEffect(() => {
+    if (plans) {
+      setCarouselIndex(plans.findIndex((plan) => plan.planId === selectedPlanId));
+    }
+  }, [selectedPlanId]);
+
+  useEffect(() => {
+    if (plans && carouselIndex >= 0 && carouselIndex < plans.length) {
+      setSelectedPlanId(plans[carouselIndex].planId);
+    }
+  }, [carouselIndex]);
+  return {
+    selectedPlanId, setSelectedPlanId, carouselIndex, setCarouselIndex,
+  };
 };

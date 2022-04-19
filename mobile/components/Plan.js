@@ -60,7 +60,6 @@ const styles = StyleSheet.create({
 export default function Plan() {
   const navigation = useNavigation();
   const appState = useAppState();
-  const sessionState = useSessionState();
   const mealPlanApi = useMealPlanApi();
 
   const [selectedMeal, setSelectedMeal] = useState(null);
@@ -68,8 +67,13 @@ export default function Plan() {
   const [selectedMealRecipe, setSelectedMealRecipe] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
-  const [selectedPlanId, setSelectedPlanId] = usePlanSelector();
-  const [carouselIndex, setCarouselIndex] = useState(0);
+
+  const {
+    selectedPlanId,
+    setSelectedPlanId,
+    carouselIndex,
+    setCarouselIndex,
+  } = usePlanSelector();
 
   const [recipes, setRecipes] = useState([]);
   const [planData, setPlanData] = useState(null);
@@ -113,7 +117,6 @@ export default function Plan() {
 
   const hasPlanData = planData && Object.keys(planData).length > 0;
   const plans = hasPlanData ? Object.values(planData) : null;
-  const selectedPlan = selectedPlanId && planData[selectedPlanId];
 
   const doMealSwap = ({ source, target }) => {
     setSwapSource(null);
@@ -214,19 +217,6 @@ export default function Plan() {
   };
 
   const { width } = Dimensions.get('window');
-
-  useEffect(() => {
-    if (plans) {
-      setCarouselIndex(plans.findIndex((plan) => plan.planId === selectedPlanId));
-    }
-  }, [selectedPlanId]);
-
-  useEffect(() => {
-    if (plans) {
-      console.log("Carousel Index: " + carouselIndex);
-      setSelectedPlanId(plans[carouselIndex].planId);
-    }
-  }, [carouselIndex]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
