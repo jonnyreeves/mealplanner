@@ -11,7 +11,7 @@ const SectionHeader = ({ section }) => (
   <Title>{section.title}</Title>
 );
 
-export const MealPlanShoppingList = ({ sections, selectedPlanId, onStoreLinkPress }) => {
+export const MealPlanShoppingList = ({ sections, selectedPlanId, setSelectedPlanId, onStoreLinkPress, planData }) => {
   const formatIngredientQty = (value) => {
     if (parseInt(value, 10).toString() === value) {
       return `${value}x`;
@@ -107,6 +107,12 @@ export const MealPlanShoppingList = ({ sections, selectedPlanId, onStoreLinkPres
     );
   };
 
+  const MealPlanShoppingListHeader = () => (
+    <View style={{ marginBottom: 10 }}>
+      <PlanSelector planData={planData} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
+    </View>
+  );
+
   return (
     <SectionList
       ItemSeparatorComponent={Divider}
@@ -117,6 +123,7 @@ export const MealPlanShoppingList = ({ sections, selectedPlanId, onStoreLinkPres
       keyExtractor={mealPlanKeyExtrator}
       renderItem={renderSectionListItem}
       renderSectionHeader={SectionHeader}
+      ListHeaderComponent={MealPlanShoppingListHeader}
     />
   );
 };

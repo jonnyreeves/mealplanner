@@ -94,6 +94,12 @@ export default function List() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, justifyContent: 'space-between' }}>
+
+        <ToggleButtonGroup selectedValue={listMode} onPress={(value) => setListMode(value)}>
+          <ToggleButtonGroup.Btn label="Groceries" value="plan" />
+          <ToggleButtonGroup.Btn label="Shopping Lists" value="lists" />
+        </ToggleButtonGroup>
+
         {listMode === 'lists' && (
           <ShoppingList
             sections={shoppingLists}
@@ -105,13 +111,12 @@ export default function List() {
         )}
         {listMode !== 'lists' && Boolean(selectedPlanId) && (
           <>
-            <View style={{ margin: 20 }}>
-              <PlanSelector planData={appState.getPlanData()} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
-            </View>
             <MealPlanShoppingList
+              planData={appState.getPlanData()}
               sections={selectedPlanListSections}
               buildingListSections={buildingListSections}
               selectedPlanId={selectedPlanId}
+              setSelectedPlanId={setSelectedPlanId}
               onStoreLinkPress={openTescoSearch}
             />
           </>
@@ -121,11 +126,6 @@ export default function List() {
             <LoadingSpinner />
           </View>
         )}
-
-        <ToggleButtonGroup selectedValue={listMode} onPress={(value) => setListMode(value)}>
-          <ToggleButtonGroup.Btn label="Groceries" value="plan" />
-          <ToggleButtonGroup.Btn label="Shopping Lists" value="lists" />
-        </ToggleButtonGroup>
 
       </View>
     </SafeAreaView>
