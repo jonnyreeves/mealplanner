@@ -12,12 +12,14 @@ import { MealPlanApiCtx } from '../service/context';
 import ViewRecipe from './ViewRecipe';
 import EditRecipe from './EditRecipe';
 import ChooseRecipe from './ChooseRecipe';
+import CreateNewPlan from './CreateNewPlan';
 import doAddRecipeToPlan from './AddRecipeToPlan';
 import { Routes } from '../constants';
 import EditRecipeTags from './EditRecipeTags';
 import EditRecipeIngredients from './EditRecipeIngredients';
 import CreateRecipe from './CreateRecipe';
 import List from './List';
+import ModifyPlan from './ModifyPlan';
 
 const AppStack = createNativeStackNavigator();
 
@@ -68,6 +70,8 @@ export const DefaultContainer = withTheme(({ theme }) => {
           <AppStack.Screen name={Routes.EditRecipeIngredients} component={EditRecipeIngredients} options={{ headerTitle: 'Add Recipe Ingredient' }} />
           <AppStack.Screen name="ChooseRecipe" component={ChooseRecipe} />
           <AppStack.Screen name="AddRecipeToPlan" component={doAddRecipeToPlan} options={{ headerTitle: 'Add Recipe to Plan' }} />
+          <AppStack.Screen name={Routes.CreateNewPlan} component={CreateNewPlan} options={{ headerTitle: 'Create new Plan' }} />
+          <AppStack.Screen name={Routes.ModifyPlan} component={ModifyPlan} options={{ headerTitle: 'Modify Plan' }} />
         </AppStack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

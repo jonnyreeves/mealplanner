@@ -5,4 +5,6 @@ export const Routes = {
   EditRecipe: 'EditRecipe',
   EditRecipeTags: 'EditRecipeTags',
   EditRecipeIngredients: 'EditRecipeIngredients',
+  CreateNewPlan: 'CreateNewPlan',
+  ModifyPlan: 'ModifyPlan',
 };
