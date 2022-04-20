@@ -27,7 +27,7 @@ export function dateWithOrdinal(d) {
   let ordinal = 'th';
   if (day === 11 || day === 12 || day === 13) {
     ordinal = 'th';
-  } else if (lastDigit === 1) {
+  } else if (lastDigit === '1') {
     ordinal = 'st';
   } else if (lastDigit === '2') {
     ordinal = 'nd';
