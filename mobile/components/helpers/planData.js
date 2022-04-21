@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAppState } from '../../service/context';
 import { dateWithOrdinal, getShortDayOfTheWeek, getShortMonth, shortPrettyDate, today, toShortISOString } from './date';
+import { usePlanUpdatedListener } from './navigation';
 
 
 function sortByDate(key) {
@@ -79,7 +80,7 @@ export const usePlanSelector = () => {
   const plans = sortedPlans(planData);
 
   useEffect(() => {
-    if (!selectedPlanId && plans.length > 0) {
+    if (plans.length > 0 && !plans.some((p) => p.planId === selectedPlanId)) {
       setSelectedPlanId(plans[0].planId);
     }
   }, [planData]);
