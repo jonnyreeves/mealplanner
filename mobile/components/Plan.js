@@ -21,9 +21,7 @@ import { toShortISOString, today } from './helpers/date';
 import {
   useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener,
 } from './helpers/navigation';
-import { sortedPlans, usePlanSelector } from './helpers/planData';
 import { LoadingSpinner } from './widgets/modals';
-import { PlannerGrid } from './widgets/PlannerGrid';
 import { PlanCarousel } from './widgets/PlanCarousel';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
 
@@ -68,19 +66,10 @@ export default function Plan() {
   const [modalVisible, setModalVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
 
-  const {
-    selectedPlanId,
-    setSelectedPlanId,
-    carouselIndex,
-    setCarouselIndex,
-  } = usePlanSelector();
-
   const [recipes, setRecipes] = useState([]);
   const [planData, setPlanData] = useState(null);
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
-
-  const carouselRef = useRef(null);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -217,14 +206,6 @@ export default function Plan() {
       </Surface>
     );
   };
-
-  const { width } = Dimensions.get('window');
-
-  useEffect(() => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollToIndex({ index: carouselIndex });
-    }
-  }, [carouselIndex]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
