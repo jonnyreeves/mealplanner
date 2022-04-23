@@ -71,9 +71,9 @@ export const MealPlanShoppingList = ({ sections, selectedPlanId, setSelectedPlan
 
   const mealPlanKeyExtrator = (item) => {
     if (item.ingredient) {
-      return `key-${kebab(item.ingredient)}`;
+      return `key-${item.ingredient}`;
     }
-    return `key-${kebab(item.name)}-${item.slot}-${item.date}`;
+    return `key-${item.name}-${item.slot}-${item.date}`;
   };
 
   const renderSectionListItem = ({ item, section }) => {
@@ -96,9 +96,7 @@ export const MealPlanShoppingList = ({ sections, selectedPlanId, setSelectedPlan
   };
 
   const EmptyShoppingList = () => {
-    // const week = (selectedWeek === 'thisWeek') ? 'this week' : 'next week';
-    const week = selectedPlanId;
-    const msg = `There's nothing on ${week}'s plan`;
+    const msg = 'There are no meals on this plan';
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <IconButton icon="calendar-alert" color="#d8e2dc" size={128} />
@@ -109,7 +107,12 @@ export const MealPlanShoppingList = ({ sections, selectedPlanId, setSelectedPlan
 
   const MealPlanShoppingListHeader = () => (
     <View style={{ marginBottom: 10 }}>
-      <PlanSelector planData={planData} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
+      <PlanSelector
+        readonly
+        planData={planData}
+        selectedPlanId={selectedPlanId}
+        setSelectedPlanId={setSelectedPlanId}
+      />
     </View>
   );
 
@@ -152,7 +155,7 @@ export const ShoppingList = ({
     <>
       <SectionList
         ItemSeparatorComponent={Divider}
-        contentContainerStyle={{ padding: 12, paddingBottom: 50 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 50 }}
         sections={sections}
         initialNumToRender={15}
         keyExtractor={shoppingListKeyExtractor}

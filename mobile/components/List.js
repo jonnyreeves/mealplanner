@@ -9,7 +9,6 @@ import { toPlannerGridData, usePlanSelector } from './helpers/planData';
 import { ToggleButtonGroup } from './widgets/buttons';
 import { MealPlanShoppingList, ShoppingList } from './widgets/ShoppingList';
 import { useAppState, useMealPlanApi } from '../service/context';
-import { PlanSelector } from './widgets/PlanSelector';
 import { LoadingSpinner } from './widgets/modals';
 
 export default function List() {
@@ -91,6 +90,9 @@ export default function List() {
     Linking.openURL(tescoUrl);
   };
 
+  const hasDataToRender = (selectedPlanListSections.length > 0);
+
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, justifyContent: 'space-between' }}>
@@ -100,7 +102,11 @@ export default function List() {
           <ToggleButtonGroup.Btn label="Shopping Lists" value="lists" />
         </ToggleButtonGroup>
 
-        {listMode === 'lists' && (
+        {!hasDataToRender && (
+          <LoadingSpinner />
+        )}
+
+        {hasDataToRender && listMode === 'lists' && (
           <ShoppingList
             sections={shoppingLists}
             onStoreLinkPress={openTescoSearch}
@@ -109,7 +115,7 @@ export default function List() {
             onRefresh={refreshShoppingList}
           />
         )}
-        {listMode !== 'lists' && Boolean(selectedPlanId) && (
+        {hasDataToRender && listMode === 'plan' && (
           <>
             <MealPlanShoppingList
               planData={appState.getPlanData()}
@@ -121,11 +127,7 @@ export default function List() {
             />
           </>
         )}
-        {listMode !== 'lists' && Boolean(selectedPlanId) === false && (
-          <View style={{ height: 400 }}>
-            <LoadingSpinner />
-          </View>
-        )}
+
 
       </View>
     </SafeAreaView>
