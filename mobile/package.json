@@ -35,11 +35,9 @@
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-44.0.0.tar.gz",
-    "react-native-autocomplete-input": "^5.0.2",
     "react-native-paper": "^4.11.1",
     "react-native-safe-area-context": "3.3.2",
     "react-native-screens": "~3.10.1",
-    "react-native-sideswipe": "^1.5.0",
     "react-native-web": "0.17.1",
     "title-case": "^3.0.3"
   },

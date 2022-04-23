@@ -13,7 +13,7 @@ const { colors } = theme;
 const styles = StyleSheet.create({
   plannerGridContainer: {
     width: width - 30,
-    marginRight: 30,
+    marginHorizontal: 15,
   },
   planListLabel: {
     width: 44,

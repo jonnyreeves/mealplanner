@@ -1,10 +1,11 @@
 import { useNavigation } from '@react-navigation/core';
 import React, {
-  useState, useEffect,
+  useState, useEffect, useRef,
 } from 'react';
 import {
   BackHandler,
   Dimensions,
+  FlatList,
   Linking,
   Platform, Pressable, StyleSheet, Vibration, View,
 } from 'react-native';
@@ -12,7 +13,6 @@ import {
   Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SideSwipe from 'react-native-sideswipe';
 
 import { Routes } from '../constants';
 import { useAppState, useMealPlanApi, useSessionState } from '../service/context';
@@ -24,7 +24,7 @@ import {
 import { sortedPlans, usePlanSelector } from './helpers/planData';
 import { LoadingSpinner } from './widgets/modals';
 import { PlannerGrid } from './widgets/PlannerGrid';
-import { PlanSelector } from './widgets/PlanSelector';
+import { PlanCarousel } from './widgets/PlanCarousel';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
 
 const styles = StyleSheet.create({
@@ -80,6 +80,8 @@ export default function Plan() {
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
 
+  const carouselRef = useRef(null);
+
   const [refreshing, setRefreshing] = useState(false);
 
   const refresh = () => {
@@ -117,7 +119,6 @@ export default function Plan() {
   }, [selectedMeal]);
 
   const hasPlanData = planData && Object.keys(planData).length > 0;
-  const plans = hasPlanData ? sortedPlans(planData) : [];
 
   const doMealSwap = ({ source, target }) => {
     setSwapSource(null);
@@ -219,6 +220,12 @@ export default function Plan() {
 
   const { width } = Dimensions.get('window');
 
+  useEffect(() => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollToIndex({ index: carouselIndex });
+    }
+  }, [carouselIndex]);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Portal>
@@ -228,35 +235,14 @@ export default function Plan() {
       </Portal>
       <View style={styles.viewContainer}>
         {!hasPlanData && <LoadingSpinner message="Fetching meal plan" />}
-
         {hasPlanData && (
-          <>
-            <View style={{ margin: 20 }}>
-              <PlanSelector planData={planData} selectedPlanId={selectedPlanId} setSelectedPlanId={setSelectedPlanId} />
-            </View>
-
-            <SideSwipe
-              data={plans}
-              itemWidth={width}
-              contentOffset={15}
-              threshold={100}
-              useVelocityForIndex={false}
-              index={carouselIndex}
-              onIndexChange={setCarouselIndex}
-              renderItem={({ item }) => (
-                <PlannerGrid
-                  swapSource={swapSource}
-                  onMealSelected={onMealSelected}
-                  plan={item}
-                  refreshing={refreshing}
-                  onRefresh={doRefresh}
-                />
-              )}
-            />
-          </>
+          <PlanCarousel
+            planData={planData}
+            swapSource={swapSource}
+            onMealSelected={onMealSelected}
+          />
         )}
       </View>
-
       <Snackbar
         visible={snackBarVisible}
         onDismiss={() => setSnackBarVisible(false)}

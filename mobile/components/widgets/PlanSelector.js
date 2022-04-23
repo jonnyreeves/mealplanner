@@ -52,7 +52,7 @@ const formatPlanTitle = (plan) => {
   return 'Currently active plan';
 };
 
-export const PlanSelector = ({ planData, selectedPlanId, setSelectedPlanId }) => {
+export const PlanSelector = ({ planData, selectedPlanId, setSelectedPlanId, readonly }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
 
@@ -80,9 +80,11 @@ export const PlanSelector = ({ planData, selectedPlanId, setSelectedPlanId }) =>
         <Text style={styles.planSelectorActionPlanTitleText}>{formatPlanTitle(planData[planId])}</Text>
         <Text style={styles.planSelectorActionPlanDateSpanText}>{formatPlanDateSpan(planData[planId])}</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => onPlanEditPress(planId)}>
-        <MaterialCommunityIcons name="calendar-edit" size={24} style={{ padding: 4, color: 'grey' }} />
-      </TouchableOpacity>
+      {!readonly && (
+        <TouchableOpacity onPress={() => onPlanEditPress(planId)}>
+          <MaterialCommunityIcons name="calendar-edit" size={24} style={{ padding: 4, color: 'grey' }} />
+        </TouchableOpacity>
+      )}
     </View>
   ));
 
@@ -94,9 +96,11 @@ export const PlanSelector = ({ planData, selectedPlanId, setSelectedPlanId }) =>
       <Portal>
         <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modalContainer}>
           {planSelectorActions}
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-            <Button onPress={() => onCreatePlanPress()} style={{ marginTop: 8 }}>Create new plan</Button>
-          </View>
+          {!readonly && (
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+              <Button onPress={() => onCreatePlanPress()} style={{ marginTop: 8 }}>Create new plan</Button>
+            </View>
+          )}
         </Modal>
       </Portal>
       <TouchableOpacity onPress={() => setModalVisible(true)} style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
