@@ -56,7 +56,7 @@ export const DefaultContainer = withTheme(({ theme }) => {
       <NavigationContainer>
         <AppStack.Navigator>
           <AppStack.Screen name="Home" component={HomeTabs} options={{ headerShown: false }} />
-          <AppStack.Screen name={Routes.ViewRecipe} component={ViewRecipe} options={{ headerTitle: 'Recipe Details' }} />
+          <AppStack.Screen name={Routes.ViewRecipe} component={ViewRecipe} options={{ headerShown: false }} />
           <AppStack.Screen name={Routes.EditRecipe} component={EditRecipe} options={{ headerTitle: 'Edit Recipe' }} />
           <AppStack.Screen
             name={Routes.CreateRecipe}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Linking, StyleSheet, View, ScrollView,
+  Linking, StyleSheet, View, ScrollView, TouchableOpacity,
 } from 'react-native';
 import {
   Title, Button, Text, Subheading, FAB,
@@ -13,6 +13,11 @@ import { LoadingSpinner } from './widgets/modals';
 import { ChipList } from './widgets/chips';
 import { Routes } from '../constants';
 import { IngredientsTable } from './widgets/tables';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { theme } from '../theme';
+
+const { colors } = theme;
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -29,6 +34,13 @@ const styles = StyleSheet.create({
   addToPlanBtn: {
     marginBottom: 80,
   },
+  recipeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    padding: 8,
+  },
+  recipeText: { fontSize: 18, color: colors.primary }
 });
 
 export default function ViewRecipe({ route }) {
@@ -63,46 +75,63 @@ export default function ViewRecipe({ route }) {
     </>
   );
 
-  const titleCard = (
-    <>
-      <Title>{recipe.name}</Title>
-    </>
+  const RecipeSource = () => {
+    const isHttpLink = recipe.source?.substr(0, 4) === 'http';
+    if (isHttpLink) {
+      return (
+        <TouchableOpacity style={styles.recipeContainer} onPress={() => Linking.openURL(recipe.source)}>
+          <Text style={styles.recipeText}>Open Recipe</Text>
+          <MaterialCommunityIcons name="chevron-right" size={26} style={{ color: colors.primary }} />
+        </TouchableOpacity>
+      );
+    }
+    return (
+      <View style={styles.recipeContainer}>
+        <Text style={styles.recipeText}>{recipe.source || 'No recipe'}</Text>
+      </View>
+    );
+  };
+
+  const HeaderButtons = () => (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+      <TouchableOpacity style={{ flexDirection: 'row', justifyContent: 'flex-start' }} onPress={() => navigation.goBack()}>
+        <MaterialCommunityIcons name="arrow-left" size={24} style={{ color: 'black' }} />
+      </TouchableOpacity>
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+        {showAddButton && <AddToPlanButton />}
+      </View>
+
+    </View>
   );
 
-  const isHttpLink = recipe.source?.substr(0, 4) === 'http';
-  const sourceCard = (
-    <>
-      {isHttpLink && (
-        <Button compact onPress={() => Linking.openURL(recipe.source)}>
-          Open Recipe
-        </Button>
-      )}
-      {!isHttpLink && <Text>{recipe.source || 'No recipe'}</Text>}
-    </>
+  const AddToPlanButton = () => (
+    <TouchableOpacity onPress={() => onAddToPlan()}>
+      <MaterialCommunityIcons name="calendar-plus" size={24} style={{ color: colors.primary }} />
+    </TouchableOpacity>
   );
-
-  const addToPlanButton = <Button onPress={() => onAddToPlan()} mode="outlined" style={styles.addToPlanBtn}>Add to Plan</Button>;
 
   const editRecipe = () => {
     navigation.push(Routes.EditRecipe, { recipeId });
   };
 
   return (
-    <>
-      <ScrollView style={styles.viewContainer} contentContainerStyle={{ paddingBottom: 140 }}>
-        <View style={{ flex: 1 }}>
-          {titleCard}
-          {sourceCard}
-          <TagsCard />
-          <IngredientsCard />
-        </View>
-        {showAddButton && addToPlanButton}
-      </ScrollView>
-      <FAB
-        style={styles.fab}
-        icon="pencil-outline"
-        onPress={() => editRecipe()}
-      />
-    </>
+    <SafeAreaView style={{ flex: 1 }}>
+      <>
+        <ScrollView style={styles.viewContainer} contentContainerStyle={{ paddingBottom: 140 }}>
+          <View style={{ flex: 1 }}>
+            <HeaderButtons />
+            <Title style={{ fontSize: 24, textAlign: 'center' }}>{recipe.name}</Title>
+            <RecipeSource />
+            <TagsCard />
+            <IngredientsCard />
+          </View>
+        </ScrollView>
+        <FAB
+          style={styles.fab}
+          icon="pencil-outline"
+          onPress={() => editRecipe()}
+        />
+      </>
+    </SafeAreaView>
   );
 }
