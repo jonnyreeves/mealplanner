@@ -40,7 +40,15 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     padding: 8,
   },
-  recipeText: { fontSize: 18, color: colors.primary }
+  recipeText: {
+    fontSize: 18,
+    color: colors.primary,
+    textAlign: 'center',
+  },
+  tagListContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
 });
 
 export default function ViewRecipe({ route }) {
@@ -61,21 +69,19 @@ export default function ViewRecipe({ route }) {
     navigation.push('AddRecipeToPlan', { recipe });
   };
 
-  const IngredientsCard = () => (
+  const MealIngredients = () => (
     <>
-      <Subheading style={{ paddingTop: 10 }}>Ingredients</Subheading>
       <IngredientsTable ingredients={recipe.ingredients} />
     </>
   );
 
-  const TagsCard = () => (
+  const MealTags = () => (
     <>
-      <Subheading style={{ paddingTop: 10 }}>Tags</Subheading>
-      <ChipList items={recipe.tags} />
+      <ChipList items={recipe.tags} containerStyle={styles.tagListContainer} />
     </>
   );
 
-  const RecipeSource = () => {
+  const MealRecipe = () => {
     const isHttpLink = recipe.source?.substr(0, 4) === 'http';
     if (isHttpLink) {
       return (
@@ -100,7 +106,6 @@ export default function ViewRecipe({ route }) {
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
         {showAddButton && <AddToPlanButton />}
       </View>
-
     </View>
   );
 
@@ -121,9 +126,9 @@ export default function ViewRecipe({ route }) {
           <View style={{ flex: 1 }}>
             <HeaderButtons />
             <Title style={{ fontSize: 24, textAlign: 'center' }}>{recipe.name}</Title>
-            <RecipeSource />
-            <TagsCard />
-            <IngredientsCard />
+            <MealRecipe />
+            <MealTags />
+            <MealIngredients />
           </View>
         </ScrollView>
         <FAB
