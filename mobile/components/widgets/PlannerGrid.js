@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import React, { useMemo, useState } from 'react';
 import {
-  StyleSheet, View, TouchableOpacity, FlatList, RefreshControl, Dimensions
+  StyleSheet, View, TouchableOpacity, FlatList, Dimensions
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import { toPlannerGridData } from '../helpers/planData';
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
 });
 
 export const PlannerGrid = ({
-  swapSource, plan, onMealSelected, refreshing, onRefresh,
+  swapSource, plan, onMealSelected,
 }) => {
   const gridData = toPlannerGridData(plan);
 

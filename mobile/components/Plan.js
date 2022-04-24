@@ -4,22 +4,19 @@ import React, {
 } from 'react';
 import {
   BackHandler,
-  Dimensions,
-  FlatList,
   Linking,
-  Platform, Pressable, StyleSheet, Vibration, View,
+  Platform, RefreshControl, StyleSheet, View,
 } from 'react-native';
 import {
-  Portal, Modal, Snackbar, Searchbar, Text, Button, Title, Surface,
+  Portal, Modal, Snackbar, Text, Button, Title, Surface,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Routes } from '../constants';
-import { useAppState, useMealPlanApi, useSessionState } from '../service/context';
+import { useAppState, useMealPlanApi } from '../service/context';
 
-import { toShortISOString, today } from './helpers/date';
 import {
-  useNavigationFocusListener, usePlanUpdatedListener, useRecipesUpdatedListener,
+  useNavigationFocusListener, usePlanUpdatedListener,
 } from './helpers/navigation';
 import { LoadingSpinner } from './widgets/modals';
 import { PlanCarousel } from './widgets/PlanCarousel';
@@ -42,17 +39,6 @@ const styles = StyleSheet.create({
       android: { flex: 0 },
     }),
   },
-  nextMealCard: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginHorizontal: 0,
-    borderRadius: 12,
-  },
-  nextMealCardContent: {
-    flex: 1,
-    paddingLeft: 10,
-  },
 });
 
 export default function Plan() {
@@ -61,12 +47,10 @@ export default function Plan() {
   const mealPlanApi = useMealPlanApi();
 
   const [selectedMeal, setSelectedMeal] = useState(null);
-  const [todaysMeal, setTodaysMeal] = useState(null);
   const [selectedMealRecipe, setSelectedMealRecipe] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [snackBarVisible, setSnackBarVisible] = useState(false);
 
-  const [recipes, setRecipes] = useState([]);
   const [planData, setPlanData] = useState(null);
   const [swapSource, setSwapSource] = useState(null);
   const [deletedMeal, setDeletedMeal] = useState(null);
@@ -75,9 +59,7 @@ export default function Plan() {
 
   const refresh = () => {
     console.log('refreshing plan');
-    setRecipes(appState.getRecipes());
     setPlanData(appState.getPlanData());
-    setTodaysMeal(appState.getPlanData()[toShortISOString(today())]);
   };
 
   const doRefresh = async () => {
@@ -87,7 +69,6 @@ export default function Plan() {
     setRefreshing(false);
   };
 
-  useRecipesUpdatedListener(() => refresh());
   usePlanUpdatedListener(() => refresh());
   useNavigationFocusListener(() => refresh());
 
@@ -180,32 +161,15 @@ export default function Plan() {
     }
   };
 
-  const NextMealCard = () => {
-    const now = new Date();
-    const slot = (now.getHours() > 14) ? 'Dinner' : 'Lunch';
-    const entry = (slot === 'Dinner') ? todaysMeal.dinner : todaysMeal.lunch;
-    const recipe = recipes?.find((r) => r.name === entry.name);
-    const isRecipeUrl = recipe?.recipe?.substr(0, 4) === 'http';
-
-    const cardTitle = slot === 'Lunch' ? 'Today\'s Lunch...' : 'Tonight\'s Dinner...';
-    let nextText = entry.name || 'Nothing planned';
-    if (!isRecipeUrl && recipe?.recipe) {
-      nextText += ` -- 📖 ${recipe.recipe}`;
-    }
-    const recipeBtn = (
-      <Button style={{ marginTop: 'auto' }} compact onPress={() => Linking.openURL(recipe?.recipe)}>Open Recipe</Button>
-    );
-
-    return (
-      <Surface style={styles.nextMealCard}>
-        <View style={styles.nextMealCardContent}>
-          <Title style={{ fontSize: 16 }}>{cardTitle}</Title>
-          <Text>{nextText}</Text>
-        </View>
-        {isRecipeUrl && recipeBtn}
-      </Surface>
-    );
-  };
+  const UndoDeletedMealSnackbar = () => (
+    <Snackbar
+      visible={snackBarVisible}
+      onDismiss={() => setSnackBarVisible(false)}
+      action={{ label: 'Undo', onPress: doUndeleteMeal }}
+    >
+      {deletedMeal && `${deletedMeal.name} deleted`}
+    </Snackbar>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -215,25 +179,19 @@ export default function Plan() {
         </Modal>
       </Portal>
       <View style={styles.viewContainer}>
-        {!hasPlanData && <LoadingSpinner message="Fetching meal plan" />}
         {hasPlanData && (
           <PlanCarousel
             planData={planData}
             swapSource={swapSource}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
             onMealSelected={onMealSelected}
           />
         )}
+        {!hasPlanData && (
+          <LoadingSpinner message="Fetching meal plan" />
+        )}
       </View>
-      <Snackbar
-        visible={snackBarVisible}
-        onDismiss={() => setSnackBarVisible(false)}
-        action={{
-          label: 'Undo',
-          onPress: () => doUndeleteMeal(),
-        }}
-      >
-        {deletedMeal && `${deletedMeal.name} deleted`}
-      </Snackbar>
+      <UndoDeletedMealSnackbar />
     </SafeAreaView>
   );
 }

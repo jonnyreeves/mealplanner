@@ -6,7 +6,7 @@ import { PlanSelector } from './PlanSelector';
 
 // eslint-disable-next-line arrow-body-style
 export const PlanCarousel = ({
-  planData, swapSource, onMealSelected, refreshing, doRefresh, readonly
+  planData, swapSource, onMealSelected, refreshControl, readonly
 }) => {
   const carouselRef = useRef(null);
   const {
@@ -41,6 +41,7 @@ export const PlanCarousel = ({
         data={plans}
         itemWidth={width}
         scrollEventThrottle={100}
+        refreshControl={refreshControl}
         ref={carouselRef}
         keyExtractor={(item) => item.planId}
         onMomentumScrollEnd={(e) => {
@@ -54,8 +55,6 @@ export const PlanCarousel = ({
             swapSource={swapSource}
             onMealSelected={onMealSelected}
             plan={item}
-            refreshing={refreshing}
-            onRefresh={doRefresh}
           />
         )}
       />
