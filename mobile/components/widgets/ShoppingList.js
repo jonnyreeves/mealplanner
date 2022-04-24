@@ -1,11 +1,13 @@
 import React from 'react';
-import { RefreshControl, SectionList, View } from 'react-native';
+import { Dimensions, RefreshControl, SectionList, View } from 'react-native';
 import {
   Divider, Checkbox, Text, IconButton, Title,
 } from 'react-native-paper';
 import { shortPrettyMealSlot } from '../helpers/date';
 import { kebab } from '../helpers/kebab';
 import { PlanSelector } from './PlanSelector';
+
+const { width } = Dimensions.get('window');
 
 const SectionHeader = ({ section }) => (
   <Title>{section.title}</Title>

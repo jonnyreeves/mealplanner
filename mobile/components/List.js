@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Linking, View } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { Dimensions, FlatList, Linking, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { toIngredientList } from './helpers/ingredientList';
 import {
@@ -20,6 +20,8 @@ export default function List() {
   const { selectedPlanId, setSelectedPlanId } = usePlanSelector();
   const [listMode, setListMode] = useState('plan');
   const [buildingListSections, setBuildingListSections] = useState(false);
+
+  const listRef = useRef(null);
 
   const buildSelectedPlanListSections = (gridData) => {
     const recipes = appState.getRecipes();
@@ -84,14 +86,21 @@ export default function List() {
     setBuildingListSections(false);
   }, [selectedPlanListSections]);
 
+  useEffect(() => {
+    if (listRef.current) {
+      const index = (listMode === 'plan') ? 0 : 1;
+      listRef.current.scrollToIndex({ index });
+    }
+  }, [listMode]);
+
   const openTescoSearch = (searchTerm) => {
     const tescoUrl = `https://www.tesco.com/groceries/en-GB/search?query=${encodeURIComponent(searchTerm)}`;
     // Linking.openURL(tescoUrl);
     Linking.openURL(tescoUrl);
   };
 
-  const hasDataToRender = (selectedPlanListSections.length > 0);
-
+  const hasDataToRender = true;
+  const { width } = Dimensions.get('window');
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -106,28 +115,44 @@ export default function List() {
           <LoadingSpinner />
         )}
 
-        {hasDataToRender && listMode === 'lists' && (
-          <ShoppingList
-            sections={shoppingLists}
-            onStoreLinkPress={openTescoSearch}
-            onCheckboxPress={(listName, item) => appState.toggleListItem(listName, item)}
-            refreshing={refreshingShoppingList}
-            onRefresh={refreshShoppingList}
+        {hasDataToRender && (
+          <FlatList
+            horizontal
+            pagingEnabled
+            ref={listRef}
+            keyExtractor={(item) => `list-${item}`}
+            onMomentumScrollEnd={(e) => {
+              const { contentOffset } = e.nativeEvent;
+              const viewSize = e.nativeEvent.layoutMeasurement;
+              const pageNum = Math.round(contentOffset.x / viewSize.width);
+              setListMode((pageNum === 0) ? 'plan' : 'lists');
+            }}
+            data={['plan', 'lists']}
+            renderItem={({ index }) => (
+              <View style={{ width }}>
+                {index === 0 && (
+                  <MealPlanShoppingList
+                    planData={appState.getPlanData()}
+                    sections={selectedPlanListSections}
+                    buildingListSections={buildingListSections}
+                    selectedPlanId={selectedPlanId}
+                    setSelectedPlanId={setSelectedPlanId}
+                    onStoreLinkPress={openTescoSearch}
+                  />
+                )}
+                {index === 1 && (
+                  <ShoppingList
+                    sections={shoppingLists}
+                    onStoreLinkPress={openTescoSearch}
+                    onCheckboxPress={(listName, item) => appState.toggleListItem(listName, item)}
+                    refreshing={refreshingShoppingList}
+                    onRefresh={refreshShoppingList}
+                  />
+                )}
+              </View>
+            )}
           />
         )}
-        {hasDataToRender && listMode === 'plan' && (
-          <>
-            <MealPlanShoppingList
-              planData={appState.getPlanData()}
-              sections={selectedPlanListSections}
-              buildingListSections={buildingListSections}
-              selectedPlanId={selectedPlanId}
-              setSelectedPlanId={setSelectedPlanId}
-              onStoreLinkPress={openTescoSearch}
-            />
-          </>
-        )}
-
 
       </View>
     </SafeAreaView>
