@@ -53,7 +53,6 @@ const styles = StyleSheet.create({
   },
   noResultsFoundContainer: {
     flex: 1,
-    textAlign: 'center',
     marginTop: 100,
   },
 });
@@ -252,7 +251,7 @@ export const RecipeBrowser = React.forwardRef(({
 
   const noRecipes = (
     <View style={styles.noResultsFoundContainer}>
-      <Text>No recipes match your query</Text>
+      <Text style={{ fontSize: 18, marginBottom: 20, textAlign: 'center' }}>No meals match your search terms</Text>
       <Button onPress={() => resetFilters()}>
         Reset Filters
       </Button>
@@ -288,7 +287,7 @@ export const RecipeBrowser = React.forwardRef(({
               ref={searchbarRef}
               onSubmitEditing={onSubmitEditing}
               autoCorrect={false}
-              placeholder="Search Meals"
+              placeholder="Search meals"
               value={query}
               onChangeText={setQuery}
               returnKeyType={onSearchSubmitted ? 'done' : 'search'}
