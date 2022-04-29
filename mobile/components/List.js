@@ -14,10 +14,11 @@ import { LoadingSpinner } from './widgets/modals';
 export default function List() {
   const appState = useAppState();
   const mealPlanApi = useMealPlanApi();
+  const planData = appState.getPlanData();
 
   const [shoppingLists, setShoppingLists] = useState([]);
   const [selectedPlanListSections, setSelectedPlanListSections] = useState([]);
-  const { selectedPlanId, setSelectedPlanId } = usePlanSelector();
+  const { selectedPlanId, setSelectedPlanId } = usePlanSelector(planData);
   const [listMode, setListMode] = useState('plan');
   const [buildingListSections, setBuildingListSections] = useState(false);
 
@@ -44,7 +45,7 @@ export default function List() {
     if (!selectedPlanId) {
       return;
     }
-    const planData = appState.getPlanData();
+
     const result = buildSelectedPlanListSections(toPlannerGridData(planData[selectedPlanId]));
     setSelectedPlanListSections(result);
   };

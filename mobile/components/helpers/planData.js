@@ -72,11 +72,10 @@ export function toTodayAndTomorrowData(planEntries) {
 
 export const sortedPlans = (planData) => Object.values(planData).sort(planSorter);
 
-export const usePlanSelector = () => {
+export const usePlanSelector = (planData) => {
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [carouselIndex, setCarouselIndex] = useState(0);
 
-  const planData = useAppState().getPlanData();
   const plans = sortedPlans(planData);
 
   useEffect(() => {

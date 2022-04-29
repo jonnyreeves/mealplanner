@@ -14,7 +14,7 @@ export const PlanCarousel = ({
     setSelectedPlanId,
     carouselIndex,
     setCarouselIndex,
-  } = usePlanSelector();
+  } = usePlanSelector(planData);
 
   useEffect(() => {
     if (carouselRef.current) {

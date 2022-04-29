@@ -57,7 +57,7 @@ export const PlanSelector = ({ planData, selectedPlanId, setSelectedPlanId, read
   const navigation = useNavigation();
 
   const planIds = sortedPlans(planData).map((plan) => plan.planId);
-  const selectedPlan = (selectedPlanId) ? planData[selectedPlanId] : planData[planIds[0]];
+  const selectedPlan = planData[selectedPlanId] || planData[planIds[0]];
 
   const onPlanPress = (planId) => {
     setSelectedPlanId(planId);
