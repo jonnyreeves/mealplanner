@@ -1,6 +1,6 @@
-import { useNavigation } from '@react-navigation/core';
+import { useFocusEffect, useNavigation } from '@react-navigation/core';
 import React, {
-  useState, useEffect, useRef,
+  useState, useEffect, useRef, useCallback,
 } from 'react';
 import {
   BackHandler,
@@ -71,6 +71,18 @@ export default function Plan() {
 
   usePlanUpdatedListener(() => refresh());
   useNavigationFocusListener(() => refresh());
+
+  useFocusEffect(useCallback(() => {
+    const onBackPress = () => {
+      if (swapSource) {
+        setSwapSource(null);
+        return true;
+      }
+      return false;
+    };
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+  }, [swapSource, setSwapSource]));
 
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', () => {
