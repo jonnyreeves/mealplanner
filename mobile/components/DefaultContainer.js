@@ -13,7 +13,7 @@ import ViewRecipe from './ViewRecipe';
 import EditRecipe from './EditRecipe';
 import ChooseRecipe from './ChooseRecipe';
 import CreateNewPlan from './CreateNewPlan';
-import doAddRecipeToPlan from './AddRecipeToPlan';
+import AddRecipeToPlan from './AddRecipeToPlan';
 import { Routes } from '../constants';
 import EditRecipeTags from './EditRecipeTags';
 import EditRecipeIngredients from './EditRecipeIngredients';
@@ -69,7 +69,7 @@ export const DefaultContainer = withTheme(({ theme }) => {
           <AppStack.Screen name={Routes.EditRecipeTags} component={EditRecipeTags} options={{ headerTitle: 'Edit Recipe Tags' }} />
           <AppStack.Screen name={Routes.EditRecipeIngredients} component={EditRecipeIngredients} options={{ headerTitle: 'Add Recipe Ingredient' }} />
           <AppStack.Screen name="ChooseRecipe" component={ChooseRecipe} />
-          <AppStack.Screen name="AddRecipeToPlan" component={doAddRecipeToPlan} options={{ headerTitle: 'Add Recipe to Plan' }} />
+          <AppStack.Screen name="AddRecipeToPlan" component={AddRecipeToPlan} options={{ headerTitle: 'Add Recipe to Plan' }} />
           <AppStack.Screen name={Routes.CreateNewPlan} component={CreateNewPlan} options={{ headerTitle: 'Create new Plan' }} />
           <AppStack.Screen name={Routes.ModifyPlan} component={ModifyPlan} options={{ headerTitle: 'Modify Plan' }} />
         </AppStack.Navigator>

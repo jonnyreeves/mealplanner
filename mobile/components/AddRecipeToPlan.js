@@ -30,10 +30,10 @@ const styles = StyleSheet.create({
   titleText: {
     textAlign: 'center',
     fontSize: 16,
-  }
+  },
 });
 
-export default function doAddRecipeToPlan({ route }) {
+export default function AddRecipeToPlan({ route }) {
   const { recipe } = route.params;
 
   const appState = useAppState();
