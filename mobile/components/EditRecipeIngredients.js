@@ -1,11 +1,14 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, {
+  useCallback, useEffect, useLayoutEffect, useState,
+} from 'react';
 import {
+  BackHandler,
   FlatList, StyleSheet, TouchableOpacity, View,
 } from 'react-native';
 import {
   Text, Title, Searchbar, Portal, Modal, Divider,
 } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import { kebab } from './helpers/kebab';
 import { useAppState, useSessionState } from '../service/context';
@@ -129,6 +132,14 @@ export default function EditRecipeIngredients({ route }) {
     onIngredientPressed(query.trim().toLowerCase());
   };
 
+  const dismissQtyModal = () => {
+    setQtyModalVisible(false);
+    if (ingNameParam) {
+      // setTimeout(() => navigation.goBack(), 50);
+      navigation.goBack();
+    }
+  };
+
   useLayoutEffect(() => {
     setAllIngredients(appState.getAllIngredients());
 
@@ -179,7 +190,7 @@ export default function EditRecipeIngredients({ route }) {
   return (
     <>
       <Portal>
-        <Modal visible={qtyModalVisible} onDismiss={() => setQtyModalVisible(false)} style={{ bottom: 340 }} contentContainerStyle={styles.qtyModalStyle}>
+        <Modal visible={qtyModalVisible} onDismiss={() => dismissQtyModal(false)} style={{ bottom: 340 }} contentContainerStyle={styles.qtyModalStyle}>
           <Title>{qtyModalTitle}</Title>
           <Text style={{ marginBottom: 10 }}>eg: `2`, `250g`, etc</Text>
           <ThemedTextInput
@@ -194,29 +205,31 @@ export default function EditRecipeIngredients({ route }) {
       </Portal>
 
       <View style={styles.viewContainer}>
-        <FlatList
-          ListHeaderComponent={(
-            <>
-              <Searchbar
-                style={styles.searchbar}
-                onSubmitEditing={onSubmitEditing}
-                autoCorrect={false}
-                autoCapitalize="none"
-                placeholder="Ingredient name"
-                value={query}
-                onChangeText={setQuery}
-                returnKeyType="done"
-              />
-              {showCreateNewIngredient && <CreateNewIngredient />}
-              {showQueryTooShort && <QueryTooShort />}
-            </>
-          )}
-          extraData={ingredientAdded}
-          data={visibleIngredients}
-          ItemSeparatorComponent={Divider}
-          keyExtractor={(ingredient) => kebab(ingredient || '-')}
-          renderItem={(renderIngredient)}
-        />
+        {!ingNameParam && (
+          <FlatList
+            ListHeaderComponent={(
+              <>
+                <Searchbar
+                  style={styles.searchbar}
+                  onSubmitEditing={onSubmitEditing}
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  placeholder="Ingredient name"
+                  value={query}
+                  onChangeText={setQuery}
+                  returnKeyType="done"
+                />
+                {showCreateNewIngredient && <CreateNewIngredient />}
+                {showQueryTooShort && <QueryTooShort />}
+              </>
+            )}
+            extraData={ingredientAdded}
+            data={visibleIngredients}
+            ItemSeparatorComponent={Divider}
+            keyExtractor={(ingredient) => kebab(ingredient || '-')}
+            renderItem={(renderIngredient)}
+          />
+        )}
       </View>
     </>
   );
