@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
   tagListContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
+    marginVertical: 20,
   },
 });
 

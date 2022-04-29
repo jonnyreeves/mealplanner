@@ -1,24 +1,43 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import {
+  StyleSheet, TouchableOpacity, View, Text,
+} from 'react-native';
 import {
   Button, Subheading, Title,
 } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+import { theme } from '../../theme';
 import { prettyMealSlot } from '../helpers/date';
+
+const { colors } = theme;
 
 const styles = StyleSheet.create({
   viewContainer: {
-  },
-  centerText: {
-    textAlign: 'center',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
   },
   actionButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'flex-start',
-    margin: 10,
   },
   actionButton: {
     marginRight: 8,
+  },
+  viewRecipeContainer: {
+    flex: 1,
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingTop: 4,
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+  },
+  viewRecipeText: {
+    fontSize: 18,
+    textAlign: 'center',
+    color: colors.primary,
   },
 });
 
@@ -31,7 +50,7 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
         style: styles.actionButton,
       },
       change: {
-        name: meal.name ? 'Change' : 'Select',
+        name: meal.name ? 'Replace' : 'Select',
         icon: 'pencil',
         style: styles.actionButton,
       },
@@ -40,23 +59,45 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
         icon: 'swap-horizontal',
         style: { ...styles.actionButton, marginRight: 0 },
       },
+      adjust: {
+        name: 'Adjust Ingredients',
+        icon: 'scale',
+        style: { ...styles.actionButton, marginRight: 0, marginBottom: 8 },
+      },
     };
     const cfg = cfgMap[action];
     return <Button compact mode="outlined" icon={cfg.icon} style={cfg.style} onPress={onPress}>{cfg.name}</Button>;
   };
 
   const title = prettyMealSlot(meal.slot, meal.date);
-  const subtitle = meal.name || 'Empty';
 
-  const ViewRecipeInfo = () => (
-    <Button onPress={() => onAction('show-recipe', meal)}>View Recipe</Button>
-  );
+  const MealName = () => {
+    const displayName = meal.name || 'No meal selected';
+    if (hasRecipe) {
+      return (
+        <TouchableOpacity
+          style={styles.viewRecipeContainer}
+          onPress={() => onAction('show-recipe', meal)}
+        >
+          <Text style={[styles.viewRecipeText, { paddingLeft: 4 }]}>{displayName}</Text>
+          <MaterialCommunityIcons name="chevron-right" size={26} style={{ paddingTop: 2, color: colors.primary }} />
+        </TouchableOpacity>
+      );
+    }
+    return (
+      <View style={styles.viewRecipeContainer}>
+        <Text style={styles.viewRecipeText}>{displayName}</Text>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.viewContainer}>
-      <Title style={styles.centerText}>{title}</Title>
-      <Subheading style={styles.centerText}>{subtitle}</Subheading>
-      {hasRecipe && <ViewRecipeInfo />}
+      <Title>{title}</Title>
+      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-start' }}>
+        <MealName />
+      </View>
+      {false && hasRecipe && <ActionButton action="adjust" />}
       <View style={styles.actionButtonContainer}>
         {meal.name !== '' && <ActionButton action="delete" onPress={() => onAction('delete', meal)} />}
         <ActionButton action="change" onPress={() => onAction('change', meal)} />

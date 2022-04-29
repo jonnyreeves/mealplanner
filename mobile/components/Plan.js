@@ -33,11 +33,11 @@ const styles = StyleSheet.create({
   modalContainer: {
     padding: 20,
     margin: 20,
+    borderRadius: 8,
+    maxHeight: 200,
+    minHeight: 200,
+    flex: 1,
     backgroundColor: 'white',
-    ...Platform.select({
-      web: { flex: 1 },
-      android: { flex: 0 },
-    }),
   },
 });
 
@@ -186,7 +186,7 @@ export default function Plan() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Portal>
-        <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.modalContainer}>
+        <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} style={{ margin: 0 }} contentContainerStyle={styles.modalContainer}>
           {selectedMeal && <SelectedMealModal meal={selectedMeal} hasRecipe={!!selectedMealRecipe} onAction={onAction} />}
         </Modal>
       </Portal>
