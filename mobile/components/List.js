@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Dimensions, FlatList, Linking, View } from 'react-native';
+import { Dimensions, FlatList, Linking, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { toIngredientList } from './helpers/ingredientList';
 import {
@@ -10,6 +10,13 @@ import { ToggleButtonGroup } from './widgets/buttons';
 import { MealPlanShoppingList, ShoppingList } from './widgets/ShoppingList';
 import { useAppState, useMealPlanApi } from '../service/context';
 import { LoadingSpinner } from './widgets/modals';
+
+const styles = StyleSheet.create({
+  shoppingListContainer: {
+    marginHorizontal: 10,
+    paddingBottom: 50,
+  },
+});
 
 export default function List() {
   const appState = useAppState();
@@ -139,6 +146,7 @@ export default function List() {
                     selectedPlanId={selectedPlanId}
                     setSelectedPlanId={setSelectedPlanId}
                     onStoreLinkPress={openTescoSearch}
+                    contentContainerStyle={styles.shoppingListContainer}
                   />
                 )}
                 {index === 1 && (
@@ -148,6 +156,7 @@ export default function List() {
                     onCheckboxPress={(listName, item) => appState.toggleListItem(listName, item)}
                     refreshing={refreshingShoppingList}
                     onRefresh={refreshShoppingList}
+                    contentContainerStyle={styles.shoppingListContainer}
                   />
                 )}
               </View>

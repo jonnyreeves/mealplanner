@@ -13,8 +13,6 @@ import { useAppState } from '../service/context';
 
 const styles = StyleSheet.create({
   viewContainer: {
-    flex: 1,
-    padding: 12,
   },
 });
 

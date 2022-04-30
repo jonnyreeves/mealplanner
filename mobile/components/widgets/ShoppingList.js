@@ -13,7 +13,7 @@ const SectionHeader = ({ section }) => (
   <Title>{section.title}</Title>
 );
 
-export const MealPlanShoppingList = ({ sections, selectedPlanId, setSelectedPlanId, onStoreLinkPress, planData }) => {
+export const MealPlanShoppingList = ({ sections, selectedPlanId, setSelectedPlanId, onStoreLinkPress, planData, contentContainerStyle }) => {
   const formatIngredientQty = (value) => {
     if (parseInt(value, 10).toString() === value) {
       return `${value}x`;
@@ -122,7 +122,7 @@ export const MealPlanShoppingList = ({ sections, selectedPlanId, setSelectedPlan
     <SectionList
       ItemSeparatorComponent={Divider}
       ListEmptyComponent={EmptyShoppingList}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 50 }}
+      contentContainerStyle={contentContainerStyle}
       sections={sections}
       initialNumToRender={15}
       keyExtractor={mealPlanKeyExtrator}
@@ -134,7 +134,7 @@ export const MealPlanShoppingList = ({ sections, selectedPlanId, setSelectedPlan
 };
 
 export const ShoppingList = ({
-  sections, onStoreLinkPress, onCheckboxPress, refreshing, onRefresh,
+  sections, onStoreLinkPress, onCheckboxPress, refreshing, onRefresh, contentContainerStyle,
 }) => {
   const shoppingListKeyExtractor = (item) => (`key-${kebab(item.item)}`);
 
@@ -157,7 +157,7 @@ export const ShoppingList = ({
     <>
       <SectionList
         ItemSeparatorComponent={Divider}
-        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 50 }}
+        contentContainerStyle={contentContainerStyle}
         sections={sections}
         initialNumToRender={15}
         keyExtractor={shoppingListKeyExtractor}
