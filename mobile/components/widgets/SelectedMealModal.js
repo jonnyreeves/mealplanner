@@ -14,9 +14,7 @@ const { colors } = theme;
 
 const styles = StyleSheet.create({
   viewContainer: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'flex-start',
   },
   actionButtonContainer: {
     flexDirection: 'row',
@@ -27,12 +25,11 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   viewRecipeContainer: {
-    flex: 1,
-    alignItems: 'center',
     flexDirection: 'row',
-    paddingTop: 4,
-    paddingHorizontal: 10,
+    alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 30,
+    marginHorizontal: 20,
   },
   viewRecipeText: {
     fontSize: 18,
@@ -79,7 +76,7 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
           style={styles.viewRecipeContainer}
           onPress={() => onAction('show-recipe', meal)}
         >
-          <Text style={[styles.viewRecipeText, { paddingLeft: 4 }]}>{displayName}</Text>
+          <Text style={[styles.viewRecipeText, { marginLeft: 16 }]}>{displayName}</Text>
           <MaterialCommunityIcons name="chevron-right" size={26} style={{ paddingTop: 2, color: colors.primary }} />
         </TouchableOpacity>
       );
@@ -94,9 +91,7 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
   return (
     <View style={styles.viewContainer}>
       <Title>{title}</Title>
-      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-start' }}>
-        <MealName />
-      </View>
+      <MealName />
       {false && hasRecipe && <ActionButton action="adjust" />}
       <View style={styles.actionButtonContainer}>
         {meal.name !== '' && <ActionButton action="delete" onPress={() => onAction('delete', meal)} />}

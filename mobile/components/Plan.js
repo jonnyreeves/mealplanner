@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Routes } from '../constants';
 import { useAppState, useMealPlanApi } from '../service/context';
+import { theme } from '../theme';
 
 import {
   useNavigationFocusListener, usePlanUpdatedListener,
@@ -21,6 +22,8 @@ import {
 import { LoadingSpinner } from './widgets/modals';
 import { PlanCarousel } from './widgets/PlanCarousel';
 import { SelectedMealModal } from './widgets/SelectedMealModal';
+
+const { defaultStyles } = theme;
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -30,14 +33,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 20,
   },
-  modalContainer: {
-    padding: 20,
-    margin: 20,
-    borderRadius: 8,
-    maxHeight: 200,
-    minHeight: 200,
-    flex: 1,
-    backgroundColor: 'white',
+  selectedMealModal: {
+    ...defaultStyles.modal,
   },
 });
 
@@ -186,7 +183,7 @@ export default function Plan() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Portal>
-        <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} style={{ margin: 0 }} contentContainerStyle={styles.modalContainer}>
+        <Modal visible={modalVisible} onDismiss={() => setModalVisible(false)} contentContainerStyle={styles.selectedMealModal}>
           {selectedMeal && <SelectedMealModal meal={selectedMeal} hasRecipe={!!selectedMealRecipe} onAction={onAction} />}
         </Modal>
       </Portal>

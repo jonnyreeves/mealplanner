@@ -11,12 +11,13 @@ import {
 import { sortedPlans } from '../helpers/planData';
 import { useNavigation } from '@react-navigation/core';
 import { Routes } from '../../constants';
+import { theme } from '../../theme';
+
+const { defaultStyles } = theme;
 
 const styles = StyleSheet.create({
   modalContainer: {
-    padding: 20,
-    margin: 20,
-    backgroundColor: 'white',
+    ...defaultStyles.modal,
     ...Platform.select({
       web: { flex: 1 },
       android: { flex: 0 },

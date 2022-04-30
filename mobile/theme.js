@@ -17,4 +17,12 @@ export const theme = {
     // backdrop: '#fefae0',
     // notification: '',
   },
+  defaultStyles: {
+    modal: {
+      margin: 20,
+      padding: 20,
+      backgroundColor: 'white',
+      borderRadius: 12,
+    },
+  },
 };

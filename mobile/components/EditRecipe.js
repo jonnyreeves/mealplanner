@@ -13,6 +13,7 @@ import {
   IngredientEditor, SourceEditor, TagEditor, TitleEditor, useUnsavedChangesDectector,
 } from './widgets/RecipeEditor';
 import { useAppState, useSessionState } from '../service/context';
+import { theme } from '../theme';
 
 const styles = StyleSheet.create({
   viewContainer: {

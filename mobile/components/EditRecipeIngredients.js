@@ -14,6 +14,9 @@ import { kebab } from './helpers/kebab';
 import { useAppState, useSessionState } from '../service/context';
 import { ThemedTextInput } from './widgets/input';
 import { alphabetically } from './helpers/ingredientList';
+import { theme } from '../theme';
+
+const { defaultStyles } = theme;
 
 const styles = StyleSheet.create({
   viewContainer: {
@@ -34,10 +37,7 @@ const styles = StyleSheet.create({
     marginTop: 50,
   },
   qtyModalStyle: {
-    backgroundColor: 'white',
-    padding: 20,
-    margin: 20,
-    borderRadius: 15,
+    ...defaultStyles.modal,
   },
 });
 
