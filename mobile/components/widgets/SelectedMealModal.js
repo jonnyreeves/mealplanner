@@ -63,7 +63,18 @@ export const SelectedMealModal = ({ meal, hasRecipe, onAction }) => {
       },
     };
     const cfg = cfgMap[action];
-    return <Button compact mode="outlined" icon={cfg.icon} style={cfg.style} onPress={onPress}>{cfg.name}</Button>;
+    return (
+      <Button
+        compact
+        mode="outlined"
+        icon={cfg.icon}
+        style={cfg.style}
+        contentStyle={{ paddingRight: 8 }}
+        onPress={onPress}
+      >
+        {cfg.name}
+      </Button>
+    );
   };
 
   const title = prettyMealSlot(meal.slot, meal.date);

@@ -58,7 +58,14 @@ export default function ChooseRecipe({ route }) {
   return (
     <View style={styles.viewContainer}>
       {recipes && (
-        <RecipeBrowser ref={recipeBrowserRef} recipes={recipes} onSearchSubmitted={onSearchSubmitted} onRecipePress={onRecipePress} />
+        <RecipeBrowser
+          showAddToPlanAction
+          ref={recipeBrowserRef}
+          recipes={recipes}
+          onSearchSubmitted={onSearchSubmitted}
+          onRecipePress={onRecipePress}
+          searchbarPlaceholder="Enter meal name"
+        />
       )}
     </View>
   );

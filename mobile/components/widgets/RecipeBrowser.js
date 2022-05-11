@@ -7,11 +7,11 @@ import {
 import {
   Text, Chip, Searchbar, Button, Divider, useTheme, Modal, Portal,
 } from 'react-native-paper';
-import { alphabetically } from '../helpers/ingredientList';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { alphabetically } from '../helpers/ingredientList';
 
 import { kebab } from '../helpers/kebab';
-import { Highlight } from '../helpers/highlight'
+import { Highlight } from '../helpers/highlight';
 
 const styles = StyleSheet.create({
   recipeListItem: {
@@ -23,6 +23,13 @@ const styles = StyleSheet.create({
   recipeIngredients: {
     color: '#808080',
   },
+  searchOptionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 10,
+  },
   miniTagContainer: {
     flexDirection: 'row',
     marginBottom: 2,
@@ -32,6 +39,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#808080',
     borderRadius: 6,
+    backgroundColor: '#f6f6f6',
     paddingVertical: 1,
     paddingHorizontal: 6,
     marginRight: 6,
@@ -39,6 +47,18 @@ const styles = StyleSheet.create({
   miniTagText: {
     fontSize: 12,
     color: '#808080',
+  },
+  tagSelectorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#808080',
+    paddingLeft: 8,
+    paddingRight: 4,
+    paddingVertical: 5,
+    marginRight: 6,
   },
   tagListContainer: {
     justifyContent: 'center',
@@ -58,7 +78,7 @@ const styles = StyleSheet.create({
 });
 
 export const RecipeBrowser = React.forwardRef(({
-  recipes, onRecipePress, onSearchSubmitted,
+  recipes, onRecipePress, onSearchSubmitted, searchbarPlaceholder, showAddToPlanAction
 }, ref) => {
   const theme = useTheme();
 
@@ -141,6 +161,19 @@ export const RecipeBrowser = React.forwardRef(({
     return -1;
   });
 
+  if (showAddToPlanAction && query.length > 2) {
+    // FIXME: Why is this not hiding the user inputted meal when a matching one is found?
+    if (!visibleRecipes.some((recipe) => recipe.name.toLocaleLowerCase() === query.trim().toLocaleLowerCase())) {
+      visibleRecipes.unshift({
+        id: `adhoc-${query}`,
+        name: query,
+        tags: [],
+        ingredients: [],
+        adhoc: true, // TODO: is this needed for styling?
+      });
+    }
+  }
+
   const onSubmitEditing = () => {
     if (typeof onSearchSubmitted === 'function') {
       onSearchSubmitted(query);
@@ -153,81 +186,71 @@ export const RecipeBrowser = React.forwardRef(({
     </View>
   );
 
+  const MealIngredients = ({ ingredients }) => {
+    const ingredientsList = ingredients.map((ing) => ing.name).sort(alphabetically).join(', ');
+    return (
+      <Text style={styles.recipeIngredients}>
+        <Highlight source={ingredientsList} target={query} highlightStyle={{ color: 'black' }} />
+      </Text>
+    );
+  };
+
   const renderRecipe = ({ item }) => {
-    const ingredientsList = item.ingredients.map((ing) => ing.name).sort(alphabetically).join(', ');
-    const tagList = item.tags.map((tag) => {
-      const key = `${item.name}-${tag}`;
-      return <MiniTag value={tag} key={key} />;
-    });
+    const tagList = item.tags.map((tag) => <MiniTag value={tag} key={`${item.name}-${tag}`} />);
 
     return (
       <View style={styles.recipeListItem}>
         <TouchableOpacity onPress={() => { onRecipePress(item); }}>
           <Text style={styles.recipeName}>{item.name}</Text>
           {tagList.length > 0 && <View style={styles.miniTagContainer}>{tagList}</View>}
-          <Text style={styles.recipeIngredients}>
-            {includeIngredients && <Highlight source={ingredientsList} target={query} highlightStyle={{ color: 'black' }} />}
-            {!includeIngredients && ingredientsList}
-          </Text>
+          {includeIngredients && <MealIngredients ingredients={item.ingredients} />}
         </TouchableOpacity>
       </View>
     );
   };
 
-  const TagDropdown = () => (
-    <View style={{
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      marginTop: 10,
-      marginBottom: 10,
-    }}>
-      <TouchableOpacity
-        style={[{
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'flex-start',
-          borderWidth: 1,
-          borderRadius: 8,
-          borderColor: '#808080',
-          paddingLeft: 8,
-          paddingRight: 4,
-          paddingVertical: 5,
-          marginRight: 6,
-        }, selectedTags.length > 0 ? { backgroundColor: theme.colors.accent } : {}]}
-        onPress={() => setTagModalVisible(true)}
-      >
-        <Text>
-          {selectedTags.length === 0 && 'Tag'}
-          {selectedTags.length === 1 && selectedTags[0]}
-          {selectedTags.length > 1 && `${selectedTags[0]} +${selectedTags.length - 1}`}
-        </Text>
-        <MaterialCommunityIcons name="menu-down" size={18} style={{ color: 'grey' }} />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[{
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'flex-start',
-          borderWidth: 1,
-          borderRadius: 8,
-          borderColor: '#808080',
-          paddingLeft: 8,
-          paddingRight: 8,
-          paddingVertical: 5,
-        }, includeIngredients ? { backgroundColor: theme.colors.accent } : {}]}
-        onPress={() => setIncludeIngredients(!includeIngredients)}
-      >
-        <Text>Include Ingredients</Text>
-      </TouchableOpacity>
+  const TagSelector = () => (
+    <TouchableOpacity
+      style={[
+        styles.tagSelectorContainer,
+        selectedTags.length > 0 ? { backgroundColor: theme.colors.accent } : {},
+      ]}
+      onPress={() => setTagModalVisible(true)}
+    >
+      <Text>
+        {selectedTags.length === 0 && 'Tag'}
+        {selectedTags.length === 1 && selectedTags[0]}
+        {selectedTags.length > 1 && `${selectedTags[0]} +${selectedTags.length - 1}`}
+      </Text>
+      <MaterialCommunityIcons name="menu-down" size={18} style={{ color: 'grey' }} />
+    </TouchableOpacity>
+  );
 
-    </View>
+  const IngredientsToggle = () => (
+    <TouchableOpacity
+      style={[{
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        borderWidth: 1,
+        borderRadius: 8,
+        borderColor: '#808080',
+        paddingLeft: 8,
+        paddingRight: 8,
+        paddingVertical: 5,
+      }, includeIngredients ? { backgroundColor: theme.colors.accent } : {}]}
+      onPress={() => setIncludeIngredients(!includeIngredients)}
+    >
+      <Text>Include Ingredients</Text>
+    </TouchableOpacity>
   );
 
   const SearchOptions = () => (
-    <View>
-      <TagDropdown />
+    <View style={styles.searchOptionsContainer}>
+      <TagSelector />
+      <IngredientsToggle />
     </View>
+
   );
 
   const TagList = () => (
@@ -271,8 +294,9 @@ export const RecipeBrowser = React.forwardRef(({
             ...Platform.select({
               web: { flex: 1 },
               android: { flex: 0 },
-            })
-          }}>
+            }),
+          }}
+        >
           <Text style={{ fontSize: 18 }}>Select tags to filter results by</Text>
           <TagList />
           <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
@@ -287,7 +311,7 @@ export const RecipeBrowser = React.forwardRef(({
               ref={searchbarRef}
               onSubmitEditing={onSubmitEditing}
               autoCorrect={false}
-              placeholder="Search meals"
+              placeholder={searchbarPlaceholder || 'Search meals'}
               value={query}
               onChangeText={setQuery}
               returnKeyType={onSearchSubmitted ? 'done' : 'search'}
