@@ -190,6 +190,7 @@ export default function Plan() {
       <View style={styles.viewContainer}>
         {hasPlanData && (
           <PlanCarousel
+            showTodayView
             planData={planData}
             swapSource={swapSource}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={doRefresh} />}
