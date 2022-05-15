@@ -163,7 +163,12 @@ export default function Plan() {
         navigation.push('ChooseRecipe', { action: 'select', meal });
         break;
       case 'show-recipe':
-        navigation.navigate(Routes.ViewRecipe, { recipeId: selectedMealRecipe.id, showAddButton: false });
+        navigation.navigate(Routes.ViewRecipe, {
+          recipeId: selectedMealRecipe.id,
+          mealDate: meal.date,
+          mealSlot: meal.slot,
+          showAddButton: false,
+        });
         break;
       default:
         console.error(`Unsupported action: ${action}`);

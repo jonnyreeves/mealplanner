@@ -16,6 +16,7 @@ import { IngredientsTable } from './widgets/tables';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { theme } from '../theme';
+import { prettyMealSlot } from './helpers/date';
 
 const { colors } = theme;
 
@@ -34,11 +35,31 @@ const styles = StyleSheet.create({
   addToPlanBtn: {
     marginBottom: 80,
   },
-  recipeContainer: {
+  planInfoContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'flex-start',
     padding: 8,
+  },
+  planInfoDateText: {
+    paddingLeft: 4,
+    fontSize: 16,
+  },
+  planInfoDateIcon: {
+    color: 'gray',
+  },
+  ingredientTableHeaderContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  recipeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    marginVertical: 12,
   },
   recipeText: {
     fontSize: 18,
@@ -48,17 +69,18 @@ const styles = StyleSheet.create({
   tagListContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginVertical: 20,
+    marginVertical: 0,
   },
 });
 
 export default function ViewRecipe({ route }) {
-  const { recipeId, showAddButton } = route.params;
+  const { recipeId, showAddButton, mealDate, mealSlot } = route.params;
+  const isPlannedMeal = !!(mealSlot && mealDate);
 
   const navigation = useNavigation();
   const appState = useAppState();
 
-  const [recipe, setRecipe] = useState(null);
+  const [recipe, setRecipe] = useState(null)
 
   useFocusEffect(() => {
     setRecipe(appState.getRecipeById(recipeId));
@@ -70,8 +92,16 @@ export default function ViewRecipe({ route }) {
     navigation.push('AddRecipeToPlan', { recipe });
   };
 
+  const onModifyPlannedIngredients = () => {
+    // TODO.
+  };
+
   const MealIngredients = () => (
     <>
+      <View style={styles.ingredientTableHeaderContainer}>
+        <Subheading>Ingredients</Subheading>
+        {isPlannedMeal && (<Button compact icon="pencil" onPress={onModifyPlannedIngredients}>Modify</Button>)}
+      </View>
       <IngredientsTable ingredients={recipe.ingredients} />
     </>
   );
@@ -116,6 +146,15 @@ export default function ViewRecipe({ route }) {
     </TouchableOpacity>
   );
 
+  const PlanInfo = () => (
+    <View style={styles.planInfoContainer}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <MaterialCommunityIcons name="calendar" size={18} style={styles.planInfoDateIcon} />
+        <Text style={styles.planInfoDateText}>{prettyMealSlot(mealSlot, mealDate)}</Text>
+      </View>
+    </View>
+  );
+
   const editRecipe = () => {
     navigation.push(Routes.EditRecipe, { recipeId });
   };
@@ -127,8 +166,9 @@ export default function ViewRecipe({ route }) {
           <View style={{ flex: 1 }}>
             <HeaderButtons />
             <Title style={{ fontSize: 24, textAlign: 'center' }}>{recipe.name}</Title>
+            {isPlannedMeal && (<PlanInfo />)}
             <MealRecipe />
-            <MealTags />
+            {!isPlannedMeal && (<MealTags />)}
             <MealIngredients />
           </View>
         </ScrollView>
